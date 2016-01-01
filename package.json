@@ -16,7 +16,9 @@
     "eslint": "^1.10.3",
     "eslint-config-airbnb": "^2.1.1",
     "eslint-plugin-react": "^3.13.1",
+    "eslint-watch": "^2.1.4",
     "espower-babel": "^4.0.1",
+    "foreman": "^1.4.1",
     "mocha": "^2.3.4",
     "pegjs": "^0.9.0",
     "power-assert": "^1.2.0",
@@ -45,9 +47,10 @@
     "build:parser": "pegjs src/parser.pegjs lib/parser.js",
     "lint": "eslint src test",
     "test": "mocha --compilers js:espower-babel/guess test/*.js",
+    "watch": "nf start",
     "watch:build": "babel src --watch --source-maps inline --out-dir lib",
-    "watch:build:parser": "watch 'npm run -s build:parser' src/parser.pegjs -d",
-    "watch:lint": "watch 'npm -s run lint' src test -d",
-    "watch:test": "mocha --watch --compilers js:espower-babel/guess test/*.js"
+    "watch:build:parser": "watch 'npm run -s build:parser' src -d --filter=config/filter.js",
+    "watch:lint": "esw --watch src test",
+    "watch:test": "watch 'npm -s run test' src test -d"
   }
 }
