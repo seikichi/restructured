@@ -37,14 +37,14 @@
     "type": "MIT",
     "url": "http://seikichi.mit-license.org/"
   },
-  "main": "lib/rst.js",
+  "main": "lib/RST.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/seikichi/rst.js.git"
   },
   "scripts": {
     "build": "npm run build:parser && babel src --source-maps inline --out-dir lib",
-    "build:parser": "pegjs src/parser.pegjs lib/parser.js",
+    "build:parser": "pegjs src/Parser.pegjs lib/Parser.js",
     "lint": "eslint src test",
     "test": "mocha --compilers js:espower-babel/guess test/*.js",
     "watch": "nf start",
