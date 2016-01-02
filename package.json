@@ -7,7 +7,7 @@
     "url": "https://github.com/seikichi/rst.js/issues"
   },
   "config": {
-    "allowed_start_rules": "Document,Paragraph,MarkupLine"
+    "allowed_start_rules": "Document,Paragraph"
   },
   "dependencies": {
     "lodash": "^3.10.1",

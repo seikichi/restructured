@@ -20,7 +20,6 @@
   var InterpretedText = require('./nodes/InterpretedText').default;
   var HyperlinkReference = require('./nodes/HyperlinkReference').default;
   var Text = require('./nodes/Text').default;
-  var MarkupLine = require('./nodes/MarkupLine').default;
 
   // variables
   var currentIndentSize = 0;
@@ -61,38 +60,32 @@ BodyElement =
   }
 
 Paragraph =
-  lines:MarkupLine+
+  children:(ParagraphChildrenStartWithInlineMarkup / ParagraphChildrenStartWithText)
+  Newline?
   &(BlankLines) {
-    return new Paragraph({ children: lines });
+    return new Paragraph({ children: children });
   }
 
-MarkupLine =
-  &(Whitespace* !Endline !Whitespace .)
-  children:(MarkupLineStartWithInlineMarkup / MarkupLineStartWithText)
-  Endline {
-    return new MarkupLine({ children: children });
-  }
-
-MarkupLineStartWithInlineMarkup =
+ParagraphChildrenStartWithInlineMarkup =
   head:(ClearInlineMarkupPreceding InlineMarkup)
   tail:(TextWithInlineMarkup / TextWithoutInlineMarkup)* {
-    return [head[1]].concat(_.flatten(tail));
+    return [head[1]].concat(tail);
   }
 
-MarkupLineStartWithText =
-  texts:(TextWithInlineMarkup / TextWithoutInlineMarkup)+ {
-    return _.flatten(texts);
+ParagraphChildrenStartWithText =
+  children:(TextWithInlineMarkup / TextWithoutInlineMarkup)+ {
+    return children;
   }
 
 TextWithInlineMarkup =
-  text:(!Endline !(InlineMarkupPreceding InlineMarkup) .)*
+  text:(!(Newline BlankLines) !(InlineMarkupPreceding InlineMarkup) .)*
   markup:(InlineMarkupPreceding InlineMarkup) {
     var textStr = _.map(text, function (v) { return v[2]; }).join('') + markup[0];
     return [new Text({ text: textStr }), markup[1]];
   }
 
 TextWithoutInlineMarkup =
-  text:(!Endline !(InlineMarkupPreceding InlineMarkup) .)+ {
+  text:(!(Newline BlankLines) !(InlineMarkupPreceding InlineMarkup) .)+ {
     var textStr = _.map(text, function (v) { return v[2]; }).join('');
     return [new Text({ text: textStr })];
   }
@@ -110,7 +103,7 @@ CorrespondingClosingChar =
   }
 
 InlineMarkupPreceding =
-  p:(Whitespace / '-' / ':' / '/' / '\'' / '"' / '<' / '(' / '[' / '{' /
+  p:(Whitespace / Newline / '-' / ':' / '/' / '\'' / '"' / '<' / '(' / '[' / '{' /
      UnicodePd / UnicodePo / UnicodePi / UnicodePf / UnicodePs) {
     inlineMarkupPreceding = p;
     return p;
@@ -134,26 +127,26 @@ InlineMarkup =
   CitationReference
 
 Emphasis =
-  ('*' !Whitespace !CorrespondingClosingChar)
-  text:(!Endline !(!Whitespace !'\\' . '*' InlineMarkupFollowing) .)*
-  last:(!Endline !Whitespace .)
+  ('*' !NormalizedToWhitespace !CorrespondingClosingChar)
+  text:(!(Newline BlankLines) !(!NormalizedToWhitespace !'\\' . '*' InlineMarkupFollowing) .)*
+  last:(!Endline !NormalizedToWhitespace .)
   ('*' &InlineMarkupFollowing) {
     return new InlineMarkup({ type: 'emphasis', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
   }
 
 StrongEmphasis =
-  ('**' !Whitespace !CorrespondingClosingChar)
-  text:(!Endline !(!Whitespace !'\\' . '**' InlineMarkupFollowing) .)*
-  last:(!Endline !Whitespace .)
+  ('**' !NormalizedToWhitespace !CorrespondingClosingChar)
+  text:(!(Newline BlankLines) !(!NormalizedToWhitespace !'\\' . '**' InlineMarkupFollowing) .)*
+  last:(!Endline !NormalizedToWhitespace .)
   ('**' &InlineMarkupFollowing) {
     return new InlineMarkup({ type: 'strong_emphasis', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
   }
 
 InterpretedText =
   role:(':' (!Endline !Whitespace !':' .)+ ':')?
-  ('`' !Whitespace !CorrespondingClosingChar)
-  text:(!Endline !(!Whitespace !'\\' . '`' InlineMarkupFollowing) .)*
-  last:(!Endline !Whitespace .)
+  ('`' !NormalizedToWhitespace !CorrespondingClosingChar)
+  text:(!(Newline BlankLines) !(!NormalizedToWhitespace !'\\' . '`' InlineMarkupFollowing) .)*
+  last:(!Endline !NormalizedToWhitespace .)
   ('`' &InlineMarkupFollowing) {
     var roleStr = null;
     if (!_.isNull(role)) {
@@ -163,25 +156,25 @@ InterpretedText =
   }
 
 InlineLiteral =
-  ('``' !Whitespace !CorrespondingClosingChar)
-  text:(!Endline !(!Whitespace . '``' InlineMarkupFollowing) .)*
-  last:(!Endline !Whitespace .)
+  ('``' !NormalizedToWhitespace !CorrespondingClosingChar)
+  text:(!(Newline BlankLines) !(!NormalizedToWhitespace . '``' InlineMarkupFollowing) .)*
+  last:(!Endline !NormalizedToWhitespace .)
   ('``' &InlineMarkupFollowing) {
     return new InlineMarkup({ type: 'inline_literal', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
   }
 
 SubstitutionReference =
-  ('|' !Whitespace !CorrespondingClosingChar)
-  text:(!Endline !(!Whitespace !'\\' . '|' InlineMarkupFollowing) .)*
-  last:(!Endline !Whitespace .)
+  ('|' !NormalizedToWhitespace !CorrespondingClosingChar)
+  text:(!(Newline BlankLines) !(!NormalizedToWhitespace !'\\' . '|' InlineMarkupFollowing) .)*
+  last:(!Endline !NormalizedToWhitespace .)
   ('|' &InlineMarkupFollowing) {
     return new InlineMarkup({ type: 'substitution_reference', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
   }
 
 InlineInternalTarget =
-  ('_`' !Whitespace !CorrespondingClosingChar)
-  text:(!Endline !(!Whitespace !'\\' . '`' InlineMarkupFollowing) .)*
-  last:(!Endline !Whitespace .)
+  ('_`' !NormalizedToWhitespace !CorrespondingClosingChar)
+  text:(!(Newline BlankLines) !(!NormalizedToWhitespace !'\\' . '`' InlineMarkupFollowing) .)*
+  last:(!Endline !NormalizedToWhitespace .)
   ('`' &InlineMarkupFollowing) {
     return new InlineMarkup({ type: 'inline_internal_target', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
   }
@@ -211,9 +204,9 @@ HyperlinkReference =
   NamedSimpleHyperlinkReference
 
 NamedHyperlinkReference =
-  ('`' !Whitespace !CorrespondingClosingChar)
-  text:(!Endline !(!Whitespace !'\\' . '`_' InlineMarkupFollowing) .)*
-  last:(!Endline !Whitespace .)
+  ('`' !NormalizedToWhitespace !CorrespondingClosingChar)
+  text:(!(Newline BlankLines) !(!NormalizedToWhitespace !'\\' . '`_' InlineMarkupFollowing) .)*
+  last:(!Endline !NormalizedToWhitespace .)
   ('`_' &InlineMarkupFollowing) {
     return new HyperlinkReference({ anonymous: false, simple: false, text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
   }
@@ -224,9 +217,9 @@ NamedSimpleHyperlinkReference =
   }
 
 AnonymousHyperlinkReference =
-  ('`' !Whitespace !CorrespondingClosingChar)
-  text:(!Endline !(!Whitespace !'\\' . '`__' InlineMarkupFollowing) .)*
-  last:(!Endline !Whitespace .)
+  ('`' !NormalizedToWhitespace !CorrespondingClosingChar)
+  text:(!(Newline BlankLines) !(!NormalizedToWhitespace !'\\' . '`_' InlineMarkupFollowing) .)*
+  last:(!Endline !NormalizedToWhitespace .)
   ('`__' &InlineMarkupFollowing) {
     return new HyperlinkReference({ anonymous: true, simple: false, text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
   }
@@ -255,6 +248,7 @@ Eof = !.
 Newline = '\n' / ('\r' '\n'?)
 Whitespace = ' ' / '\v' / '\f' / '\t'
 Endline = Newline / Eof
+NormalizedToWhitespace = Whitespace / Newline
 
 BlankLines =
   (Whitespace* Newline &(Whitespace* Endline))*
