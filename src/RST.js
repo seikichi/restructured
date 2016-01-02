@@ -1,5 +1,9 @@
 import parser from './parser';
 
-const parse = s => parser.parse(s);
+const RST = {
+  parse(s) {
+    return parser.parse(s, { startRule: 'Document' });
+  },
+};
 
-export default { parse };
+export default RST;

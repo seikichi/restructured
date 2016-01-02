@@ -15,7 +15,7 @@ Progress
 
 - Body Elements
 
-  - Paragraphs
+  - ✓ Paragraphs
   - Bullet Lists
   - Enumerated Lists
   - Definition Lists
@@ -58,10 +58,7 @@ Progress
 - Implicit Hyperlink Targets
 - Inline Markup
 
-  - Inline markup recognition rules
-  - Recognition order
-  - Character-Level Inline Markup
-  - Emphasis
+  - ✓ Emphasis
   - Strong Emphasis
   - Interpreted Text
   - Inline Literals
