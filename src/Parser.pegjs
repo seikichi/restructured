@@ -96,7 +96,8 @@ InlineMarkup =
   HyperlinkReference /
   InterpretedText /
   SubstitutionReference /
-  FootnoteReference
+  FootnoteReference /
+  CitationReference
 
 Emphasis =
   ('*' !Whitespace !CorrespondingClosingChar)
@@ -162,6 +163,11 @@ FootnoteLabel =
 FootnoteReference =
   '[' label:FootnoteLabel ']_' &InlineMarkupFollowing {
     return new InlineMarkup({ type: 'footnote_reference', text: label });
+  }
+
+CitationReference =
+  '[' label:ReferenceName ']_' &InlineMarkupFollowing {
+    return new InlineMarkup({ type: 'citation_reference', text: label });
   }
 
 HyperlinkReference =

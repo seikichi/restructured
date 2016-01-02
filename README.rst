@@ -68,6 +68,6 @@ Progress
 
   - ✓ Inline Internal Targets
   - ✓ Footnote References
-  - Citation References
+  - ✓ Citation References
   - ✓ Substitution References
   - Standalone Hyperlinks
