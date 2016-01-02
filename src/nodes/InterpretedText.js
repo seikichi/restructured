@@ -1,8 +1,8 @@
 class InterpretedText {
-  constructor({ text, role }) {
+  constructor({ role, children }) {
     this.type = 'interpreted_text';
-    this.text = text;
     this.role = role;
+    this.children = children;
   }
 }
 

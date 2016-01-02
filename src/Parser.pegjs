@@ -29,6 +29,7 @@
   var currentIndentSize = 0;
   var indentSizeStack = [];
   var inlineMarkupPreceding = null;
+  var markupEndString = null;
 }
 
 // Document Structure
@@ -206,57 +207,80 @@ InlineMarkup =
   FootnoteReference /
   CitationReference
 
+MarkupEndString =
+  &{ return markupEndString.length == 1 } s:(.) &{ return s === markupEndString; } /
+  &{ return markupEndString.length == 2 } s:(..) &{ return s.join('') === markupEndString; } /
+  &{ return markupEndString.length == 3 } s:(...) &{ return s.join('') === markupEndString; }
+
+MarkupTextWithIndent =
+  indent:SameIndent
+  text:(!Newline !(!NormalizedToWhitespace !'\\' . MarkupEndString InlineMarkupFollowing) .)* {
+    var textStr = _.map(text, function (v) { return v[2]; }).join('');
+    return new Text({ text: textStr, indent: indent });
+  }
+
+MarkupTextWithoutIndent =
+  text:(!Newline !(!NormalizedToWhitespace !'\\' . MarkupEndString InlineMarkupFollowing) .)* {
+    var textStr = _.map(text, function (v) { return v[2]; }).join('');
+    return new Text({ text: textStr });
+  }
+
+MarkupTail =
+  first:MarkupTextWithoutIndent
+  middle:(Newline MarkupTextWithIndent)*
+  last:(!Endline !NormalizedToWhitespace .)
+  (MarkupEndString &InlineMarkupFollowing) {
+    var children = [first].concat(_.map(middle, function (v) { return v[1]; }));
+    children[children.length - 1].text += last[2];
+    return children;
+  }
+
 Emphasis =
   ('*' !NormalizedToWhitespace !CorrespondingClosingChar)
-  text:(!(Newline BlankLines) !(!NormalizedToWhitespace !'\\' . '*' InlineMarkupFollowing) .)*
-  last:(!Endline !NormalizedToWhitespace .)
-  ('*' &InlineMarkupFollowing) {
-    return new InlineMarkup({ type: 'emphasis', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
+  &{ markupEndString = '*'; return true; }
+  children:MarkupTail {
+    return new InlineMarkup({ type: 'emphasis', children: children });
   }
 
 StrongEmphasis =
   ('**' !NormalizedToWhitespace !CorrespondingClosingChar)
-  text:(!(Newline BlankLines) !(!NormalizedToWhitespace !'\\' . '**' InlineMarkupFollowing) .)*
-  last:(!Endline !NormalizedToWhitespace .)
-  ('**' &InlineMarkupFollowing) {
-    return new InlineMarkup({ type: 'strong_emphasis', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
+  &{ markupEndString = '**'; return true; }
+  children:MarkupTail {
+    return new InlineMarkup({ type: 'strong_emphasis', children: children });
   }
 
 InterpretedText =
   role:(':' (!Endline !Whitespace !':' .)+ ':')?
   ('`' !NormalizedToWhitespace !CorrespondingClosingChar)
-  text:(!(Newline BlankLines) !(!NormalizedToWhitespace !'\\' . '`' InlineMarkupFollowing) .)*
-  last:(!Endline !NormalizedToWhitespace .)
-  ('`' &InlineMarkupFollowing) {
+  &{ markupEndString = '`'; return true; }
+  children:MarkupTail {
     var roleStr = null;
     if (!_.isNull(role)) {
       roleStr = _.map(role[1], function (v) { return v[3]; }).join('');
     }
-    return new InterpretedText({ role: roleStr, text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
+    return new InterpretedText({ role: roleStr, children: children });
   }
 
+// TODO(seikichi): unescaped backslash preceding a start-string end-string
 InlineLiteral =
   ('``' !NormalizedToWhitespace !CorrespondingClosingChar)
-  text:(!(Newline BlankLines) !(!NormalizedToWhitespace . '``' InlineMarkupFollowing) .)*
-  last:(!Endline !NormalizedToWhitespace .)
-  ('``' &InlineMarkupFollowing) {
-    return new InlineMarkup({ type: 'inline_literal', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
+  &{ markupEndString = '``'; return true; }
+  children:MarkupTail {
+    return new InlineMarkup({ type: 'inline_literal', children: children });
   }
 
 SubstitutionReference =
   ('|' !NormalizedToWhitespace !CorrespondingClosingChar)
-  text:(!(Newline BlankLines) !(!NormalizedToWhitespace !'\\' . '|' InlineMarkupFollowing) .)*
-  last:(!Endline !NormalizedToWhitespace .)
-  ('|' &InlineMarkupFollowing) {
-    return new InlineMarkup({ type: 'substitution_reference', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
+  &{ markupEndString = '|'; return true; }
+  children:MarkupTail {
+    return new InlineMarkup({ type: 'substitution_reference', children: children });
   }
 
 InlineInternalTarget =
   ('_`' !NormalizedToWhitespace !CorrespondingClosingChar)
-  text:(!(Newline BlankLines) !(!NormalizedToWhitespace !'\\' . '`' InlineMarkupFollowing) .)*
-  last:(!Endline !NormalizedToWhitespace .)
-  ('`' &InlineMarkupFollowing) {
-    return new InlineMarkup({ type: 'inline_internal_target', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
+  &{ markupEndString = '`'; return true; }
+  children:MarkupTail {
+    return new InlineMarkup({ type: 'inline_internal_target', children: children });
   }
 
 FootnoteLabel =
@@ -269,12 +293,12 @@ FootnoteLabel =
 
 FootnoteReference =
   '[' label:FootnoteLabel ']_' &InlineMarkupFollowing {
-    return new InlineMarkup({ type: 'footnote_reference', text: label });
+    return new InlineMarkup({ type: 'footnote_reference', children: new Text({ text: label }) });
   }
 
 CitationReference =
   '[' label:ReferenceName ']_' &InlineMarkupFollowing {
-    return new InlineMarkup({ type: 'citation_reference', text: label });
+    return new InlineMarkup({ type: 'citation_reference', children: new Text({ text: label }) });
   }
 
 HyperlinkReference =
@@ -285,28 +309,27 @@ HyperlinkReference =
 
 NamedHyperlinkReference =
   ('`' !NormalizedToWhitespace !CorrespondingClosingChar)
-  text:(!(Newline BlankLines) !(!NormalizedToWhitespace !'\\' . '`_' InlineMarkupFollowing) .)*
-  last:(!Endline !NormalizedToWhitespace .)
-  ('`_' &InlineMarkupFollowing) {
-    return new HyperlinkReference({ anonymous: false, simple: false, text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
+  &{ markupEndString = '`_'; return true; }
+  children:MarkupTail {
+    return new HyperlinkReference({ anonymous: false, simple: false, children: children });
   }
 
 NamedSimpleHyperlinkReference =
   ref:HyperlinkReferenceName '_' {
-    return new HyperlinkReference({ anonymous: false, simple: true, text: ref });
+    return new HyperlinkReference({ anonymous: false, simple: true, children: [new Text({ text: ref })] });
   }
 
 AnonymousHyperlinkReference =
   ('`' !NormalizedToWhitespace !CorrespondingClosingChar)
-  text:(!(Newline BlankLines) !(!NormalizedToWhitespace !'\\' . '`_' InlineMarkupFollowing) .)*
-  last:(!Endline !NormalizedToWhitespace .)
-  ('`__' &InlineMarkupFollowing) {
-    return new HyperlinkReference({ anonymous: true, simple: false, text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
+  &{ markupEndString = '`__'; return true; }
+  children:MarkupTail {
+    return new HyperlinkReference({ anonymous: true, simple: false, children: children });
+    return {children: children};
   }
 
 AnonymousSimpleHyperlinkReference =
   ref:HyperlinkReferenceName '__' {
-    return new HyperlinkReference({ anonymous: true, simple: true, text: ref });
+    return new HyperlinkReference({ anonymous: true, simple: true, children: [new Text({ text: ref })] });
   }
 
 // Reference
@@ -356,4 +379,6 @@ Dedent =
 SameIndent =
   i:Whitespace* &{
     return ParserUtil.calcIndentSize(i) === currentIndentSize;
+  } {
+    return i.join('');
   }

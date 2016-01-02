@@ -1,7 +1,7 @@
 class InlineMarkup {
-  constructor({ type, text }) {
+  constructor({ type, children }) {
     this.type = type;
-    this.text = text;
+    this.children = children;
   }
 }
 

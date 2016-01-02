@@ -1,7 +1,7 @@
 class HyperlinkReference {
-  constructor({ text, simple, anonymous }) {
+  constructor({ children, simple, anonymous }) {
     this.type = 'hyperlink_reference';
-    this.text = text;
+    this.children = children;
     this.simple = simple;
     this.anonymous = anonymous;
   }

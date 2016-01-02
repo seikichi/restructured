@@ -1,7 +1,8 @@
 class Text {
-  constructor({ text }) {
+  constructor({ text, indent = undefined }) {
     this.type = 'text';
     this.text = text;
+    this.indent = indent;
   }
 }
 
