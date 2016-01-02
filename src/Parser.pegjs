@@ -27,10 +27,23 @@
   var inlineMarkupPreceding = null;
 }
 
-Document = .* { return new Document({ children: [] }); }
-Paragraph = lines:MarkupLine+ BlankLines {
-  return new Paragraph({ children: lines });
-}
+Document =
+  children:BodyElement*
+  BlankLines {
+    return new Document({ children: children });
+  }
+
+BodyElement =
+  BlankLines?
+  element:(Paragraph) {
+    return element;
+  }
+
+Paragraph =
+  lines:MarkupLine+
+  BlankLines {
+    return new Paragraph({ children: lines });
+  }
 
 MarkupLine =
   &(Whitespace* !Endline !Whitespace .)
