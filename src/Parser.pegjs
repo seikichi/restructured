@@ -39,32 +39,29 @@ MarkupLine =
 
 MarkupLineStartWithInlineMarkup =
   head:(ClearInlineMarkupPreceding InlineMarkup)
-  tail:TextWithInlineMarkup* {
+  tail:(TextWithInlineMarkup / TextWithoutInlineMarkup)* {
     return [head[1]].concat(_.flatten(tail));
   }
 
 MarkupLineStartWithText =
-  texts:TextWithInlineMarkup+ {
+  texts:(TextWithInlineMarkup / TextWithoutInlineMarkup)+ {
     return _.flatten(texts);
   }
 
 TextWithInlineMarkup =
-  text:(!Endline !(InlineMarkupPreceding InlineMarkup) .)+
-  markup:(InlineMarkupPreceding InlineMarkup)? {
+  text:(!Endline !(InlineMarkupPreceding InlineMarkup) .)*
+  markup:(InlineMarkupPreceding InlineMarkup) {
+    var textStr = _.map(text, function (v) { return v[2]; }).join('') + markup[0];
+    return [new Text({ text: textStr }), markup[1]];
+  }
+
+TextWithoutInlineMarkup =
+  text:(!Endline !(InlineMarkupPreceding InlineMarkup) .)+ {
     var textStr = _.map(text, function (v) { return v[2]; }).join('');
-    if (!_.isNull(markup)) {
-      textStr += markup[0];
-    }
-    var ret = [new Text({ text: textStr })];
-    if (!_.isNull(markup)) {
-      ret.push(markup[1]);
-    }
-    return ret;
+    return [new Text({ text: textStr })];
   }
 
 // Inline Markup
-InlineMarkup = StrongEmphasis / Emphasis
-
 ClearInlineMarkupPreceding = &{
   inlineMarkupPreceding = null;
   return true;
@@ -89,7 +86,13 @@ InlineMarkupFollowing =
   '/' / '\'' / '"' / ')' / ']' / '}' / '>' /
   UnicodePd / UnicodePo / UnicodePi / UnicodePf / UnicodePe
 
-// Emphasis
+InlineMarkup =
+  StrongEmphasis /
+  Emphasis /
+  InlineLiteral /
+  InterpretedText /
+  SubstitutionReference
+
 Emphasis =
   ('*' !Whitespace !CorrespondingClosingChar)
   text:(!Endline !(!Whitespace !'\\' . '*' InlineMarkupFollowing) .)*
@@ -98,7 +101,6 @@ Emphasis =
     return new InlineMarkup({ type: 'emphasis', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
   }
 
-// StrongEmphasis
 StrongEmphasis =
   ('**' !Whitespace !CorrespondingClosingChar)
   text:(!Endline !(!Whitespace !'\\' . '**' InlineMarkupFollowing) .)*
@@ -107,6 +109,31 @@ StrongEmphasis =
     return new InlineMarkup({ type: 'strong_emphasis', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
   }
 
+InterpretedText =
+  ('`' !Whitespace !CorrespondingClosingChar)
+  text:(!Endline !(!Whitespace !'\\' . '`' InlineMarkupFollowing) .)*
+  last:(!Endline !Whitespace .)
+  ('`' &InlineMarkupFollowing) {
+    return new InlineMarkup({ type: 'interpreted_text', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
+  }
+
+InlineLiteral =
+  ('``' !Whitespace !CorrespondingClosingChar)
+  text:(!Endline !(!Whitespace . '``' InlineMarkupFollowing) .)*
+  last:(!Endline !Whitespace .)
+  ('``' &InlineMarkupFollowing) {
+    return new InlineMarkup({ type: 'inline_literal', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
+  }
+
+SubstitutionReference =
+  ('|' !Whitespace !CorrespondingClosingChar)
+  text:(!Endline !(!Whitespace !'\\' . '|' InlineMarkupFollowing) .)*
+  last:(!Endline !Whitespace .)
+  ('|' &InlineMarkupFollowing) {
+    return new InlineMarkup({ type: 'substitution_reference', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
+  }
+
+// Utility
 Eof = !.
 Newline = '\n' / ('\r' '\n'?)
 Whitespace = ' ' / '\v' / '\f' / '\t'

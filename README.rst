@@ -60,8 +60,8 @@ Progress
 
   - ✓ Emphasis
   - ✓ Strong Emphasis
-  - Interpreted Text
-  - Inline Literals
+  - ✓ Interpreted Text
+  - ✓ Inline Literals
   - Hyperlink References
 
     - Embedded URIs and Aliases
@@ -69,5 +69,5 @@ Progress
   - Inline Internal Targets
   - Footnote References
   - Citation References
-  - Substitution References
+  - ✓ Substitution References
   - Standalone Hyperlinks
