@@ -15,7 +15,7 @@
   // nodes
   var Document = require('./nodes/Document').default;
   var Paragraph = require('./nodes/Paragraph').default;
-  var Emphasis = require('./nodes/Emphasis').default;
+  var InlineMarkup = require('./nodes/InlineMarkup').default;
   var Text = require('./nodes/Text').default;
   var MarkupLine = require('./nodes/MarkupLine').default;
 
@@ -48,8 +48,6 @@ MarkupLineStartWithText =
     return _.flatten(texts);
   }
 
-InlineMarkup = Emphasis
-
 TextWithInlineMarkup =
   text:(!Endline !(InlineMarkupPreceding InlineMarkup) .)+
   markup:(InlineMarkupPreceding InlineMarkup)? {
@@ -64,13 +62,13 @@ TextWithInlineMarkup =
     return ret;
   }
 
-Emphasis =
-  ('*' !Whitespace !CorrespondingClosingChar)
-  text:(!Endline !(!Whitespace !'\\' . '*' InlineMarkupFollowing) .)*
-  last:(!Endline !Whitespace .)
-  ('*' &InlineMarkupFollowing) {
-    return new Emphasis({ text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
-  }
+// Inline Markup
+InlineMarkup = Emphasis
+
+ClearInlineMarkupPreceding = &{
+  inlineMarkupPreceding = null;
+  return true;
+}
 
 CorrespondingClosingChar =
   f:InlineMarkupFollowing &{
@@ -85,16 +83,20 @@ InlineMarkupPreceding =
     return p;
   }
 
-ClearInlineMarkupPreceding = &{
-  inlineMarkupPreceding = null;
-  return true;
-}
-
 InlineMarkupFollowing =
   Endline / Whitespace /
   '-' / '.' / ',' / ':' / ';' / '!' / '?' / '\\' /
   '/' / '\'' / '"' / ')' / ']' / '}' / '>' /
   UnicodePd / UnicodePo / UnicodePi / UnicodePf / UnicodePe
+
+// Emphasis
+Emphasis =
+  ('*' !Whitespace !CorrespondingClosingChar)
+  text:(!Endline !(!Whitespace !'\\' . '*' InlineMarkupFollowing) .)*
+  last:(!Endline !Whitespace .)
+  ('*' &InlineMarkupFollowing) {
+    return new InlineMarkup({ type: 'emphasis', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
+  }
 
 Eof = !.
 Newline = '\n' / ('\r' '\n'?)
