@@ -16,6 +16,7 @@
   var Document = require('./nodes/Document').default;
   var Paragraph = require('./nodes/Paragraph').default;
   var InlineMarkup = require('./nodes/InlineMarkup').default;
+  var InterpretedText = require('./nodes/InterpretedText').default;
   var Text = require('./nodes/Text').default;
   var MarkupLine = require('./nodes/MarkupLine').default;
 
@@ -112,11 +113,16 @@ StrongEmphasis =
   }
 
 InterpretedText =
+  role:(':' (!Endline !Whitespace !':' .)+ ':')?
   ('`' !Whitespace !CorrespondingClosingChar)
   text:(!Endline !(!Whitespace !'\\' . '`' InlineMarkupFollowing) .)*
   last:(!Endline !Whitespace .)
   ('`' &InlineMarkupFollowing) {
-    return new InlineMarkup({ type: 'interpreted_text', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
+    var roleStr = null;
+    if (!_.isNull(role)) {
+      roleStr = _.map(role[1], function (v) { return v[3]; }).join('');
+    }
+    return new InterpretedText({ role: roleStr, text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
   }
 
 InlineLiteral =
