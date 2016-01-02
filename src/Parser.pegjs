@@ -29,7 +29,6 @@
   var currentIndentSize = 0;
   var indentSizeStack = [];
   var inlineMarkupPreceding = null;
-  var blockQuoteStartLine = null;
 }
 
 // Document Structure
@@ -149,15 +148,14 @@ SimpleBlockQuote =
   }
 
 BlockQuoteIndent =
-  i:Whitespace+
-  &{
-    var indentSize = ParserUtil.calcIndentSize(i);
-    if (indentSize <= currentIndentSize) { return false; }
-    blockQuoteStartLine = location()['start']['line'];
-    indentSizeStack.push(currentIndentSize);
-    currentIndentSize = indentSize;
-    return true;
-  }
+  &(i:Whitespace+
+    &{
+      var indentSize = ParserUtil.calcIndentSize(i);
+      if (indentSize <= currentIndentSize) { return false; }
+      indentSizeStack.push(currentIndentSize);
+      currentIndentSize = indentSize;
+      return true;
+    })
 
 TextWithInlineMarkup =
   text:(!(Newline BlankLines) !(InlineMarkupPreceding InlineMarkup) .)*
@@ -357,6 +355,5 @@ Dedent =
 
 SameIndent =
   i:Whitespace* &{
-    var skip = blockQuoteStartLine === location()['start']['line'];
-    return skip || ParserUtil.calcIndentSize(i) === currentIndentSize;
+    return ParserUtil.calcIndentSize(i) === currentIndentSize;
   }
