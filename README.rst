@@ -9,9 +9,9 @@ Progress
 
 - Document Structure
 
-  - Document
+  - ✓ Document
   - Sections
-  - Transitions
+  - ✓ Transitions
 
 - Body Elements
 

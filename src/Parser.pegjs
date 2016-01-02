@@ -14,6 +14,7 @@
 
   // nodes
   var Document = require('./nodes/Document').default;
+  var Transition = require('./nodes/Transition').default;
   var Paragraph = require('./nodes/Paragraph').default;
   var InlineMarkup = require('./nodes/InlineMarkup').default;
   var InterpretedText = require('./nodes/InterpretedText').default;
@@ -27,10 +28,30 @@
   var inlineMarkupPreceding = null;
 }
 
+// Document Structure
 Document =
-  children:BodyElement*
+  children:(Transition / BodyElement)*
   BlankLines {
     return new Document({ children: children });
+  }
+
+Transition =
+  BlankLines
+  marker:TransitionMarker Whitespace* Newline
+  &(BlankLines) {
+    return new Transition({ marker: marker });
+  }
+
+TransitionMarker =
+  marker:(('!!!!' '!'*) / ('""""' '"'*) / ('####' '#'*) / ('$$$$' '$'*) /
+          ('%%%%' '%'*) / ('&&&&' '&'*) / ("''''" "'"*) / ('((((' '('*) /
+          ('))))' ')'*) / ('****' '*'*) / ('++++' '+'*) / (',,,,' ','*) /
+          ('----' '-'*) / ('....' '.'*) / ('////' '/'*) / ('::::' ':'*) /
+          (';;;;' ';'*) / ('<<<<' '<'*) / ('====' '='*) / ('>>>>' '>'*) /
+          ('????' '?'*) / ('@@@@' '@'*) / ('[[[[' '['*) / ('\\\\\\\\' '\\'*) /
+          (']]]]' ']'*) / ('^^^^' '^'*) / ('____' '_'*) / ('````' '`'*) /
+          ('{{{{' '{'*) / ('||||' '|'*) / ('}}}}' '}'*) / ('~~~~' '~'*)) {
+    return marker[0] + marker[1].join('');
   }
 
 BodyElement =
@@ -41,7 +62,7 @@ BodyElement =
 
 Paragraph =
   lines:MarkupLine+
-  BlankLines {
+  &(BlankLines) {
     return new Paragraph({ children: lines });
   }
 
@@ -235,7 +256,11 @@ Newline = '\n' / ('\r' '\n'?)
 Whitespace = ' ' / '\v' / '\f' / '\t'
 Endline = Newline / Eof
 
-BlankLines = (Whitespace* Newline)* Whitespace* Endline
+BlankLines =
+  (Whitespace* Newline &(Whitespace* Endline))*
+  Whitespace*
+  Endline
+
 RawLine = (!'\r' !'\n' .)* Newline / .+ Eof
 
 UnicodePd = c:. &{ return regexPd.test(c); }
