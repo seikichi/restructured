@@ -90,8 +90,10 @@ InlineMarkup =
   StrongEmphasis /
   Emphasis /
   InlineLiteral /
+  InlineInternalTarget /
   InterpretedText /
-  SubstitutionReference
+  SubstitutionReference /
+  FootnoteReference
 
 Emphasis =
   ('*' !Whitespace !CorrespondingClosingChar)
@@ -131,6 +133,22 @@ SubstitutionReference =
   last:(!Endline !Whitespace .)
   ('|' &InlineMarkupFollowing) {
     return new InlineMarkup({ type: 'substitution_reference', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
+  }
+
+InlineInternalTarget =
+  ('_`' !Whitespace !CorrespondingClosingChar)
+  text:(!Endline !(!Whitespace !'\\' . '`' InlineMarkupFollowing) .)*
+  last:(!Endline !Whitespace .)
+  ('`' &InlineMarkupFollowing) {
+    return new InlineMarkup({ type: 'inline_internal_target', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
+  }
+
+FootnoteReference =
+  ('[' !Whitespace !CorrespondingClosingChar)
+  text:(!Endline !(!Whitespace !'\\' . ']_' InlineMarkupFollowing) .)*
+  last:(!Endline !Whitespace .)
+  (']_' &InlineMarkupFollowing) {
+    return new InlineMarkup({ type: 'footnote_reference', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
   }
 
 // Utility

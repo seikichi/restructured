@@ -66,8 +66,8 @@ Progress
 
     - Embedded URIs and Aliases
 
-  - Inline Internal Targets
-  - Footnote References
+  - ✓ Inline Internal Targets
+  - ✓ Footnote References
   - Citation References
   - ✓ Substitution References
   - Standalone Hyperlinks
