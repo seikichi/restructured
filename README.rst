@@ -9,55 +9,57 @@ A reStructuredText parser for JavaScript.
 Example
 =======
 
-::
+Consider the following script.
 
-   % cat <<'EOF' > sample.rst
-   Paragraphs contain text and may contain inline markup:
-   *emphasis*, **strong emphasis**, `interpreted text`, ``inline
-   literals``, standalone hyperlinks (http://www.python.org),
-   external hyperlinks (Python_), internal cross-references
-   (example_), footnote references ([1]_), citation references
-   ([CIT2002]_), substitution references (|example|), and _`inline
-   internal targets`.
+.. code:: javascript
 
-   Paragraphs are separated by blank lines and are left-aligned.
-   EOF
-   % cat <<'EOF' > sample.js
-   var RST = require('RST').default;
-   var fs = require('fs');
+   var RST = require('../lib/RST.js').default;
 
-   var text = fs.readFileSync('/dev/stdin').toString();
-   console.log(JSON.stringify(RST.parse(text)));
-   EOF
-   % node sample.js < sample.rst | jq .
+   var document = RST.parse([
+     '########',
+     ' rst.js ',
+     '########',
+     '',
+     '**作りかけです!!**'
+   ].join('\n'));
+
+   console.log(JSON.stringify(document));
+
+The above script outputs following JSON.
+
+.. code:: json
+
    {
      "type": "document",
      "children": [
        {
+         "type": "section",
+         "title": [
+           [
+             {
+               "type": "text",
+               "text": "rst.js "
+             }
+           ]
+         ],
+         "overline": {
+           "line": "########"
+         },
+         "underline": {
+           "line": "########"
+         }
+       },
+       {
          "type": "paragraph",
          "children": [
-           [
-             {
-               "type": "text",
-               "text": "Paragraphs contain text and may contain inline markup:\n"
-             },
-             {
-               "type": "emphasis",
-               "text": "emphasis"
-             }
-           ],
-           [
-             {
-               "type": "text",
-               "text": ", "
-             },
-             {
-               "type": "strong_emphasis",
-               "text": "strong emphasis"
-             }
-           ],
-   ...
-
+           {
+             "type": "strong_emphasis",
+             "text": "作りかけです!!"
+           }
+         ]
+       }
+     ]
+   }
 
 Progress
 ========
