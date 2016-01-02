@@ -14,6 +14,7 @@
 
   // nodes
   var Document = require('./nodes/Document').default;
+  var Section = require('./nodes/Section').default;
   var Transition = require('./nodes/Transition').default;
   var Paragraph = require('./nodes/Paragraph').default;
   var InlineMarkup = require('./nodes/InlineMarkup').default;
@@ -29,10 +30,48 @@
 
 // Document Structure
 Document =
-  children:(Transition / BodyElement)*
+  children:(Section / Transition / BodyElement)*
   BlankLines {
     return new Document({ children: children });
   }
+
+Section =
+  BlankLines?
+  section:(SectionWithOverline / SectionWithoutOverline)
+  &(BlankLines) {
+    return section;
+  }
+
+SectionWithOverline =
+  &(SectionLine !BlankLines RawLine SectionLine)
+  overline:SectionLine
+  Whitespace* title:RawLine
+  underline:SectionLine {
+    var children = peg$parse(title.raw, {startRule: 'Paragraph'}).children;
+    return new Section({ title: children, underline: underline, overline: overline });
+  }
+
+SectionWithoutOverline =
+  &(!BlankLines RawLine SectionLine)
+  title:RawLine
+  underline:SectionLine {
+    var children = peg$parse(title.raw, {startRule: 'Paragraph'}).children;
+    return new Section({ title: children, underline: underline });
+  }
+
+SectionLine =
+  line:(('!!!!' '!'*) / ('""""' '"'*) / ('####' '#'*) / ('$$$$' '$'*) /
+        ('%%%%' '%'*) / ('&&&&' '&'*) / ("''''" "'"*) / ('((((' '('*) /
+        ('))))' ')'*) / ('****' '*'*) / ('++++' '+'*) / (',,,,' ','*) /
+        ('----' '-'*) / ('....' '.'*) / ('////' '/'*) / ('::::' ':'*) /
+        (';;;;' ';'*) / ('<<<<' '<'*) / ('====' '='*) / ('>>>>' '>'*) /
+        ('????' '?'*) / ('@@@@' '@'*) / ('[[[[' '['*) / ('\\\\\\\\' '\\'*) /
+        (']]]]' ']'*) / ('^^^^' '^'*) / ('____' '_'*) / ('````' '`'*) /
+        ('{{{{' '{'*) / ('||||' '|'*) / ('}}}}' '}'*) / ('~~~~' '~'*))
+  Whitespace* Newline {
+    return {line: line[0] + line[1].join('')};
+  }
+
 
 Transition =
   BlankLines
@@ -255,7 +294,10 @@ BlankLines =
   Whitespace*
   Endline
 
-RawLine = (!'\r' !'\n' .)* Newline / .+ Eof
+RawLine =
+  raw:(!Endline .)+ Endline {
+    return { raw: _.map(raw, function (v) { return v[1]; }).join('') };
+  }
 
 UnicodePd = c:. &{ return regexPd.test(c); }
 UnicodePo = c:. &{ return regexPo.test(c); }

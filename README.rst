@@ -65,7 +65,7 @@ Progress
 - Document Structure
 
   - ✓ Document
-  - Sections
+  - ✓ Sections
   - ✓ Transitions
 
 - Body Elements
