@@ -151,12 +151,17 @@ InlineInternalTarget =
     return new InlineMarkup({ type: 'inline_internal_target', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
   }
 
+FootnoteLabel =
+  label:([0-9]+ / '#' ReferenceName / '#' / '*') {
+    if (_.isArray(label)) {
+      return label.join('');
+    }
+    return label;
+  }
+
 FootnoteReference =
-  ('[' !Whitespace !CorrespondingClosingChar)
-  text:(!Endline !(!Whitespace !'\\' . ']_' InlineMarkupFollowing) .)*
-  last:(!Endline !Whitespace .)
-  (']_' &InlineMarkupFollowing) {
-    return new InlineMarkup({ type: 'footnote_reference', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
+  '[' label:FootnoteLabel ']_' &InlineMarkupFollowing {
+    return new InlineMarkup({ type: 'footnote_reference', text: label });
   }
 
 HyperlinkReference =
