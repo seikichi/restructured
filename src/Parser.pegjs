@@ -63,7 +63,7 @@ TextWithInlineMarkup =
   }
 
 // Inline Markup
-InlineMarkup = Emphasis
+InlineMarkup = StrongEmphasis / Emphasis
 
 ClearInlineMarkupPreceding = &{
   inlineMarkupPreceding = null;
@@ -96,6 +96,15 @@ Emphasis =
   last:(!Endline !Whitespace .)
   ('*' &InlineMarkupFollowing) {
     return new InlineMarkup({ type: 'emphasis', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
+  }
+
+// StrongEmphasis
+StrongEmphasis =
+  ('**' !Whitespace !CorrespondingClosingChar)
+  text:(!Endline !(!Whitespace !'\\' . '**' InlineMarkupFollowing) .)*
+  last:(!Endline !Whitespace .)
+  ('**' &InlineMarkupFollowing) {
+    return new InlineMarkup({ type: 'strong_emphasis', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
   }
 
 Eof = !.

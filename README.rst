@@ -59,7 +59,7 @@ Progress
 - Inline Markup
 
   - ✓ Emphasis
-  - Strong Emphasis
+  - ✓ Strong Emphasis
   - Interpreted Text
   - Inline Literals
   - Hyperlink References
