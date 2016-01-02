@@ -62,7 +62,7 @@ Progress
   - ✓ Strong Emphasis
   - ✓ Interpreted Text
   - ✓ Inline Literals
-  - Hyperlink References
+  - ✓ Hyperlink References
 
     - Embedded URIs and Aliases
 

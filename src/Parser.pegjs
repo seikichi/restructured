@@ -17,6 +17,7 @@
   var Paragraph = require('./nodes/Paragraph').default;
   var InlineMarkup = require('./nodes/InlineMarkup').default;
   var InterpretedText = require('./nodes/InterpretedText').default;
+  var HyperlinkReference = require('./nodes/HyperlinkReference').default;
   var Text = require('./nodes/Text').default;
   var MarkupLine = require('./nodes/MarkupLine').default;
 
@@ -92,6 +93,7 @@ InlineMarkup =
   Emphasis /
   InlineLiteral /
   InlineInternalTarget /
+  HyperlinkReference /
   InterpretedText /
   SubstitutionReference /
   FootnoteReference
@@ -157,7 +159,53 @@ FootnoteReference =
     return new InlineMarkup({ type: 'footnote_reference', text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
   }
 
+HyperlinkReference =
+  AnonymousHyperlinkReference /
+  AnonymousSimpleHyperlinkReference /
+  NamedHyperlinkReference /
+  NamedSimpleHyperlinkReference
+
+NamedHyperlinkReference =
+  ('`' !Whitespace !CorrespondingClosingChar)
+  text:(!Endline !(!Whitespace !'\\' . '`_' InlineMarkupFollowing) .)*
+  last:(!Endline !Whitespace .)
+  ('`_' &InlineMarkupFollowing) {
+    return new HyperlinkReference({ anonymous: false, simple: false, text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
+  }
+
+NamedSimpleHyperlinkReference =
+  ref:HyperlinkReferenceName '_' {
+    return new HyperlinkReference({ anonymous: false, simple: true, text: ref });
+  }
+
+AnonymousHyperlinkReference =
+  ('`' !Whitespace !CorrespondingClosingChar)
+  text:(!Endline !(!Whitespace !'\\' . '`__' InlineMarkupFollowing) .)*
+  last:(!Endline !Whitespace .)
+  ('`__' &InlineMarkupFollowing) {
+    return new HyperlinkReference({ anonymous: true, simple: false, text: _.map(text, function (v) { return v[2]; }).join('') + last[2] });
+  }
+
+AnonymousSimpleHyperlinkReference =
+  ref:HyperlinkReferenceName '__' {
+    return new HyperlinkReference({ anonymous: true, simple: true, text: ref });
+  }
+
+// Reference
+ReferenceName =
+  head:AlphanumericAscii
+  tail:(AlphanumericAscii / [-_.:+])+ {
+    return head + tail.join('');
+  }
+
+HyperlinkReferenceName =
+  head:AlphanumericAscii
+  tail:(AlphanumericAscii / [-.:+])+ {
+    return head + tail.join('');
+  }
+
 // Utility
+AlphanumericAscii = [A-Za-z0-9]
 Eof = !.
 Newline = '\n' / ('\r' '\n'?)
 Whitespace = ' ' / '\v' / '\f' / '\t'
