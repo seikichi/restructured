@@ -13,7 +13,7 @@ Consider the following script.
 
 .. code:: javascript
 
-   var RST = require('../lib/RST.js').default;
+   var RST = require('RST.js').default;
 
    var document = RST.parse([
      '########',
