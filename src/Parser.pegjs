@@ -16,16 +16,20 @@
   var Document = require('./nodes/Document').default;
   var Section = require('./nodes/Section').default;
   var Transition = require('./nodes/Transition').default;
+
   var Paragraph = require('./nodes/Paragraph').default;
+  var BlockQuote = require('./nodes/BlockQuote').default;
+
+  var Text = require('./nodes/Text').default;
   var InlineMarkup = require('./nodes/InlineMarkup').default;
   var InterpretedText = require('./nodes/InterpretedText').default;
   var HyperlinkReference = require('./nodes/HyperlinkReference').default;
-  var Text = require('./nodes/Text').default;
 
   // variables
   var currentIndentSize = 0;
   var indentSizeStack = [];
   var inlineMarkupPreceding = null;
+  var blockQuoteStartLine = null;
 }
 
 // Document Structure
@@ -94,11 +98,14 @@ TransitionMarker =
 
 BodyElement =
   BlankLines?
-  element:(Paragraph) {
+  element:(Paragraph / BlockQuote) {
     return element;
   }
 
+BodyElementExceptBlockQuote = Paragraph
+
 Paragraph =
+  SameIndent
   children:(ParagraphChildrenStartWithInlineMarkup / ParagraphChildrenStartWithText)
   Newline?
   &(BlankLines) {
@@ -114,6 +121,42 @@ ParagraphChildrenStartWithInlineMarkup =
 ParagraphChildrenStartWithText =
   children:(TextWithInlineMarkup / TextWithoutInlineMarkup)+ {
     return children;
+  }
+
+BlockQuote = NestedBlockQuote / SimpleBlockQuote
+
+BlockQuoteBody =
+  head:BodyElementExceptBlockQuote
+  tail:BodyElement* {
+    return [head].concat(tail);
+  }
+
+NestedBlockQuote =
+  BlankLines?
+  BlockQuoteIndent
+  children:BlockQuoteBody
+  Dedent
+  outer:BlockQuote {
+    return new BlockQuote({ children: [new BlockQuote({ children: children })].concat(outer.children) });
+  }
+
+SimpleBlockQuote =
+  BlankLines?
+  BlockQuoteIndent
+  children:BlockQuoteBody
+  Dedent {
+    return new BlockQuote({ children: children });
+  }
+
+BlockQuoteIndent =
+  i:Whitespace+
+  &{
+    var indentSize = ParserUtil.calcIndentSize(i);
+    if (indentSize <= currentIndentSize) { return false; }
+    blockQuoteStartLine = location()['start']['line'];
+    indentSizeStack.push(currentIndentSize);
+    currentIndentSize = indentSize;
+    return true;
   }
 
 TextWithInlineMarkup =
@@ -305,3 +348,15 @@ UnicodePi = c:. &{ return regexPi.test(c); }
 UnicodePf = c:. &{ return regexPf.test(c); }
 UnicodePs = c:. &{ return regexPs.test(c); }
 UnicodePe = c:. &{ return regexPe.test(c); }
+
+Dedent =
+  &{
+    currentIndentSize = indentSizeStack.pop();
+    return true;
+  }
+
+SameIndent =
+  i:Whitespace* &{
+    var skip = blockQuoteStartLine === location()['start']['line'];
+    return skip || ParserUtil.calcIndentSize(i) === currentIndentSize;
+  }

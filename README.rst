@@ -88,7 +88,7 @@ Progress
     - Quoted Literal Blocks
 
   - Line Blocks
-  - Block Quotes
+  - ✓ Block Quotes
   - Doctest Blocks
   - Tables
 
