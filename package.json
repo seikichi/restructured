@@ -10,8 +10,7 @@
     "allowed_start_rules": "Document,Paragraph"
   },
   "dependencies": {
-    "lodash": "^3.10.1",
-    "unicode-8.0.0": "^0.1.5"
+    "lodash": "^3.10.1"
   },
   "devDependencies": {
     "babel": "^6.3.26",

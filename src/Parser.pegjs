@@ -3,15 +3,6 @@
   var _ = require('lodash');
   var ParserUtil = require('./ParserUtil').default;
 
-  // unicodes
-  var regexPd = require('unicode-8.0.0/categories/Pd/regex');
-  var regexPo = require('unicode-8.0.0/categories/Po/regex');
-  var regexPi = require('unicode-8.0.0/categories/Pi/regex');
-  var regexPf = require('unicode-8.0.0/categories/Pf/regex');
-  var regexPs = require('unicode-8.0.0/categories/Ps/regex');
-  var regexPe = require('unicode-8.0.0/categories/Pe/regex');
-  var mirroring = require('unicode-8.0.0/bidi-mirroring')
-
   // nodes
   var Document = require('./nodes/Document').default;
   var Section = require('./nodes/Section').default;
@@ -126,6 +117,7 @@ Text =
     var textStr = _.map(text, function (v) { return v[2]; }).join('');
     if (!_.isNull(last)) {
       textStr += last[0];
+      inlineMarkupPreceding = last[0];
     }
     return new Text({ text: textStr });
   }
@@ -225,23 +217,19 @@ ClearInlineMarkupPreceding = &{
 }
 
 CorrespondingClosingChar =
-  f:InlineMarkupFollowing &{
-    var code = f.charCodeAt(0);
-    return mirroring[code] && mirroring[code] == inlineMarkupPreceding
+  c:. &{
+    return ParserUtil.isMatchPunctuations(inlineMarkupPreceding, c);
   }
 
 InlineMarkupPreceding =
-  p:(Whitespace / Newline / '-' / ':' / '/' / '\'' / '"' / '<' / '(' / '[' / '{' /
-     UnicodePd / UnicodePo / UnicodePi / UnicodePf / UnicodePs) {
-    inlineMarkupPreceding = p;
-    return p;
+  c:.
+  &{ return ParserUtil.isInlineMarkupPrefix(c); } {
+    inlineMarkupPreceding = c;
+    return c;
   }
 
 InlineMarkupFollowing =
-  Endline / Whitespace /
-  '-' / '.' / ',' / ':' / ';' / '!' / '?' / '\\' /
-  '/' / '\'' / '"' / ')' / ']' / '}' / '>' /
-  UnicodePd / UnicodePo / UnicodePi / UnicodePf / UnicodePe
+  Endline / c:. &{ return ParserUtil.isInlineMarkupSuffix(c); }
 
 InlineMarkup =
   StrongEmphasis /
@@ -276,14 +264,16 @@ MarkupTail =
   first:MarkupTextWithoutIndent
   middle:(Newline MarkupTextWithIndent)*
   last:(!Endline !NormalizedToWhitespace .)
-  (MarkupEndString &InlineMarkupFollowing) {
+  MarkupEndString
+  &InlineMarkupFollowing {
     var children = [first].concat(_.map(middle, function (v) { return v[1]; }));
     children[children.length - 1].text += last[2];
     return children;
   }
 
 Emphasis =
-  ('*' !NormalizedToWhitespace !CorrespondingClosingChar)
+  &{ debugger; return inlineMarkupPreceding != '*'; }
+  ('*' !'*' !NormalizedToWhitespace !CorrespondingClosingChar)
   &{ markupEndString = '*'; return true; }
   children:MarkupTail {
     return new InlineMarkup({ type: 'emphasis', children: children });
@@ -362,7 +352,7 @@ NamedHyperlinkReference =
   }
 
 NamedSimpleHyperlinkReference =
-  ref:HyperlinkReferenceName '_' {
+  ref:HyperlinkReferenceName '_' &InlineMarkupFollowing {
     return new HyperlinkReference({ anonymous: false, simple: true, children: [new Text({ text: ref })] });
   }
 
@@ -375,7 +365,7 @@ AnonymousHyperlinkReference =
   }
 
 AnonymousSimpleHyperlinkReference =
-  ref:HyperlinkReferenceName '__' {
+  ref:HyperlinkReferenceName '__' &InlineMarkupFollowing {
     return new HyperlinkReference({ anonymous: true, simple: true, children: [new Text({ text: ref })] });
   }
 
@@ -410,13 +400,6 @@ RawLine =
   raw:(!Endline .)+ Endline {
     return { raw: _.map(raw, function (v) { return v[1]; }).join('') };
   }
-
-UnicodePd = c:. &{ return regexPd.test(c); }
-UnicodePo = c:. &{ return regexPo.test(c); }
-UnicodePi = c:. &{ return regexPi.test(c); }
-UnicodePf = c:. &{ return regexPf.test(c); }
-UnicodePs = c:. &{ return regexPs.test(c); }
-UnicodePe = c:. &{ return regexPe.test(c); }
 
 Indent =
   &(i:Whitespace+ &{
