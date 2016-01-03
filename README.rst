@@ -75,7 +75,7 @@ Progress
   - ✓ Paragraphs
   - ✓ Bullet Lists
   - Enumerated Lists
-  - Definition Lists
+  - ✓ Definition Lists
   - Field Lists
 
     - Bibliographic Fields

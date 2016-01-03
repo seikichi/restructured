@@ -29,6 +29,7 @@
   var currentIndentSize = 0;
   var indentSizeStack = [];
   var indentIgnoreLine = null;
+  var nextIndentSize = null;
 
   var inlineMarkupPreceding = null;
   var markupEndString = null;
@@ -98,13 +99,13 @@ TransitionMarker =
     return marker[0] + marker[1].join('');
   }
 
+BodyElementExceptBlockQuote = BulletList / DefinitionList / Paragraph
+
 BodyElement =
   BlankLines?
-  element:(BulletList/ Paragraph / BlockQuote) {
+  element:(BodyElementExceptBlockQuote / BlockQuote) {
     return element;
   }
-
-BodyElementExceptBlockQuote = BulletList / Paragraph
 
 Paragraph = body:(SameIndent ParagraphText Endline)+ {
   var children = _.flatten(_.map(body, function (v) { return v[1]; }));
@@ -154,6 +155,34 @@ BulletListIndent =
     currentIndentSize = nextIndentSize;
   }
 
+// Definition List
+DefinitionList =
+  BlankLines?
+  head:DefinitionListItem
+  tail:(BlankLines? DefinitionListItem)*
+  &(BlankLines) {
+    return {type: 'definition_list', children: [head].concat(tail.map(function (t) { return t[1]; }))};
+  }
+
+DefinitionListItem =
+  SameIndent term:DefinitionTerm Whitespace* (':' Whitespace* DefinitionClassifier Whitespace*)* Newline
+  Indent
+  body:BodyElement+
+  Dedent {
+    return { type: 'definition_list_item', term: term, body: body };
+  }
+
+DefinitionTerm =
+  term:Nonspacechar+ {
+    return term.map(function (t) { return t[1]; }).join('');
+  }
+
+DefinitionClassifier =
+  term:Nonspacechar+ {
+    return term.map(function (t) { return t[1]; }).join('');
+  }
+
+// BlockQuote
 BlockQuote = NestedBlockQuote / SimpleBlockQuote
 
 BlockQuoteBody =
@@ -370,6 +399,7 @@ Newline = '\n' / ('\r' '\n'?)
 Whitespace = ' ' / '\v' / '\f' / '\t'
 Endline = Newline / Eof
 NormalizedToWhitespace = Whitespace / Newline
+Nonspacechar = !NormalizedToWhitespace .
 
 BlankLines =
   (Whitespace* Newline &(Whitespace* Endline))*
@@ -387,6 +417,25 @@ UnicodePi = c:. &{ return regexPi.test(c); }
 UnicodePf = c:. &{ return regexPf.test(c); }
 UnicodePs = c:. &{ return regexPs.test(c); }
 UnicodePe = c:. &{ return regexPe.test(c); }
+
+Indent =
+  &(i:Whitespace+ &{
+    var size = ParserUtil.calcIndentSize(i);
+    if (size <= currentIndentSize) { return false; }
+    nextIndentSize = size;
+    return true;
+  })
+  &((Whitespace* Newline / i:Whitespace+ RawLine &{
+    var size = ParserUtil.calcIndentSize(i);
+    if (size <= currentIndentSize) { return false; }
+    nextIndentSize = Math.min(nextIndentSize, size);
+    return true;
+  })*)
+  &{
+    indentSizeStack.push(currentIndentSize);
+    currentIndentSize = nextIndentSize;
+    return true;
+  }
 
 Dedent =
   &{
