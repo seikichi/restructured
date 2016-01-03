@@ -73,7 +73,7 @@ Progress
 - Body Elements
 
   - ✓ Paragraphs
-  - Bullet Lists
+  - ✓ Bullet Lists
   - Enumerated Lists
   - Definition Lists
   - Field Lists

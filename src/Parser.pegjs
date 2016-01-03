@@ -28,6 +28,8 @@
   // variables
   var currentIndentSize = 0;
   var indentSizeStack = [];
+  var indentIgnoreLine = null;
+
   var inlineMarkupPreceding = null;
   var markupEndString = null;
 }
@@ -98,16 +100,13 @@ TransitionMarker =
 
 BodyElement =
   BlankLines?
-  element:(Paragraph / BlockQuote) {
+  element:(BulletList/ Paragraph / BlockQuote) {
     return element;
   }
 
-BodyElementExceptBlockQuote = Paragraph
+BodyElementExceptBlockQuote = BulletList / Paragraph
 
-Paragraph = (
-  body:(SameIndent ParagraphText Newline)+
-  &(BlankLines)
-) {
+Paragraph = body:(SameIndent ParagraphText Endline)+ {
   var children = _.flatten(_.map(body, function (v) { return v[1]; }));
   return new Paragraph({ children: children });
 }
@@ -128,6 +127,31 @@ Text =
       textStr += last[0];
     }
     return new Text({ text: textStr });
+  }
+
+// Bullet List
+BulletList =
+  BlankLines?
+  head:BulletListItem
+  tail:(BlankLines? BulletListItem)* {
+    return {type: 'bullet_list', children: [head].concat(tail.map(function (t) { return t[1]; }))};
+  }
+
+BulletListItem =
+  SameIndent
+  marker:'-'
+  BulletListIndent
+  body:BodyElement*
+  Dedent {
+    return {type: 'bullet_list_item', children: body};
+  }
+
+BulletListIndent =
+  i:Whitespace+ {
+    var nextIndentSize = currentIndentSize + ParserUtil.calcIndentSize(i) + 1;
+    indentIgnoreLine = location()['start']['line'];
+    indentSizeStack.push(currentIndentSize);
+    currentIndentSize = nextIndentSize;
   }
 
 BlockQuote = NestedBlockQuote / SimpleBlockQuote
@@ -372,7 +396,8 @@ Dedent =
 
 SameIndent =
   i:Whitespace* &{
-    return ParserUtil.calcIndentSize(i) === currentIndentSize;
+    var ignore = indentIgnoreLine === location()['start']['line'];
+    return ignore || ParserUtil.calcIndentSize(i) === currentIndentSize;
   } {
     return i.join('');
   }
