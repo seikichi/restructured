@@ -104,23 +104,30 @@ BodyElement =
 
 BodyElementExceptBlockQuote = Paragraph
 
-Paragraph =
-  SameIndent
-  children:(ParagraphChildrenStartWithInlineMarkup / ParagraphChildrenStartWithText)
-  Newline?
-  &(BlankLines) {
-    return new Paragraph({ children: children });
-  }
+Paragraph = (
+  body:(SameIndent ParagraphText Newline)+
+  &(BlankLines)
+) {
+  var children = _.flatten(_.map(body, function (v) { return v[1]; }));
+  return new Paragraph({ children: children });
+}
 
-ParagraphChildrenStartWithInlineMarkup =
-  head:(ClearInlineMarkupPreceding InlineMarkup)
-  tail:(TextWithInlineMarkup / TextWithoutInlineMarkup)* {
-    return [head[1]].concat(tail);
-  }
+ParagraphText = (
+  ClearInlineMarkupPreceding
+  head:(InlineMarkup / (Text InlineMarkup?))
+  tail:(Text InlineMarkup?)*
+) {
+  return _.compact(_.flatten([head].concat(tail)));
+}
 
-ParagraphChildrenStartWithText =
-  children:(TextWithInlineMarkup / TextWithoutInlineMarkup)+ {
-    return children;
+Text =
+  text:(!Newline !(InlineMarkupPreceding InlineMarkup) .)+
+  last:(InlineMarkupPreceding &(InlineMarkup))? {
+    var textStr = _.map(text, function (v) { return v[2]; }).join('');
+    if (!_.isNull(last)) {
+      textStr += last[0];
+    }
+    return new Text({ text: textStr });
   }
 
 BlockQuote = NestedBlockQuote / SimpleBlockQuote
@@ -157,19 +164,6 @@ BlockQuoteIndent =
       currentIndentSize = indentSize;
       return true;
     })
-
-TextWithInlineMarkup =
-  text:(!(Newline BlankLines) !(InlineMarkupPreceding InlineMarkup) .)*
-  markup:(InlineMarkupPreceding InlineMarkup) {
-    var textStr = _.map(text, function (v) { return v[2]; }).join('') + markup[0];
-    return [new Text({ text: textStr }), markup[1]];
-  }
-
-TextWithoutInlineMarkup =
-  text:(!(Newline BlankLines) !(InlineMarkupPreceding InlineMarkup) .)+ {
-    var textStr = _.map(text, function (v) { return v[2]; }).join('');
-    return [new Text({ text: textStr })];
-  }
 
 // Inline Markup
 ClearInlineMarkupPreceding = &{
