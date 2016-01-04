@@ -106,7 +106,7 @@ Paragraph.
           ],
           attribution: new Attribution({
             children: [
-              new Text({ text: 'Attribution 1\n' })
+              new Text({ text: 'Attribution 1\n' }),
             ],
           }),
         }),
@@ -114,6 +114,49 @@ Paragraph.
           children: [
             new Paragraph({ children: [new Text({ text: 'Block quote 2.\n' })] }),
           ],
+        }),
+      ],
+    ],
+    [
+      'block quote with complicated attribution',
+      `\
+Paragraph.
+
+   -- Not a valid attribution
+
+   Block quote 1.
+
+   --Attribution 1
+
+   --Invalid attribution
+
+   Block quote 2.
+
+   --Attribution 2
+`,
+      [
+        new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
+        new BlockQuote({
+          children: [
+            new Paragraph({ children: [new Text({ text: '-- Not a valid attribution\n' })] }),
+            new Paragraph({ children: [new Text({ text: 'Block quote 1.\n' })] }),
+          ],
+          attribution: new Attribution({
+            children: [
+              new Text({ text: 'Attribution 1\n' }),
+            ],
+          }),
+        }),
+        new BlockQuote({
+          children: [
+            new Paragraph({ children: [new Text({ text: '--Invalid attribution\n' })] }),
+            new Paragraph({ children: [new Text({ text: 'Block quote 2.\n' })] }),
+          ],
+          attribution: new Attribution({
+            children: [
+              new Text({ text: 'Attribution 2\n' }),
+            ],
+          }),
         }),
       ],
     ],

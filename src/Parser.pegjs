@@ -185,7 +185,7 @@ BlockQuoteBody =
 
 Attribution =
   BlankLines
-  SameIndent ('---' / '--') Whitespace+ &(!Endline .)
+  SameIndent ('---' / '--') Whitespace* &(!Endline .)
   &{ indentIgnoreLine = location().start.line; return true; }
   AttributionIndent
   body:Paragraph
