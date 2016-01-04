@@ -94,6 +94,16 @@ export class Definition extends new Record({
 export class BlockQuote extends new Record({
   type: 'block_quote',
   children: new List(),
+  attribution: null,
+}) {
+  constructor({ children, attribution = null }) {
+    super({ children: new List(children), attribution });
+  }
+}
+
+export class Attribution extends new Record({
+  type: 'attribution',
+  children: new List(),
 }) {
   constructor({ children }) {
     super({ children: new List(children) });

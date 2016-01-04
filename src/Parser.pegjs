@@ -12,6 +12,7 @@
   var indentSizeStack = [];
   var indentIgnoreLine = null;
   var nextIndentSize = null;
+  var prevIndentSize = null;
 
   var inlineMarkupPreceding = null;
   var markupEndString = null;
@@ -97,7 +98,9 @@ Paragraph = body:(SameIndent ParagraphText)+ {
 ParagraphText = (
   ClearInlineMarkupPreceding
   head:(InlineMarkup / (Text InlineMarkup?))
-  tail:(Text InlineMarkup?)*
+  // FIXME: ここで !Whitespace は違う
+  //        Inline Markup と素テキストが改行混みで入り混じるとおかしくなる
+  tail:(!Whitespace Text InlineMarkup?)*
 ) {
   return _.compact(_.flatten([head].concat(tail)));
 }
@@ -134,7 +137,7 @@ BulletListItem =
 BulletListIndent =
   i:Whitespace+ {
     var nextIndentSize = currentIndentSize + ParserUtil.calcIndentSize(i) + 1;
-    indentIgnoreLine = location()['start']['line'];
+    indentIgnoreLine = location().start.line;
     indentSizeStack.push(currentIndentSize);
     currentIndentSize = nextIndentSize;
   }
@@ -176,18 +179,52 @@ BlockQuote = NestedBlockQuote / SimpleBlockQuote
 
 BlockQuoteBody =
   head:BodyElementExceptBlockQuote
-  tail:BodyElement* {
-    return [head].concat(tail);
+  tail:(!Attribution BodyElement)* {
+    return [head].concat(_.map(tail, function (v) { return v[1]; }));
+  }
+
+Attribution =
+  BlankLines
+  SameIndent ('---' / '--') Whitespace+ &(!Endline .)
+  &{ indentIgnoreLine = location().start.line; return true; }
+  AttributionIndent
+  body:Paragraph
+  Dedent {
+    return new Elements.Attribution({ children: body.children });
+  }
+
+AttributionIndent =
+  &{ nextIndentSize = Number.MAX_VALUE; return true; }
+  &(
+    RawLine // skip first line
+    (i:Whitespace+ RawLine &{
+      var size = ParserUtil.calcIndentSize(i);
+      if (size <= currentIndentSize) { return false; }
+      nextIndentSize = Math.min(nextIndentSize, size);
+      return true;
+    })*
+  )
+  &{
+    indentSizeStack.push(currentIndentSize);
+    currentIndentSize = nextIndentSize;
+    return true;
   }
 
 NestedBlockQuote =
   BlankLines?
   BlockQuoteIndent
   nested:BlockQuoteBody
+  attribution:Attribution?
+  &{ prevIndentSize = currentIndentSize; return true; }
   Dedent
+  &(
+    BlankLines
+    i:Whitespace*
+    &{ return ParserUtil.calcIndentSize(i) < prevIndentSize; }
+  )
   outer:BlockQuote {
     var children = [
-      new Elements.BlockQuote({ children: nested }),
+      new Elements.BlockQuote({ children: nested, attribution: attribution }),
     ].concat(outer.children.toArray());
     return new Elements.BlockQuote({ children: children });
   }
@@ -196,8 +233,9 @@ SimpleBlockQuote =
   BlankLines?
   BlockQuoteIndent
   children:BlockQuoteBody
+  attribution:Attribution?
   Dedent {
-    return new Elements.BlockQuote({ children: children });
+    return new Elements.BlockQuote({ children: children, attribution: attribution });
   }
 
 BlockQuoteIndent =
@@ -429,7 +467,7 @@ Dedent =
 
 SameIndent =
   i:Whitespace* &{
-    var ignore = indentIgnoreLine === location()['start']['line'];
+    var ignore = indentIgnoreLine === location().start.line;
     return ignore || ParserUtil.calcIndentSize(i) === currentIndentSize;
   } {
     return i.join('');

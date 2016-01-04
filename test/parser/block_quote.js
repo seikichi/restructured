@@ -1,6 +1,6 @@
 import assert from 'power-assert';
 import RST from '../../lib/RST';
-import { Document, Paragraph, BlockQuote, Text } from '../../lib/Elements';
+import { Document, Paragraph, BlockQuote, Text, Attribution } from '../../lib/Elements';
 
 describe('RST.parse', () => {
   [
@@ -83,6 +83,36 @@ Yes, it is correct, no warning necessary.
           children: [
             new Text({ text: 'Is this correct? Should it generate a warning?\n' }),
             new Text({ text: 'Yes, it is correct, no warning necessary.\n' }),
+          ],
+        }),
+      ],
+    ],
+    [
+      'a block quote with simple attribution',
+      `\
+Paragraph.
+
+   Block quote 1.
+
+   -- Attribution 1
+
+   Block quote 2.
+`,
+      [
+        new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
+        new BlockQuote({
+          children: [
+            new Paragraph({ children: [new Text({ text: 'Block quote 1.\n' })] }),
+          ],
+          attribution: new Attribution({
+            children: [
+              new Text({ text: 'Attribution 1\n' })
+            ],
+          }),
+        }),
+        new BlockQuote({
+          children: [
+            new Paragraph({ children: [new Text({ text: 'Block quote 2.\n' })] }),
           ],
         }),
       ],
