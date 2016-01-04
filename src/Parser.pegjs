@@ -105,7 +105,7 @@ ParagraphText = (
   //        Inline Markup と素テキストが改行混みで入り混じるとおかしくなる
   tail:(!Whitespace Text InlineMarkup?)*
 ) {
-  return _.compact(_.flatten([head].concat(tail)));
+  return _.compact((_.isArray(head) ? head : [head]).concat(_.flatten(tail)));
 }
 
 Text =
