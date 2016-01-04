@@ -89,7 +89,7 @@ BodyElement =
     return element;
   }
 
-Paragraph = body:(SameIndent ParagraphText Endline)+ {
+Paragraph = body:(SameIndent ParagraphText)+ {
   var children = _.flatten(_.map(body, function (v) { return v[1]; }));
   return new Elements.Paragraph({ children: children });
 }
@@ -104,7 +104,7 @@ ParagraphText = (
 
 Text =
   text:(!Newline !(InlineMarkupPreceding InlineMarkup) .)+
-  last:(InlineMarkupPreceding &(InlineMarkup))? {
+  last:(Endline / (InlineMarkupPreceding &(InlineMarkup)))? {
     var textStr = _.map(text, function (v) { return v[2]; }).join('');
     if (!_.isNull(last)) {
       textStr += last[0];
