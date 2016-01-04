@@ -183,10 +183,13 @@ BlockQuoteBody =
 NestedBlockQuote =
   BlankLines?
   BlockQuoteIndent
-  children:BlockQuoteBody
+  nested:BlockQuoteBody
   Dedent
   outer:BlockQuote {
-    return new Elements.BlockQuote({ children: [new Elements.BlockQuote({ children: children })].concat(outer.children) });
+    var children = [
+      new Elements.BlockQuote({ children: nested }),
+    ].concat(outer.children.toArray());
+    return new Elements.BlockQuote({ children: children });
   }
 
 SimpleBlockQuote =
