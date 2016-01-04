@@ -4,17 +4,8 @@
   var ParserUtil = require('./ParserUtil').default;
 
   // nodes
-  var Document = require('./nodes/Document').default;
-  var Section = require('./nodes/Section').default;
-  var Transition = require('./nodes/Transition').default;
-
-  var Paragraph = require('./nodes/Paragraph').default;
-  var BlockQuote = require('./nodes/BlockQuote').default;
-
-  var Text = require('./nodes/Text').default;
-  var InlineMarkup = require('./nodes/InlineMarkup').default;
-  var InterpretedText = require('./nodes/InterpretedText').default;
-  var HyperlinkReference = require('./nodes/HyperlinkReference').default;
+  var Elements = require('./Elements');
+  var Text = Elements.Text;
 
   // variables
   var currentIndentSize = 0;
@@ -30,7 +21,7 @@
 Document =
   children:(Section / Transition / BodyElement)*
   BlankLines {
-    return new Document({ children: children });
+    return new Elements.Document({ children: children });
   }
 
 Section =
@@ -46,7 +37,7 @@ SectionWithOverline =
   Whitespace* title:RawLine
   underline:SectionLine {
     var children = peg$parse(title.raw, {startRule: 'Paragraph'}).children;
-    return new Section({ title: children, underline: underline, overline: overline });
+    return new Elements.Section({ children: children });
   }
 
 SectionWithoutOverline =
@@ -54,7 +45,7 @@ SectionWithoutOverline =
   title:RawLine
   underline:SectionLine {
     var children = peg$parse(title.raw, {startRule: 'Paragraph'}).children;
-    return new Section({ title: children, underline: underline });
+    return new Elements.Section({ children: children });
   }
 
 SectionLine =
@@ -75,7 +66,7 @@ Transition =
   BlankLines
   marker:TransitionMarker Whitespace* Newline
   &(BlankLines) {
-    return new Transition({ marker: marker });
+    return new Elements.Transition({ marker: marker });
   }
 
 TransitionMarker =
@@ -100,7 +91,7 @@ BodyElement =
 
 Paragraph = body:(SameIndent ParagraphText Endline)+ {
   var children = _.flatten(_.map(body, function (v) { return v[1]; }));
-  return new Paragraph({ children: children });
+  return new Elements.Paragraph({ children: children });
 }
 
 ParagraphText = (
@@ -127,7 +118,8 @@ BulletList =
   BlankLines?
   head:BulletListItem
   tail:(BlankLines? BulletListItem)* {
-    return {type: 'bullet_list', children: [head].concat(tail.map(function (t) { return t[1]; }))};
+    var children = [head].concat(tail.map(function (t) { return t[1]; }));
+    return new Elements.BulletList({ children: children });
   }
 
 BulletListItem =
@@ -136,7 +128,7 @@ BulletListItem =
   BulletListIndent
   body:BodyElement*
   Dedent {
-    return {type: 'bullet_list_item', children: body};
+    return new Elements.ListItem({ children: body })
   }
 
 BulletListIndent =
@@ -153,7 +145,8 @@ DefinitionList =
   head:DefinitionListItem
   tail:(BlankLines? DefinitionListItem)*
   &(BlankLines) {
-    return {type: 'definition_list', children: [head].concat(tail.map(function (t) { return t[1]; }))};
+    var children = [head].concat(tail.map(function (t) { return t[1]; }));
+    return new Elements.DefinitionList({ children: children });
   }
 
 DefinitionListItem =
@@ -161,12 +154,16 @@ DefinitionListItem =
   Indent
   body:BodyElement+
   Dedent {
-    return { type: 'definition_list_item', term: term, body: body };
+    return new Elements.DefinitionListItem({
+      term: term,
+      definition: new Elements.Definition({ children: body }),
+    });
   }
 
 DefinitionTerm =
-  term:Nonspacechar+ {
-    return term.map(function (t) { return t[1]; }).join('');
+  term:(!Endline .)+ {
+    var text = term.map(function (t) { return t[1]; }).join('');
+    return new Elements.Term({children: [new Text({ text: text })]});
   }
 
 DefinitionClassifier =
@@ -189,7 +186,7 @@ NestedBlockQuote =
   children:BlockQuoteBody
   Dedent
   outer:BlockQuote {
-    return new BlockQuote({ children: [new BlockQuote({ children: children })].concat(outer.children) });
+    return new Elements.BlockQuote({ children: [new Elements.BlockQuote({ children: children })].concat(outer.children) });
   }
 
 SimpleBlockQuote =
@@ -197,7 +194,7 @@ SimpleBlockQuote =
   BlockQuoteIndent
   children:BlockQuoteBody
   Dedent {
-    return new BlockQuote({ children: children });
+    return new Elements.BlockQuote({ children: children });
   }
 
 BlockQuoteIndent =
@@ -267,23 +264,24 @@ MarkupTail =
   MarkupEndString
   &InlineMarkupFollowing {
     var children = [first].concat(_.map(middle, function (v) { return v[1]; }));
-    children[children.length - 1].text += last[2];
+    var lastText = children[children.length - 1];
+    children[children.length - 1] = new Text({ text: lastText.text + last[2] });
     return children;
   }
 
 Emphasis =
-  &{ debugger; return inlineMarkupPreceding != '*'; }
+  &{ return inlineMarkupPreceding != '*'; }
   ('*' !'*' !NormalizedToWhitespace !CorrespondingClosingChar)
   &{ markupEndString = '*'; return true; }
   children:MarkupTail {
-    return new InlineMarkup({ type: 'emphasis', children: children });
+    return new Elements.Emphasis({ children: children });
   }
 
 StrongEmphasis =
   ('**' !NormalizedToWhitespace !CorrespondingClosingChar)
   &{ markupEndString = '**'; return true; }
   children:MarkupTail {
-    return new InlineMarkup({ type: 'strong_emphasis', children: children });
+    return new Elements.StrongEmphasis({ children: children });
   }
 
 InterpretedText =
@@ -295,7 +293,7 @@ InterpretedText =
     if (!_.isNull(role)) {
       roleStr = _.map(role[1], function (v) { return v[3]; }).join('');
     }
-    return new InterpretedText({ role: roleStr, children: children });
+    return new Elements.InterpretedText({ role: roleStr, children: children });
   }
 
 // TODO(seikichi): unescaped backslash preceding a start-string end-string
@@ -303,21 +301,21 @@ InlineLiteral =
   ('``' !NormalizedToWhitespace !CorrespondingClosingChar)
   &{ markupEndString = '``'; return true; }
   children:MarkupTail {
-    return new InlineMarkup({ type: 'inline_literal', children: children });
+    return new Elements.InlineLiteral({ children: children });
   }
 
 SubstitutionReference =
   ('|' !NormalizedToWhitespace !CorrespondingClosingChar)
   &{ markupEndString = '|'; return true; }
   children:MarkupTail {
-    return new InlineMarkup({ type: 'substitution_reference', children: children });
+    return new Elements.SubstitutionReference({ children: children });
   }
 
 InlineInternalTarget =
   ('_`' !NormalizedToWhitespace !CorrespondingClosingChar)
   &{ markupEndString = '`'; return true; }
   children:MarkupTail {
-    return new InlineMarkup({ type: 'inline_internal_target', children: children });
+    return new Elements.InlineInternalTarget({  children: children });
   }
 
 FootnoteLabel =
@@ -330,12 +328,12 @@ FootnoteLabel =
 
 FootnoteReference =
   '[' label:FootnoteLabel ']_' &InlineMarkupFollowing {
-    return new InlineMarkup({ type: 'footnote_reference', children: new Text({ text: label }) });
+    return new Elements.FootnoteReference({ children: [new Text({ text: label })] });
   }
 
 CitationReference =
   '[' label:ReferenceName ']_' &InlineMarkupFollowing {
-    return new InlineMarkup({ type: 'citation_reference', children: new Text({ text: label }) });
+    return new Elements.CitationReference({ children: [new Text({ text: label })] });
   }
 
 HyperlinkReference =
@@ -348,25 +346,25 @@ NamedHyperlinkReference =
   ('`' !NormalizedToWhitespace !CorrespondingClosingChar)
   &{ markupEndString = '`_'; return true; }
   children:MarkupTail {
-    return new HyperlinkReference({ anonymous: false, simple: false, children: children });
+    return new Elements.HyperlinkReference({ anonymous: false, simple: false, children: children });
   }
 
 NamedSimpleHyperlinkReference =
   ref:HyperlinkReferenceName '_' &InlineMarkupFollowing {
-    return new HyperlinkReference({ anonymous: false, simple: true, children: [new Text({ text: ref })] });
+    return new Elements.HyperlinkReference({ anonymous: false, simple: true, children: [new Text({ text: ref })] });
   }
 
 AnonymousHyperlinkReference =
   ('`' !NormalizedToWhitespace !CorrespondingClosingChar)
   &{ markupEndString = '`__'; return true; }
   children:MarkupTail {
-    return new HyperlinkReference({ anonymous: true, simple: false, children: children });
+    return new Elements.HyperlinkReference({ anonymous: true, simple: false, children: children });
     return {children: children};
   }
 
 AnonymousSimpleHyperlinkReference =
   ref:HyperlinkReferenceName '__' &InlineMarkupFollowing {
-    return new HyperlinkReference({ anonymous: true, simple: true, children: [new Text({ text: ref })] });
+    return new Elements.HyperlinkReference({ anonymous: true, simple: true, children: [new Text({ text: ref })] });
   }
 
 // Reference

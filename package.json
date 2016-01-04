@@ -10,6 +10,7 @@
     "allowed_start_rules": "Document,Paragraph"
   },
   "dependencies": {
+    "immutable": "^3.7.6",
     "lodash": "^3.10.1"
   },
   "devDependencies": {
@@ -49,7 +50,7 @@
     "build": "npm run build:parser && babel src --source-maps inline --out-dir lib",
     "build:parser": "pegjs --allowed-start-rules $npm_package_config_allowed_start_rules src/Parser.pegjs lib/Parser.js",
     "lint": "eslint src test",
-    "test": "mocha --compilers js:espower-babel/guess test/*.js test/*/*.js",
+    "test": "mocha --compilers js:espower-babel/guess test/*.js",
     "watch": "nf start",
     "watch:build": "babel src --watch --source-maps inline --out-dir lib",
     "watch:build:parser": "watch 'npm run -s build:parser' src -d --filter=config/filter.js",

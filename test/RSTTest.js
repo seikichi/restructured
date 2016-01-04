@@ -1,7 +1,7 @@
 import assert from 'power-assert';
 import RST from '../lib/RST';
 
-import Document from '../lib/nodes/Document';
+import { Document } from '../lib/Elements';
 
 describe('RST', () => {
   describe('.parse', () => {
