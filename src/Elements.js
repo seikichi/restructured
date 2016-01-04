@@ -73,6 +73,15 @@ export class DefinitionListItem extends new Record({
   }
 }
 
+// TODO(seikichi): implement non empty comment
+export class Comment extends new Record({
+  type: 'comment',
+}) {
+  constructor({ }) {
+    super({ });
+  }
+}
+
 export class Term extends new Record({
   type: 'term',
   children: new List(),

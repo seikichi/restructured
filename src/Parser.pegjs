@@ -16,6 +16,8 @@
 
   var inlineMarkupPreceding = null;
   var markupEndString = null;
+
+  var attributesIndentList = [];
 }
 
 // Document Structure
@@ -82,7 +84,7 @@ TransitionMarker =
     return marker[0] + marker[1].join('');
   }
 
-BodyElementExceptBlockQuote = BulletList / DefinitionList / Paragraph
+BodyElementExceptBlockQuote = BulletList / DefinitionList / Comment / Paragraph
 
 BodyElement =
   BlankLines?
@@ -90,13 +92,14 @@ BodyElement =
     return element;
   }
 
-Paragraph = body:(SameIndent ParagraphText)+ {
+Paragraph = body:(SameIndent ParagraphText)+ &(BlankLines) {
   var children = _.flatten(_.map(body, function (v) { return v[1]; }));
   return new Elements.Paragraph({ children: children });
 }
 
 ParagraphText = (
   ClearInlineMarkupPreceding
+
   head:(InlineMarkup / (Text InlineMarkup?))
   // FIXME: ここで !Whitespace は違う
   //        Inline Markup と素テキストが改行混みで入り混じるとおかしくなる
@@ -185,30 +188,42 @@ BlockQuoteBody =
 
 Attribution =
   BlankLines
-  SameIndent ('---' / '--') Whitespace* &(!Endline .)
-  &{ indentIgnoreLine = location().start.line; return true; }
+  SameIndent ('---' / '--' / '\u2014') Whitespace* &(!Endline .)
   AttributionIndent
+  &{ indentIgnoreLine = location().start.line; return true; }
   body:Paragraph
   Dedent {
     return new Elements.Attribution({ children: body.children });
   }
 
 AttributionIndent =
-  &{ nextIndentSize = Number.MAX_VALUE; return true; }
   &(
     RawLine // skip first line
-    (i:Whitespace+ RawLine &{
-      var size = ParserUtil.calcIndentSize(i);
-      if (size <= currentIndentSize) { return false; }
-      nextIndentSize = Math.min(nextIndentSize, size);
+    &{ attributesIndentList = []; return true; }
+    (
+      i:Whitespace+
+      !Endline
+      RawLine
+      &{
+        var size = ParserUtil.calcIndentSize(i);
+        if (size < currentIndentSize) { return false; }
+        attributesIndentList.push(size);
+        return true;
+      }
+    )*
+    &{
+      if (_.uniq(attributesIndentList).length > 1) {
+        return false;
+      }
+      nextIndentSize = 10000;
+      if (attributesIndentList.length != 0) {
+        nextIndentSize = attributesIndentList[0];
+      }
+      indentSizeStack.push(currentIndentSize);
+      currentIndentSize = nextIndentSize;
       return true;
-    })*
+    }
   )
-  &{
-    indentSizeStack.push(currentIndentSize);
-    currentIndentSize = nextIndentSize;
-    return true;
-  }
 
 NestedBlockQuote =
   BlankLines?
@@ -247,6 +262,11 @@ BlockQuoteIndent =
       currentIndentSize = indentSize;
       return true;
     })
+
+// Comment
+// TODO(seikichi): implmenent non empty comment
+Comment =
+  SameIndent '..' Whitespace* Endline { return new Elements.Comment({ }); }
 
 // Inline Markup
 ClearInlineMarkupPreceding = &{

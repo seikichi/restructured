@@ -1,6 +1,17 @@
 import assert from 'power-assert';
 import RST from '../../lib/RST';
-import { Document, Paragraph, BlockQuote, Text, Attribution } from '../../lib/Elements';
+import {
+  Attribution,
+  BlockQuote,
+  Comment,
+  Definition,
+  DefinitionList,
+  DefinitionListItem,
+  Document,
+  Paragraph,
+  Term,
+  Text,
+} from '../../lib/Elements';
 
 describe('RST.parse', () => {
   [
@@ -20,9 +31,7 @@ Line 2.
           ],
         }),
         new BlockQuote({
-          children: [
-            new Paragraph({ children: [new Text({ text: 'Indented.\n' })] }),
-          ],
+          children: [new Paragraph({ children: [new Text({ text: 'Indented.\n' })] })],
         }),
       ],
     ],
@@ -38,18 +47,13 @@ Line 2.
 `,
       [
         new Paragraph({
-          children: [
-            new Text({ text: 'Line 1.\n' }),
-            new Text({ text: 'Line 2.\n' }),
-          ],
+          children: [new Text({ text: 'Line 1.\n' }), new Text({ text: 'Line 2.\n' })],
         }),
         new BlockQuote({
           children: [
             new Paragraph({ children: [new Text({ text: 'Indented 1.\n' })] }),
             new BlockQuote({
-              children: [
-                new Paragraph({ children: [new Text({ text: 'Indented 2.\n' })] }),
-              ],
+              children: [new Paragraph({ children: [new Text({ text: 'Indented 2.\n' })] })],
             }),
           ],
         }),
@@ -72,9 +76,7 @@ Yes, it is correct, no warning necessary.
         new BlockQuote({
           children: [
             new BlockQuote({
-              children: [
-                new Paragraph({ children: [new Text({ text: 'Indent 8 spaces.\n' })] }),
-              ],
+              children: [new Paragraph({ children: [new Text({ text: 'Indent 8 spaces.\n' })] })],
             }),
             new Paragraph({ children: [new Text({ text: 'Indent 4 spaces.\n' })] }),
           ],
@@ -84,6 +86,124 @@ Yes, it is correct, no warning necessary.
             new Text({ text: 'Is this correct? Should it generate a warning?\n' }),
             new Text({ text: 'Yes, it is correct, no warning necessary.\n' }),
           ],
+        }),
+      ],
+    ],
+    [
+      'two block quotes with attribution',
+      `\
+Paragraph.
+
+   Block quote.
+
+   -- Attribution
+
+Paragraph.
+
+   Block quote.
+
+   --Attribution
+`,
+      [
+        new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
+        new BlockQuote({
+          children: [new Paragraph({ children: [new Text({ text: 'Block quote.\n' })] })],
+          attribution: new Attribution({ children: [new Text({ text: 'Attribution\n' })] }),
+        }),
+        new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
+        new BlockQuote({
+          children: [new Paragraph({ children: [new Text({ text: 'Block quote.\n' })] })],
+          attribution: new Attribution({ children: [new Text({ text: 'Attribution\n' })] }),
+        }),
+      ],
+    ],
+    [
+      'block quotes with attribution that begin with em-dash',
+      `\
+Alternative: true em-dash.
+
+   Block quote.
+
+   \u2014 Attribution
+
+Alternative: three hyphens.
+
+   Block quote.
+
+   --- Attribution
+`,
+      [
+        new Paragraph({ children: [new Text({ text: 'Alternative: true em-dash.\n' })] }),
+        new BlockQuote({
+          children: [new Paragraph({ children: [new Text({ text: 'Block quote.\n' })] })],
+          attribution: new Attribution({ children: [new Text({ text: 'Attribution\n' })] }),
+        }),
+        new Paragraph({ children: [new Text({ text: 'Alternative: three hyphens.\n' })] }),
+        new BlockQuote({
+          children: [new Paragraph({ children: [new Text({ text: 'Block quote.\n' })] })],
+          attribution: new Attribution({ children: [new Text({ text: 'Attribution\n' })] }),
+        }),
+      ],
+    ],
+    [
+      'block quotes with multi line attribution',
+      `\
+Paragraph.
+
+   Block quote.
+
+   -- Attribution line one
+   and line two
+
+Paragraph.
+
+   Block quote.
+
+   -- Attribution line one
+      and line two
+
+Paragraph.
+`,
+      [
+        new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
+        new BlockQuote({
+          children: [new Paragraph({ children: [new Text({ text: 'Block quote.\n' })] })],
+          attribution: new Attribution({
+            children: [new Text({ text: 'Attribution line one\n' }), new Text({ text: 'and line two\n' })],
+          }),
+        }),
+        new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
+        new BlockQuote({
+          children: [new Paragraph({ children: [new Text({ text: 'Block quote.\n' })] })],
+          attribution: new Attribution({
+            children: [new Text({ text: 'Attribution line one\n' }), new Text({ text: 'and line two\n' })],
+          }),
+        }),
+        new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
+      ],
+    ],
+    [
+      'a block quote with simple attribution',
+      `\
+Paragraph.
+
+   Block quote 1.
+
+   -- Attribution 1
+
+   Block quote 2.
+
+   -- Attribution 2
+`,
+      [
+        new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
+        new BlockQuote({
+          children: [new Paragraph({ children: [new Text({ text: 'Block quote 1.\n' })] })],
+          attribution: new Attribution({ children: [new Text({ text: 'Attribution 1\n' })] }),
+        }),
+        new BlockQuote({
+          children: [new Paragraph({ children: [new Text({ text: 'Block quote 2.\n' })] })],
+          attribution: new Attribution({ children: [new Text({ text: 'Attribution 2\n' })] }),
         }),
       ],
     ],
@@ -101,18 +221,104 @@ Paragraph.
       [
         new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
         new BlockQuote({
-          children: [
-            new Paragraph({ children: [new Text({ text: 'Block quote 1.\n' })] }),
-          ],
-          attribution: new Attribution({
-            children: [
-              new Text({ text: 'Attribution 1\n' }),
-            ],
-          }),
+          children: [new Paragraph({ children: [new Text({ text: 'Block quote 1.\n' })] })],
+          attribution: new Attribution({ children: [new Text({ text: 'Attribution 1\n' })] }),
         }),
         new BlockQuote({
+          children: [new Paragraph({ children: [new Text({ text: 'Block quote 2.\n' })] })],
+        }),
+      ],
+    ],
+    [
+      'two block quotes with an empty comment',
+      `\
+Unindented paragraph.
+
+    Block quote 1.
+
+    -- Attribution 1
+
+    Block quote 2.
+
+..
+
+    Block quote 3.
+`,
+      [
+        new Paragraph({ children: [new Text({ text: 'Unindented paragraph.\n' })] }),
+        new BlockQuote({
+          children: [new Paragraph({ children: [new Text({ text: 'Block quote 1.\n' })] })],
+          attribution: new Attribution({ children: [new Text({ text: 'Attribution 1\n' })] }),
+        }),
+        new BlockQuote({
+          children: [new Paragraph({ children: [new Text({ text: 'Block quote 2.\n' })] })],
+        }),
+        new Comment({ }),
+        new BlockQuote({
+          children: [new Paragraph({ children: [new Text({ text: 'Block quote 3.\n' })] })],
+        }),
+      ],
+    ],
+    [
+      'block quote with attribution like definition list',
+      `\
+Paragraph.
+
+   -- Not an attribution
+
+Paragraph.
+
+   Block quote.
+
+   \\-- Not an attribution
+
+Paragraph.
+
+   Block quote.
+
+   -- Not an attribution line one
+      and line two
+          and line three
+`,
+      [
+        new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
+        new BlockQuote({
+          children: [new Paragraph({ children: [new Text({ text: '-- Not an attribution\n' })] })],
+        }),
+        new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
+        new BlockQuote({
           children: [
-            new Paragraph({ children: [new Text({ text: 'Block quote 2.\n' })] }),
+            new Paragraph({ children: [new Text({ text: 'Block quote.\n' })] }),
+            new Paragraph({ children: [new Text({ text: '\\-- Not an attribution\n' })] }),
+          ],
+        }),
+        new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
+        new BlockQuote({
+          children: [
+            new Paragraph({ children: [new Text({ text: 'Block quote.\n' })] }),
+            new DefinitionList({
+              children: [
+                new DefinitionListItem({
+                  term: new Term({ children: [new Text({ text: '-- Not an attribution line one' })] }),
+                  definition: new Definition({
+                    children: [
+                      new DefinitionList({
+                        children: [
+                          new DefinitionListItem({
+                            term: new Term({ children: [new Text({ text: 'and line two' })] }),
+                            definition: new Definition({
+                              children: [
+                                new Paragraph({ children: [new Text({ text: 'and line three\n' })] }),
+                              ],
+                            }),
+                          }),
+                        ],
+                      }),
+                    ],
+                  }),
+                }),
+              ],
+            }),
           ],
         }),
       ],
