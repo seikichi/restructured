@@ -10,7 +10,6 @@ describe('RST.parse', () => {
       '"*" \'|\' (*) [*] {*} <*> ‘*’ ‚*‘ ‘*‚ ’*’ ‚*’ “*” „*“ “*„ ”*” „*” »*« ›*‹ «*» »*» ›*›\n',
       '||\n',
       '__init__ __init__()\n',
-      '2 * x *a **b *.txt\n',
       '2*x a**b O(N**2) e**(x*y) f(x)*f(y) a*(1+2)\n',
     ].forEach(text => {
       it(`should parse ${text} correctly`, () => {

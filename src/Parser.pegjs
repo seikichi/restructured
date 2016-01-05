@@ -14,9 +14,7 @@
   var nextIndentSize = null;
   var prevIndentSize = null;
 
-  var inlineMarkupPreceding = null;
   var markupEndString = null;
-
   var attributesIndentList = [];
 }
 
@@ -90,33 +88,6 @@ BodyElement =
   BlankLines?
   element:(BodyElementExceptBlockQuote / BlockQuote) {
     return element;
-  }
-
-Paragraph = body:(SameIndent ParagraphText)+ &(BlankLines) {
-  var children = _.flatten(_.map(body, function (v) { return v[1]; }));
-  return new Elements.Paragraph({ children: children });
-}
-
-ParagraphText = (
-  ClearInlineMarkupPreceding
-
-  head:(InlineMarkup / (Text InlineMarkup?))
-  // FIXME: ここで !Whitespace は違う
-  //        Inline Markup と素テキストが改行混みで入り混じるとおかしくなる
-  tail:(!Whitespace Text InlineMarkup?)*
-) {
-  return _.compact((_.isArray(head) ? head : [head]).concat(_.flatten(tail)));
-}
-
-Text =
-  text:(!Newline !(InlineMarkupPreceding InlineMarkup) .)+
-  last:(Endline / (InlineMarkupPreceding &(InlineMarkup)))? {
-    var textStr = _.map(text, function (v) { return v[2]; }).join('');
-    if (!_.isNull(last)) {
-      textStr += last[0];
-      inlineMarkupPreceding = last[0];
-    }
-    return new Text({ text: textStr });
   }
 
 // Bullet List
@@ -268,22 +239,70 @@ BlockQuoteIndent =
 Comment =
   SameIndent '..' Whitespace* Endline { return new Elements.Comment({ }); }
 
-// Inline Markup
-ClearInlineMarkupPreceding = &{
-  inlineMarkupPreceding = null;
-  return true;
-}
+InlineMarkupPreceding = c:. &{ return ParserUtil.isInlineMarkupPrefix(c); } { return c; }
 
-CorrespondingClosingChar =
-  c:. &{
-    return ParserUtil.isMatchPunctuations(inlineMarkupPreceding, c);
+// Utility for Paragraph
+InlineMarkupStartString = '**' / '*' / '``' / '`' / '|' / '_`'
+InlineMarkupBeggining =
+  (p:InlineMarkupPreceding
+   s:InlineMarkupStartString
+   !Endline !Whitespace f:.
+   &{ return !(p === '*' && s === '*') && !ParserUtil.isMatchPunctuations(p, f); }) /
+  InlineMarkupPreceding (FootnoteReference /
+                         CitationReference /
+                         AnonymousSimpleHyperlinkReference /
+                         NamedSimpleHyperlinkReference)
+
+MarkupFollowedText =
+  text:(!Endline !InlineMarkupBeggining .)* last:InlineMarkupPreceding {
+    return new Text({ text: _.map(text, function (v) { return v[2]; }).join('') + last });
   }
 
-InlineMarkupPreceding =
-  c:.
-  &{ return ParserUtil.isInlineMarkupPrefix(c); } {
-    inlineMarkupPreceding = c;
-    return c;
+NewlineFollowedText =
+  text:(!Endline !InlineMarkupBeggining .)* last:Newline {
+    return new Text({ text: _.map(text, function (v) { return v[2]; }).join('') + last });
+  }
+
+EofFollowedText =
+  text:(!Endline !InlineMarkupBeggining .)+ Eof {
+    return new Text({ text: _.map(text, function (v) { return v[2]; }).join('')  });
+  }
+
+// Paragraph
+Paragraph =
+  body:(!BlankLines
+        SameIndent
+        (ParagraphBlockStartWithInlineMarkup /
+         ParagraphBlockStartWithText /
+         ParagraphBlockWithoutInlineMarkup))+
+  &(BlankLines) {
+    var children =_.flatten(_.map(body, function (v) { return v[2]; }));
+    return new Elements.Paragraph({ children: children });
+  }
+
+ParagraphBlockStartWithInlineMarkup =
+  !Whitespace
+  first:InlineMarkup
+  middle:(MarkupFollowedText InlineMarkup)*
+  last:(Eof / EofFollowedText / NewlineFollowedText) {
+    var ret = [first].concat(_.flatten(middle));
+    if (!_.isNull(last)) { ret = ret.concat(last); }
+    return ret;
+  }
+
+ParagraphBlockStartWithText =
+  !Whitespace
+  middle:(MarkupFollowedText InlineMarkup)+
+  last:(Eof / EofFollowedText / NewlineFollowedText) {
+    var ret = _.flatten(middle);
+    if (!_.isNull(last)) { ret = ret.concat(last); }
+    return ret;
+  }
+
+ParagraphBlockWithoutInlineMarkup =
+  !Whitespace
+  text:(EofFollowedText / NewlineFollowedText) {
+    return [text];
   }
 
 InlineMarkupFollowing =
@@ -331,15 +350,14 @@ MarkupTail =
   }
 
 Emphasis =
-  &{ return inlineMarkupPreceding != '*'; }
-  ('*' !'*' !NormalizedToWhitespace !CorrespondingClosingChar)
+  ('*' !'*' !NormalizedToWhitespace)
   &{ markupEndString = '*'; return true; }
   children:MarkupTail {
     return new Elements.Emphasis({ children: children });
   }
 
 StrongEmphasis =
-  ('**' !NormalizedToWhitespace !CorrespondingClosingChar)
+  ('**' !NormalizedToWhitespace)
   &{ markupEndString = '**'; return true; }
   children:MarkupTail {
     return new Elements.StrongEmphasis({ children: children });
@@ -347,7 +365,7 @@ StrongEmphasis =
 
 InterpretedText =
   role:(':' (!Endline !Whitespace !':' .)+ ':')?
-  ('`' !NormalizedToWhitespace !CorrespondingClosingChar)
+  ('`' !NormalizedToWhitespace)
   &{ markupEndString = '`'; return true; }
   children:MarkupTail {
     var roleStr = null;
@@ -359,21 +377,21 @@ InterpretedText =
 
 // TODO(seikichi): unescaped backslash preceding a start-string end-string
 InlineLiteral =
-  ('``' !NormalizedToWhitespace !CorrespondingClosingChar)
+  ('``' !NormalizedToWhitespace)
   &{ markupEndString = '``'; return true; }
   children:MarkupTail {
     return new Elements.InlineLiteral({ children: children });
   }
 
 SubstitutionReference =
-  ('|' !NormalizedToWhitespace !CorrespondingClosingChar)
+  ('|' !NormalizedToWhitespace)
   &{ markupEndString = '|'; return true; }
   children:MarkupTail {
     return new Elements.SubstitutionReference({ children: children });
   }
 
 InlineInternalTarget =
-  ('_`' !NormalizedToWhitespace !CorrespondingClosingChar)
+  ('_`' !NormalizedToWhitespace)
   &{ markupEndString = '`'; return true; }
   children:MarkupTail {
     return new Elements.InlineInternalTarget({  children: children });
@@ -404,7 +422,7 @@ HyperlinkReference =
   NamedSimpleHyperlinkReference
 
 NamedHyperlinkReference =
-  ('`' !NormalizedToWhitespace !CorrespondingClosingChar)
+  ('`' !NormalizedToWhitespace)
   &{ markupEndString = '`_'; return true; }
   children:MarkupTail {
     return new Elements.HyperlinkReference({ anonymous: false, simple: false, children: children });
@@ -416,7 +434,7 @@ NamedSimpleHyperlinkReference =
   }
 
 AnonymousHyperlinkReference =
-  ('`' !NormalizedToWhitespace !CorrespondingClosingChar)
+  ('`' !NormalizedToWhitespace)
   &{ markupEndString = '`__'; return true; }
   children:MarkupTail {
     return new Elements.HyperlinkReference({ anonymous: true, simple: false, children: children });
