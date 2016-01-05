@@ -326,26 +326,30 @@ MarkupEndString =
 
 MarkupTextWithIndent =
   indent:SameIndent
-  text:(!Newline !(!NormalizedToWhitespace !'\\' . MarkupEndString InlineMarkupFollowing) .)* {
+  text:(!Newline !(!NormalizedToWhitespace !'\\' . MarkupEndString InlineMarkupFollowing) .)+
+  last:Newline? {
     var textStr = _.map(text, function (v) { return v[2]; }).join('');
+    if (!_.isNull(last)) { textStr += last; }
     return new Text({ text: textStr, indent: indent });
   }
 
 MarkupTextWithoutIndent =
-  text:(!Newline !(!NormalizedToWhitespace !'\\' . MarkupEndString InlineMarkupFollowing) .)* {
+  text:(!Newline !(!NormalizedToWhitespace !'\\' . MarkupEndString InlineMarkupFollowing) .)+
+  last:Newline? {
     var textStr = _.map(text, function (v) { return v[2]; }).join('');
+    if (!_.isNull(last)) { textStr += last; }
     return new Text({ text: textStr });
   }
 
 MarkupTail =
   first:MarkupTextWithoutIndent
-  middle:(Newline MarkupTextWithIndent)*
-  last:(!Endline !NormalizedToWhitespace .)
+  middle:MarkupTextWithIndent*
+  !Endline !NormalizedToWhitespace last:.
   MarkupEndString
   &InlineMarkupFollowing {
-    var children = [first].concat(_.map(middle, function (v) { return v[1]; }));
+    var children = [first].concat(middle);
     var lastText = children[children.length - 1];
-    children[children.length - 1] = new Text({ text: lastText.text + last[2] });
+    children[children.length - 1] = new Text({ text: lastText.text + last });
     return children;
   }
 
