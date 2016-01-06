@@ -6,9 +6,6 @@
   "bugs": {
     "url": "https://github.com/seikichi/rst.js/issues"
   },
-  "config": {
-    "allowed_start_rules": "Document,Paragraph"
-  },
   "dependencies": {
     "immutable": "^3.7.6",
     "lodash": "^3.10.1"
@@ -24,6 +21,7 @@
     "espower-babel": "^4.0.1",
     "foreman": "^1.4.1",
     "mocha": "^2.3.4",
+    "mustache": "^2.2.1",
     "pegjs": "^0.9.0",
     "power-assert": "^1.2.0",
     "watch": "^0.17.1"
@@ -48,7 +46,9 @@
   },
   "scripts": {
     "build": "npm run build:parser && babel src --source-maps inline --out-dir lib",
-    "build:parser": "pegjs --allowed-start-rules $npm_package_config_allowed_start_rules src/Parser.pegjs lib/Parser.js",
+    "build:parser": "npm run build:parser:mustache && npm run build:parser:pegjs",
+    "build:parser:mustache": "mustache config/parser.json src/Parser.pegjs.mustache > src/Parser.pegjs",
+    "build:parser:pegjs": "pegjs --allowed-start-rules Document src/Parser.pegjs lib/Parser.js",
     "lint": "eslint src test",
     "test": "mocha --compilers js:espower-babel/guess test/*.js test/*/*.js",
     "watch": "nf start",
