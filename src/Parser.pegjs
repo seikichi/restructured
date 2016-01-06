@@ -16,6 +16,9 @@
 
   var markupEndString = null;
   var attributesIndentList = [];
+
+  var bulletMarkerStack = [];
+  var currentBulletMarker = null;
 }
 
 // Document Structure
@@ -93,20 +96,37 @@ BodyElement =
 // Bullet List
 BulletList =
   BlankLines?
+  &(SameIndent BulletListItemMarker NormalizedToWhitespace)
+  &{
+    bulletMarkerStack.push(currentBulletMarker);
+    currentBulletMarker = null;
+    return true;
+  }
   head:BulletListItem
   tail:(BlankLines? BulletListItem)* {
+    currentBulletMarker = bulletMarkerStack.pop();
     var children = [head].concat(tail.map(function (t) { return t[1]; }));
     return new Elements.BulletList({ children: children });
   }
 
+BulletListItemMarker = c:('*' / '+' / '-' / '•' / '‣' / '⁃') { return c; }
+
 BulletListItem =
   SameIndent
-  marker:'-'
-  BulletListIndent
-  body:BodyElement*
-  Dedent {
+  marker:BulletListItemMarker
+  &{
+    if (_.isNull(currentBulletMarker)) {
+      currentBulletMarker = marker;
+      return true;
+    }
+    return marker === currentBulletMarker;
+  }
+  body:(EmptyBulletListItemBody / BulletListItemBody) {
     return new Elements.ListItem({ children: body })
   }
+
+EmptyBulletListItemBody = Whitespace* Endline { return []; }
+BulletListItemBody = (BulletListIndent body:BodyElement* Dedent) { return body; }
 
 BulletListIndent =
   i:Whitespace+ {
@@ -275,7 +295,7 @@ Paragraph =
         (ParagraphBlockStartWithInlineMarkup /
          ParagraphBlockStartWithText /
          ParagraphBlockWithoutInlineMarkup))+
-  &(BlankLines) {
+  &(BlankLines / EndIndent) {
     var children =_.flatten(_.map(body, function (v) { return v[2]; }));
     return new Elements.Paragraph({ children: children });
   }
@@ -506,6 +526,12 @@ Dedent =
     currentIndentSize = indentSizeStack.pop();
     return true;
   }
+
+EndIndent = &(
+  BlankLines?
+  i:Whitespace* !NormalizedToWhitespace . &{
+    return ParserUtil.calcIndentSize(i) < currentIndentSize
+  })
 
 SameIndent =
   i:Whitespace* &{
