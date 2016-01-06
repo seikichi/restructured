@@ -1,0 +1,5 @@
+Document =
+  children:(Section / Transition / BodyElement)*
+  BlankLines {
+    return new Elements.Document({ children: children });
+  }

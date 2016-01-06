@@ -1,0 +1,22 @@
+{
+  // utilities
+  var _ = require('lodash');
+  var ParserUtil = require('./ParserUtil').default;
+
+  // nodes
+  var Elements = require('./Elements');
+  var Text = Elements.Text;
+
+  // variables
+  var currentIndentSize = 0;
+  var indentSizeStack = [];
+  var indentIgnoreLine = null;
+  var nextIndentSize = null;
+  var prevIndentSize = null;
+
+  var markupEndString = null;
+  var attributesIndentList = [];
+
+  var bulletMarkerStack = [];
+  var currentBulletMarker = null;
+}

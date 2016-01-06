@@ -1,92 +1,11 @@
-{
-  // utilities
-  var _ = require('lodash');
-  var ParserUtil = require('./ParserUtil').default;
-
-  // nodes
-  var Elements = require('./Elements');
-  var Text = Elements.Text;
-
-  // variables
-  var currentIndentSize = 0;
-  var indentSizeStack = [];
-  var indentIgnoreLine = null;
-  var nextIndentSize = null;
-  var prevIndentSize = null;
-
-  var markupEndString = null;
-  var attributesIndentList = [];
-
-  var bulletMarkerStack = [];
-  var currentBulletMarker = null;
-}
+{{> initializer.pegjs}}
 
 // Document Structure
-Document =
-  children:(Section / Transition / BodyElement)*
-  BlankLines {
-    return new Elements.Document({ children: children });
-  }
+{{> document.pegjs}}
+{{> section.pegjs}}
+{{> transition.pegjs}}
 
-Section =
-  BlankLines?
-  section:(SectionWithOverline / SectionWithoutOverline)
-  &(BlankLines) {
-    return section;
-  }
-
-SectionWithOverline =
-  &(SectionLine !BlankLines RawLine SectionLine)
-  overline:SectionLine
-  Whitespace* title:RawLine
-  underline:SectionLine {
-    var children = peg$parse(title.raw, {startRule: 'Paragraph'}).children;
-    return new Elements.Section({ children: children });
-  }
-
-SectionWithoutOverline =
-  &(!BlankLines RawLine SectionLine)
-  title:RawLine
-  underline:SectionLine {
-    var children = peg$parse(title.raw, {startRule: 'Paragraph'}).children;
-    return new Elements.Section({ children: children });
-  }
-
-SectionLine =
-  line:(('!!!!' '!'*) / ('""""' '"'*) / ('####' '#'*) / ('$$$$' '$'*) /
-        ('%%%%' '%'*) / ('&&&&' '&'*) / ("''''" "'"*) / ('((((' '('*) /
-        ('))))' ')'*) / ('****' '*'*) / ('++++' '+'*) / (',,,,' ','*) /
-        ('----' '-'*) / ('....' '.'*) / ('////' '/'*) / ('::::' ':'*) /
-        (';;;;' ';'*) / ('<<<<' '<'*) / ('====' '='*) / ('>>>>' '>'*) /
-        ('????' '?'*) / ('@@@@' '@'*) / ('[[[[' '['*) / ('\\\\\\\\' '\\'*) /
-        (']]]]' ']'*) / ('^^^^' '^'*) / ('____' '_'*) / ('````' '`'*) /
-        ('{' '{' '{' '{' '{'*) / ('||||' '|'*) /
-        ('}' '}' '}' '}' '}'*) / ('~~~~' '~'*))
-  Whitespace* Newline {
-    return {line: line[0] + line[1].join('')};
-  }
-
-
-Transition =
-  BlankLines
-  marker:TransitionMarker Whitespace* Newline
-  &(BlankLines) {
-    return new Elements.Transition({ marker: marker });
-  }
-
-TransitionMarker =
-  marker:(('!!!!' '!'*) / ('""""' '"'*) / ('####' '#'*) / ('$$$$' '$'*) /
-          ('%%%%' '%'*) / ('&&&&' '&'*) / ("''''" "'"*) / ('((((' '('*) /
-          ('))))' ')'*) / ('****' '*'*) / ('++++' '+'*) / (',,,,' ','*) /
-          ('----' '-'*) / ('....' '.'*) / ('////' '/'*) / ('::::' ':'*) /
-          (';;;;' ';'*) / ('<<<<' '<'*) / ('====' '='*) / ('>>>>' '>'*) /
-          ('????' '?'*) / ('@@@@' '@'*) / ('[[[[' '['*) / ('\\\\\\\\' '\\'*) /
-          (']]]]' ']'*) / ('^^^^' '^'*) / ('____' '_'*) / ('````' '`'*) /
-          ('{' '{' '{' '{' '{'*) / ('||||' '|'*) /
-          ('}' '}' '}' '}' '}'*) / ('~~~~' '~'*)) {
-    return marker[0] + marker[1].join('');
-  }
-
+// Body Element
 BodyElementExceptBlockQuote = BulletList / DefinitionList / Comment / Paragraph
 
 BodyElement =

@@ -47,7 +47,7 @@
   "scripts": {
     "build": "npm run build:parser && babel src --source-maps inline --out-dir lib",
     "build:parser": "npm run build:parser:mustache && npm run build:parser:pegjs",
-    "build:parser:mustache": "mustache config/parser.json src/Parser.pegjs.mustache > src/Parser.pegjs",
+    "build:parser:mustache": "mustache $(for f in src/parser/*.mustache; do echo -p \"$f\"; done) config/parser.json src/Parser.pegjs.mustache > src/Parser.pegjs",
     "build:parser:pegjs": "pegjs --allowed-start-rules Document src/Parser.pegjs lib/Parser.js",
     "lint": "eslint src test",
     "test": "mocha --compilers js:espower-babel/guess test/*.js test/*/*.js",

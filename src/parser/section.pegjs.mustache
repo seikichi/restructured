@@ -1,0 +1,37 @@
+Section =
+  BlankLines?
+  section:(SectionWithOverline / SectionWithoutOverline)
+  &(BlankLines) {
+    return section;
+  }
+
+SectionWithOverline =
+  &(SectionLine !BlankLines RawLine SectionLine)
+  overline:SectionLine
+  Whitespace* title:RawLine
+  underline:SectionLine {
+    var children = peg$parse(title.raw, {startRule: 'Paragraph'}).children;
+    return new Elements.Section({ children: children });
+  }
+
+SectionWithoutOverline =
+  &(!BlankLines RawLine SectionLine)
+  title:RawLine
+  underline:SectionLine {
+    var children = peg$parse(title.raw, {startRule: 'Paragraph'}).children;
+    return new Elements.Section({ children: children });
+  }
+
+SectionLine =
+  line:(('!!!!' '!'*) / ('""""' '"'*) / ('####' '#'*) / ('$$$$' '$'*) /
+        ('%%%%' '%'*) / ('&&&&' '&'*) / ("''''" "'"*) / ('((((' '('*) /
+        ('))))' ')'*) / ('****' '*'*) / ('++++' '+'*) / (',,,,' ','*) /
+        ('----' '-'*) / ('....' '.'*) / ('////' '/'*) / ('::::' ':'*) /
+        (';;;;' ';'*) / ('<<<<' '<'*) / ('====' '='*) / ('>>>>' '>'*) /
+        ('????' '?'*) / ('@@@@' '@'*) / ('[[[[' '['*) / ('\\\\\\\\' '\\'*) /
+        (']]]]' ']'*) / ('^^^^' '^'*) / ('____' '_'*) / ('````' '`'*) /
+        ('{' '{' '{' '{' '{'*) / ('||||' '|'*) /
+        ('}' '}' '}' '}' '}'*) / ('~~~~' '~'*))
+  Whitespace* Newline {
+    return {line: line[0] + line[1].join('')};
+  }
