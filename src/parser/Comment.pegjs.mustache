@@ -1,0 +1,3 @@
+// TODO(seikichi): implmenent non empty comment
+Comment =
+  SameIndent '..' Whitespace* Endline { return new Elements.Comment({ }); }

@@ -1,0 +1,7 @@
+BodyElementExceptBlockQuote = BulletList / DefinitionList / Comment / Paragraph
+
+BodyElement =
+  BlankLines?
+  element:(BodyElementExceptBlockQuote / BlockQuote) {
+    return element;
+  }

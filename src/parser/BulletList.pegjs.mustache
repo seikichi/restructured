@@ -1,0 +1,41 @@
+BulletList =
+  BlankLines?
+  &(SameIndent BulletListItemMarker NormalizedToWhitespace)
+  &{
+    bulletMarkerStack.push(currentBulletMarker);
+    currentBulletMarker = null;
+    return true;
+  }
+  head:BulletListItem
+  tail:(BlankLines? BulletListItem)* {
+    currentBulletMarker = bulletMarkerStack.pop();
+    var children = [head].concat(tail.map(function (t) { return t[1]; }));
+    return new Elements.BulletList({ children: children });
+  }
+
+BulletListItemMarker = c:('*' / '+' / '-' / '•' / '‣' / '⁃') { return c; }
+
+BulletListItem =
+  SameIndent
+  marker:BulletListItemMarker
+  &{
+    if (_.isNull(currentBulletMarker)) {
+      currentBulletMarker = marker;
+      return true;
+    }
+    return marker === currentBulletMarker;
+  }
+  body:(EmptyBulletListItemBody / BulletListItemBody) {
+    return new Elements.ListItem({ children: body })
+  }
+
+EmptyBulletListItemBody = Whitespace* Endline { return []; }
+BulletListItemBody = (BulletListIndent body:BodyElement* Dedent) { return body; }
+
+BulletListIndent =
+  i:Whitespace+ {
+    var nextIndentSize = currentIndentSize + ParserUtil.calcIndentSize(i) + 1;
+    indentIgnoreLine = location().start.line;
+    indentSizeStack.push(currentIndentSize);
+    currentIndentSize = nextIndentSize;
+  }

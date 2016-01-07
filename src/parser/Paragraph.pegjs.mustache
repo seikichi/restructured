@@ -1,0 +1,66 @@
+InlineMarkupPreceding = c:. &{ return ParserUtil.isInlineMarkupPrefix(c); } { return c; }
+
+// Utility for Paragraph
+InlineMarkupStartString = '**' / '*' / '``' / '`' / '|' / '_`'
+InlineMarkupBeggining =
+  (p:InlineMarkupPreceding
+   s:InlineMarkupStartString
+   !Endline !Whitespace f:.
+   &{ return !(p === '*' && s === '*') && !ParserUtil.isMatchPunctuations(p, f); }) /
+  InlineMarkupPreceding (FootnoteReference /
+                         CitationReference /
+                         AnonymousSimpleHyperlinkReference /
+                         NamedSimpleHyperlinkReference)
+
+MarkupFollowedText =
+  text:(!Endline !InlineMarkupBeggining .)* last:InlineMarkupPreceding {
+    return new Text({ text: _.map(text, function (v) { return v[2]; }).join('') + last });
+  }
+
+NewlineFollowedText =
+  text:(!Endline !InlineMarkupBeggining .)* last:Newline {
+    return new Text({ text: _.map(text, function (v) { return v[2]; }).join('') + last });
+  }
+
+EofFollowedText =
+  text:(!Endline !InlineMarkupBeggining .)+ Eof {
+    return new Text({ text: _.map(text, function (v) { return v[2]; }).join('')  });
+  }
+
+// Paragraph
+Paragraph =
+  body:(!BlankLines
+        SameIndent
+        (ParagraphBlockStartWithInlineMarkup /
+         ParagraphBlockStartWithText /
+         ParagraphBlockWithoutInlineMarkup))+
+  &(BlankLines / EndIndent) {
+    var children =_.flatten(_.map(body, function (v) { return v[2]; }));
+    return new Elements.Paragraph({ children: children });
+  }
+
+ParagraphBlockStartWithInlineMarkup =
+  !Whitespace
+  first:InlineMarkup
+  middle:(MarkupFollowedText InlineMarkup)*
+  last:(Eof / EofFollowedText / NewlineFollowedText) {
+    var ret = [first].concat(_.flatten(middle));
+    if (!_.isNull(last)) { ret = ret.concat(last); }
+    return ret;
+  }
+
+ParagraphBlockStartWithText =
+  !Whitespace
+  middle:(MarkupFollowedText InlineMarkup)+
+  last:(Eof / EofFollowedText / NewlineFollowedText) {
+    var ret = _.flatten(middle);
+    if (!_.isNull(last)) { ret = ret.concat(last); }
+    return ret;
+  }
+
+ParagraphBlockWithoutInlineMarkup =
+  !Whitespace
+  text:(EofFollowedText / NewlineFollowedText) {
+    return [text];
+  }
+

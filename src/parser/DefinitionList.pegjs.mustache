@@ -1,0 +1,30 @@
+DefinitionList =
+  BlankLines?
+  head:DefinitionListItem
+  tail:(BlankLines? DefinitionListItem)*
+  &(BlankLines) {
+    var children = [head].concat(tail.map(function (t) { return t[1]; }));
+    return new Elements.DefinitionList({ children: children });
+  }
+
+DefinitionListItem =
+  SameIndent term:DefinitionTerm Whitespace* (':' Whitespace* DefinitionClassifier Whitespace*)* Newline
+  Indent
+  body:BodyElement+
+  Dedent {
+    return new Elements.DefinitionListItem({
+      term: term,
+      definition: new Elements.Definition({ children: body }),
+    });
+  }
+
+DefinitionTerm =
+  term:(!Endline .)+ {
+    var text = term.map(function (t) { return t[1]; }).join('');
+    return new Elements.Term({children: [new Text({ text: text })]});
+  }
+
+DefinitionClassifier =
+  term:Nonspacechar+ {
+    return term.map(function (t) { return t[1]; }).join('');
+  }

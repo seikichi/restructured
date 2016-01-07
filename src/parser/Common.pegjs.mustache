@@ -1,0 +1,56 @@
+AlphanumericAscii = [A-Za-z0-9]
+Eof = !.
+Newline = '\n' / ('\r' '\n'?)
+Whitespace = ' ' / '\v' / '\f' / '\t'
+Endline = Newline / Eof
+NormalizedToWhitespace = Whitespace / Newline
+Nonspacechar = !NormalizedToWhitespace .
+
+BlankLines =
+  (Whitespace* Newline &(Whitespace* Endline))*
+  Whitespace*
+  Endline
+
+RawLine =
+  raw:(!Endline .)+ Endline {
+    return { raw: _.map(raw, function (v) { return v[1]; }).join('') };
+  }
+
+Indent =
+  &(i:Whitespace+ &{
+    var size = ParserUtil.calcIndentSize(i);
+    if (size <= currentIndentSize) { return false; }
+    nextIndentSize = size;
+    return true;
+  })
+  &((Whitespace* Newline / i:Whitespace+ RawLine &{
+    var size = ParserUtil.calcIndentSize(i);
+    if (size <= currentIndentSize) { return false; }
+    nextIndentSize = Math.min(nextIndentSize, size);
+    return true;
+  })*)
+  &{
+    indentSizeStack.push(currentIndentSize);
+    currentIndentSize = nextIndentSize;
+    return true;
+  }
+
+Dedent =
+  &{
+    currentIndentSize = indentSizeStack.pop();
+    return true;
+  }
+
+EndIndent = &(
+  BlankLines?
+  i:Whitespace* !NormalizedToWhitespace . &{
+    return ParserUtil.calcIndentSize(i) < currentIndentSize
+  })
+
+SameIndent =
+  i:Whitespace* &{
+    var ignore = indentIgnoreLine === location().start.line;
+    return ignore || ParserUtil.calcIndentSize(i) === currentIndentSize;
+  } {
+    return i.join('');
+  }
