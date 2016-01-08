@@ -1,0 +1,41 @@
+EnumeratedList =
+  BlankLines?
+  &(SameIndent EnumeratedListItemMarker NormalizedToWhitespace)
+  &{
+    enumeratedMarkerStack.push(currentEnumeratedMarker);
+    currentEnumeratedMarker = null;
+    return true;
+  }
+  head:EnumeratedListItem
+  tail:(BlankLines? EnumeratedListItem)* {
+    currentEnumeratedMarker = enumeratedMarkerStack.pop();
+    var children = [head].concat(tail.map(function (t) { return t[1]; }));
+    return new Elements.EnumeratedList({ children: children });
+  }
+
+EnumeratedListItemMarker = c:('#.') { return c; }
+
+EnumeratedListItem =
+  SameIndent
+  marker:EnumeratedListItemMarker
+  &{
+    if (_.isNull(currentEnumeratedMarker)) {
+      currentEnumeratedMarker = marker;
+      return true;
+    }
+    return marker === currentEnumeratedMarker;
+  }
+  body:(EmptyEnumeratedListItemBody / EnumeratedListItemBody) {
+    return new Elements.ListItem({ children: body })
+  }
+
+EmptyEnumeratedListItemBody = Whitespace* Endline { return []; }
+EnumeratedListItemBody = (EnumeratedListIndent body:BodyElement* Dedent) { return body; }
+
+EnumeratedListIndent =
+  i:Whitespace+ {
+    var nextIndentSize = currentIndentSize + ParserUtil.calcIndentSize(i) + currentEnumeratedMarker.length;
+    indentIgnoreLine = location().start.line;
+    indentSizeStack.push(currentIndentSize);
+    currentIndentSize = nextIndentSize;
+  }

@@ -44,6 +44,15 @@ export class BulletList extends new Record({
   }
 }
 
+export class EnumeratedList extends new Record({
+  type: 'enumerated_list',
+  children: new List(),
+}) {
+  constructor({ children }) {
+    super({ children: new List(children) });
+  }
+}
+
 export class ListItem extends new Record({
   type: 'list_item',
   children: new List(),
