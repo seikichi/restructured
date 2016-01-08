@@ -1,17 +1,7 @@
 import assert from 'power-assert';
 import RST from '../../lib/RST';
-import {
-  BulletList,
-  Document,
-  ListItem,
-  Paragraph,
-  Text,
-} from '../../lib/Elements';
-
-function p(...children) { return new Paragraph({ children }); }
-function ul(...children) { return new BulletList({ children }); }
-function li(...children) { return new ListItem({ children }); }
-function t(s) { return new Text({ text: s }); }
+import { Document } from '../../lib/Elements';
+import { p, ul, li, t } from '../TestUtils';
 
 describe('RST.parse', () => {
   [
