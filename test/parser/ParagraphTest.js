@@ -52,7 +52,7 @@ Line 3.
 A. Einstein was a really
 smart dude.
 `,
-      [p(t('A. Einstein was a really\n'), t('smart dude\n'))],
+      [p(t('A. Einstein was a really\n'), t('smart dude.\n'))],
     ],
   ].forEach(([title, input, children]) => {
     it(`should parse ${title} correctly`, () => {
