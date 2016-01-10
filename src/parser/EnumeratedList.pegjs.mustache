@@ -1,6 +1,6 @@
 EnumeratedList =
   BlankLines?
-  &(SameIndent EnumeratedListItemMarker NormalizedToWhitespace)
+  &(SameIndent Enumerator NormalizedToWhitespace)
   &{
     enumeratedMarkerStack.push(currentEnumeratedMarker);
     currentEnumeratedMarker = null;
@@ -13,17 +13,44 @@ EnumeratedList =
     return new Elements.EnumeratedList({ children: children });
   }
 
-EnumeratedListItemMarker = c:('#.') { return c; }
+EnumerationSequence =
+  AutoEnumerationSequence /
+  ArabicNumeralsEnumerationSequence /
+  // UpperCaseAlphabetEnumerationSequence /
+  // LowerCaseAlphabetEnumerationSequence
+  UpperCaseRomanEnumerationSequence /
+  LowerCaseRomanEnumerationSequence
+
+AutoEnumerationSequence = '#'
+ArabicNumeralsEnumerationSequence = head:[0-9] tail:[0-9]* { return [head].concat(tail).join(''); }
+UpperCaseAlphabetEnumerationSequence = [A-Z]
+LowerCaseAlphabetEnumerationSequence = [a-z]
+UpperCaseRomanEnumerationSequence =
+  s:[IVXLCDM]+
+  &{ ParserUtil.isUpperRomanNumber(s.join('')); } {
+    return s.join('');
+  }
+LowerCaseRomanEnumerationSequence =
+  s:[ivxlcdm]+
+  &{ ParserUtil.isUpperRomanNumber(s.join('')); } {
+    return s.join('');
+  }
+
+Enumerator =
+  e:EnumerationSequence '.' { return e + '.'; } /
+  e:EnumerationSequence ')' { return e + ')'; } /
+  '(' e:EnumerationSequence ')' { return '(' + e + ')'; }
 
 EnumeratedListItem =
   SameIndent
-  marker:EnumeratedListItemMarker
+  marker:Enumerator
   &{
     if (_.isNull(currentEnumeratedMarker)) {
       currentEnumeratedMarker = marker;
       return true;
     }
-    return marker === currentEnumeratedMarker;
+    // return marker === currentEnumeratedMarker;
+    return true;
   }
   body:(EmptyEnumeratedListItemBody / EnumeratedListItemBody) {
     return new Elements.ListItem({ children: body })
