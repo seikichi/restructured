@@ -35,12 +35,15 @@ MarkupTextWithoutIndent =
   }
 
 MarkupTail =
-  first:MarkupTextWithoutIndent
+  first:MarkupTextWithoutIndent?
   middle:MarkupTextWithIndent*
   !Endline !NormalizedToWhitespace last:.
   MarkupEndString
   &InlineMarkupFollowing {
-    var children = [first].concat(middle);
+    var children = (_.isNull(first) ? [] : [first]).concat(middle);
+    if (children.length == 0) {
+      children.push(new Text({ text: '' }));
+    }
     var lastText = children[children.length - 1];
     children[children.length - 1] = new Text({ text: lastText.text + last });
     return children;

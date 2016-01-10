@@ -1,8 +1,10 @@
 import {
   BulletList,
+  Emphasis,
   EnumeratedList,
   ListItem,
   Paragraph,
+  StrongEmphasis,
   Text,
 } from '../lib/Elements';
 
@@ -24,4 +26,12 @@ export function li(...children) {
 
 export function t(text) {
   return new Text({ text });
+}
+
+export function em(...children) {
+  return new Emphasis({ children });
+}
+
+export function strong(...children) {
+  return new StrongEmphasis({ children });
 }

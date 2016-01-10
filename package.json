@@ -53,7 +53,7 @@
     "test": "mocha --compilers js:espower-babel/guess test/*Test.js test/*/*Test.js",
     "watch": "nf start",
     "watch:build": "babel src --watch --source-maps inline --out-dir lib",
-    "watch:build:parser": "watch 'npm run -s build:parser' src -d --filter=config/filter.js",
+    "watch:build:parser": "watch 'npm run -s build:parser' src/parser -d --filter=config/filter.js",
     "watch:lint": "esw --watch src test",
     "watch:test": "watch 'npm -s run test' src test -d"
   }
