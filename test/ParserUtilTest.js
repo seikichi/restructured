@@ -27,4 +27,18 @@ describe('ParserUtil', () => {
       assert(ParserUtil.calcIndentSize(' \t       \t') === 16);
     });
   });
+
+  describe('.romanToNumber', () => {
+    it('should parse "MCMXC" correctly', () => {
+      assert(ParserUtil.romanToNumber('MCMXC') === 1990);
+    });
+
+    it('should parse "MDCLXVI" correctly', () => {
+      assert(ParserUtil.romanToNumber('MDCLXVI') === 1666);
+    });
+
+    it('should parse "MMVIII" correctly', () => {
+      assert(ParserUtil.romanToNumber('MMVIII') === 2008);
+    });
+  });
 });
