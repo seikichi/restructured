@@ -2,6 +2,7 @@ import {
   BulletList,
   Emphasis,
   EnumeratedList,
+  InlineLiteral,
   ListItem,
   Paragraph,
   StrongEmphasis,
@@ -34,4 +35,8 @@ export function em(...children) {
 
 export function strong(...children) {
   return new StrongEmphasis({ children });
+}
+
+export function tt(...children) {
+  return new InlineLiteral({ children });
 }

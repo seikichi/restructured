@@ -19,7 +19,16 @@ MarkupEndString =
 
 MarkupTextWithIndent =
   indent:SameIndent
-  text:(!Newline !(!NormalizedToWhitespace !'\\' . MarkupEndString InlineMarkupFollowing) .)+
+  text:(
+    !Newline
+    !(
+      !NormalizedToWhitespace
+      (&{ return markupEndString === '``' } / !'\\')
+      .
+      MarkupEndString
+      InlineMarkupFollowing
+    )
+    .)+
   last:Newline? {
     var textStr = _.map(text, function (v) { return v[2]; }).join('');
     if (!_.isNull(last)) { textStr += last; }
@@ -27,7 +36,16 @@ MarkupTextWithIndent =
   }
 
 MarkupTextWithoutIndent =
-  text:(!Newline !(!NormalizedToWhitespace !'\\' . MarkupEndString InlineMarkupFollowing) .)+
+  text:(
+    !Newline
+    !(
+      !NormalizedToWhitespace
+      (&{ return markupEndString === '``' } / !'\\')
+      .
+      MarkupEndString
+      InlineMarkupFollowing
+    )
+    .)+
   last:Newline? {
     var textStr = _.map(text, function (v) { return v[2]; }).join('');
     if (!_.isNull(last)) { textStr += last; }
