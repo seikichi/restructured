@@ -52,6 +52,16 @@ describe('RST.parse', () => {
           tt(t('\xabliteral\xbb')), t(' with quotes\n')),
       ],
     ],
+    [
+      'literals likes interpreted text',
+      'Find the ```interpreted text``` in this paragraph!\n',
+      [p(t('Find the '), tt(t('`interpreted text`')), t(' in this paragraph!\n'))],
+    ],
+    [
+      'literal ends with backslash',
+      'Python ``list``\\s use square bracket syntax.\n',
+      [p(t('Python '), tt(t('list')), t('\\s use square bracket syntax.\n'))],
+    ],
   ].forEach(([title, input, children]) => {
     it(`should parse ${title} correctly`, () => {
       assert.deepStrictEqual(RST.parse(input).toJS(), new Document({ children }).toJS());
