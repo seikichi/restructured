@@ -41,4 +41,22 @@ describe('ParserUtil', () => {
       assert(ParserUtil.romanToNumber('MMVIII') === 2008);
     });
   });
+
+  describe('.numberToRoman', () => {
+    it('should convert 1999 correctly', () => {
+      assert(ParserUtil.numberToRoman(1999) === 'MCMXCIX');
+    });
+
+    it('should convert 1990 correctly', () => {
+      assert(ParserUtil.numberToRoman(1990) === 'MCMXC');
+    });
+
+    it('should convert 1666 correctly', () => {
+      assert(ParserUtil.numberToRoman(1666) === 'MDCLXVI');
+    });
+
+    it('should convert 2008 correctly', () => {
+      assert(ParserUtil.numberToRoman(2008) === 'MMVIII');
+    });
+  });
 });
