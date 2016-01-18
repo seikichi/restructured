@@ -1,4 +1,5 @@
 import { List, Record } from 'immutable';
+import ParserUtil from './ParserUtil';
 
 export class Document extends new Record({
   type: 'document',
@@ -50,6 +51,94 @@ export class EnumeratedList extends new Record({
 }) {
   constructor({ children }) {
     super({ children: new List(children) });
+  }
+}
+
+export class EnumeratorSequence extends new Record({
+  type: '',
+  value: '',
+}) {
+  constructor({ type, value }) {
+    super({ type, value });
+  }
+
+  width() {
+    return this.value.length;
+  }
+
+  isAuto() {
+    return this.type === 'auto';
+  }
+
+  isArabicNumerals() {
+    return this.type === 'arabic_numerals';
+  }
+
+  isUppercaseAlphabet() {
+    return this.type === 'uppercase_alphabet';
+  }
+
+  isLowercaseAlphabet() {
+    return this.type === 'lowercase_alphabet';
+  }
+
+  isUppercaseRoman() {
+    return this.type === 'uppercase_roman';
+  }
+
+  isLowercaseRoman() {
+    return this.type === 'lowercase_roman';
+  }
+}
+
+export class Enumerator extends new Record({
+  type: 'enumerator',
+  sequence: '',
+  format: '',
+}) {
+  constructor({ sequence, format }) {
+    super({ sequence, format });
+  }
+
+  width() {
+    if (this.format === 'parentheses') {
+      return this.sequence.width() + 2;
+    }
+    return this.sequence.width() + 1;
+  }
+
+  isPeriodFormat() {
+    return this.format === 'period';
+  }
+
+  isParenthesesFormat() {
+    return this.format === 'parentheses';
+  }
+
+  isRightParenthesisFormat() {
+    return this.format === 'right_parenthesis';
+  }
+
+  isNext(e) {
+    if (this.format !== e.format || this.sequence.type !== e.sequence.type) {
+      return false;
+    } else if (this.sequence.isArabicNumerals()) {
+      return parseInt(this.sequence.value, 10) + 1 === parseInt(e.sequence.value, 10);
+    } else if (this.sequence.isUppercaseAlphabet() || this.sequence.isLowercaseAlphabet()) {
+      return this.sequence.value.charCodeAt(0) + 1 === e.sequence.value.charCodeAt(0);
+    } else if (this.sequence.isUppercaseRoman() || this.sequence.isLowercaseRoman()) {
+      return ParserUtil.romanToNumber(this.sequence.value.toUpperCase()) + 1 ===
+        ParserUtil.romanToNumber(e.sequence.value.toUpperCase());
+    }
+    return true; // auto
+  }
+
+  isFirst() {
+    if (this.sequence.isUppercaseRoman() || this.sequence.isLowercaseRoman()) {
+      const value = this.sequence.value;
+      return value === 'i' || value === 'I' || value.length === 2;
+    }
+    return true;
   }
 }
 

@@ -1,67 +1,135 @@
 EnumeratedList =
   BlankLines?
-  &(SameIndent Enumerator NormalizedToWhitespace)
+  &(IsEnumeratedListItem)
+  &(e:Enumerator &{ return e.isFirst(); })
   &{
-    enumeratedMarkerStack.push(currentEnumeratedMarker);
-    currentEnumeratedMarker = null;
+    enumeratorStack.push(currentEnumerator);
+    currentEnumerator = null;
     return true;
   }
   head:EnumeratedListItem
-  tail:(BlankLines? EnumeratedListItem)* {
-    currentEnumeratedMarker = enumeratedMarkerStack.pop();
-    var children = [head].concat(tail.map(function (t) { return t[1]; }));
+  tail:(BlankLines? &(IsEnumeratedListItem) EnumeratedListItem)* {
+    currentEnumerator = enumeratorStack.pop();
+    var children = [head].concat(tail.map(function (t) { return t[2]; }));
     return new Elements.EnumeratedList({ children: children });
   }
 
 EnumerationSequence =
   AutoEnumerationSequence /
   ArabicNumeralsEnumerationSequence /
-  // UpperCaseAlphabetEnumerationSequence /
-  // LowerCaseAlphabetEnumerationSequence
   UpperCaseRomanEnumerationSequence /
-  LowerCaseRomanEnumerationSequence
+  LowerCaseRomanEnumerationSequence /
+  UpperCaseAlphabetEnumerationSequence /
+  LowerCaseAlphabetEnumerationSequence
 
-AutoEnumerationSequence = '#'
-ArabicNumeralsEnumerationSequence = head:[0-9] tail:[0-9]* { return [head].concat(tail).join(''); }
-UpperCaseAlphabetEnumerationSequence = [A-Z]
-LowerCaseAlphabetEnumerationSequence = [a-z]
-UpperCaseRomanEnumerationSequence =
-  s:[IVXLCDM]+
-  &{ ParserUtil.isUpperRomanNumber(s.join('')); } {
-    return s.join('');
+AutoEnumerationSequence =
+  &{
+    return _.isNull(currentEnumerator) || currentEnumerator.sequence.isAuto();
+  } '#' {
+    return new Elements.EnumeratorSequence({ type: 'auto', value: '#' });
   }
+
+ArabicNumeralsEnumerationSequence =
+  &{
+    return _.isNull(currentEnumerator) || currentEnumerator.sequence.isArabicNumerals();
+  } head:[1-9] tail:[0-9]* {
+    return new Elements.EnumeratorSequence({ type: 'arabic_numerals', value: [head].concat(tail).join('') });
+  } /
+  &{
+    return _.isNull(currentEnumerator) || currentEnumerator.sequence.isArabicNumerals();
+  } head:[0] {
+    return new Elements.EnumeratorSequence({ type: 'arabic_numerals', value: head });
+  }
+
+UpperCaseAlphabetEnumerationSequence =
+  &{
+    return _.isNull(currentEnumerator) || currentEnumerator.sequence.isUppercaseAlphabet();
+  } s:[A-Z] {
+    return new Elements.EnumeratorSequence({ type: 'uppercase_alphabet', value: s });
+  }
+
+LowerCaseAlphabetEnumerationSequence =
+  &{
+    return _.isNull(currentEnumerator) || currentEnumerator.sequence.isLowercaseAlphabet();
+  } s:[a-z] {
+    return new Elements.EnumeratorSequence({ type: 'lowercase_alphabet', value: s });
+  }
+
+UpperCaseRomanEnumerationSequence =
+  &{
+    return _.isNull(currentEnumerator) || currentEnumerator.sequence.isUppercaseRoman();
+  } s:[IVXLCDM]+ &{ return ParserUtil.isUpperRomanNumber(s.join('')); } {
+    return new Elements.EnumeratorSequence({ type: 'uppercase_roman', value: s.join('') });
+  }
+
 LowerCaseRomanEnumerationSequence =
-  s:[ivxlcdm]+
-  &{ ParserUtil.isUpperRomanNumber(s.join('')); } {
-    return s.join('');
+  &{
+    return _.isNull(currentEnumerator) || currentEnumerator.sequence.isLowercaseRoman();
+  } s:[ivxlcdm]+ &{ return ParserUtil.isLowerRomanNumber(s.join('')); } {
+    return new Elements.EnumeratorSequence({ type: 'lowercase_roman', value: s.join('') });
   }
 
 Enumerator =
-  e:EnumerationSequence '.' { return e + '.'; } /
-  e:EnumerationSequence ')' { return e + ')'; } /
-  '(' e:EnumerationSequence ')' { return '(' + e + ')'; }
+  s:EnumerationSequence '.' {
+    return new Elements.Enumerator({ sequence: s, format: 'period' });
+  } /
+  s:EnumerationSequence ')' {
+    return new Elements.Enumerator({ sequence: s, format: 'right_parenthesis' });
+  } /
+  '(' s:EnumerationSequence ')' {
+    return new Elements.Enumerator({ sequence: s, format: 'parentheses' });
+  }
 
 EnumeratedListItem =
   SameIndent
-  marker:Enumerator
+  e:Enumerator
   &{
-    if (_.isNull(currentEnumeratedMarker)) {
-      currentEnumeratedMarker = marker;
+    if (_.isNull(currentEnumerator)) {
+      currentEnumerator = e;
       return true;
     }
-    // return marker === currentEnumeratedMarker;
+    if (!currentEnumerator.isNext(e)) {
+      return false;
+    }
+    currentEnumerator = e;
     return true;
   }
   body:(EmptyEnumeratedListItemBody / EnumeratedListItemBody) {
     return new Elements.ListItem({ children: body })
   }
 
+IsEnumeratedListItem =
+  SameIndent e1:Enumerator i1:Whitespace+ RawLine
+  (
+    BlankLines /
+    i2:Whitespace+ RawLine &{
+      return currentIndentSize + e1.width() + ParserUtil.calcIndentSize(i1) === ParserUtil.calcIndentSize(i2);
+    } /
+    &{
+      enumeratorStack.push(currentEnumerator);
+      currentEnumerator = e1;
+      return true;
+    }
+    (
+      SameIndent e2:Enumerator Whitespace+ RawLine &{
+        if (e1.isNext(e2)) {
+          currentEnumerator = enumeratorStack.pop();
+          return true;
+        }
+        return false;
+      } / &{
+        currentEnumerator = enumeratorStack.pop();
+        return false;
+      }
+    )
+  )
+
 EmptyEnumeratedListItemBody = Whitespace* Endline { return []; }
 EnumeratedListItemBody = (EnumeratedListIndent body:BodyElement* Dedent) { return body; }
 
 EnumeratedListIndent =
   i:Whitespace+ {
-    var nextIndentSize = currentIndentSize + ParserUtil.calcIndentSize(i) + currentEnumeratedMarker.length;
+    var nextIndentSize = currentIndentSize + ParserUtil.calcIndentSize(i) + currentEnumerator.width();
     indentIgnoreLine = location().start.line;
     indentSizeStack.push(currentIndentSize);
     currentIndentSize = nextIndentSize;
