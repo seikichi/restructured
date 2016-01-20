@@ -1,7 +1,6 @@
 EnumeratedList =
   BlankLines?
   &(IsEnumeratedListItem)
-  &(e:Enumerator &{ return e.isFirst(); })
   &{
     enumeratorStack.push(currentEnumerator);
     currentEnumerator = null;
@@ -99,20 +98,33 @@ EnumeratedListItem =
   }
 
 IsEnumeratedListItem =
-  SameIndent e1:Enumerator i1:Whitespace+ RawLine
+  SameIndent
+  &{
+    enumeratorStack.push(currentEnumerator);
+    currentEnumerator = null;
+    return true;
+  }
+  e1:(Enumerator &{
+    currentEnumerator = enumeratorStack.pop();
+    return true;
+  } / &{
+    currentEnumerator = enumeratorStack.pop();
+    return false;
+  })
+  i1:Whitespace+ RawLine
   (
     BlankLines /
     i2:Whitespace+ RawLine &{
-      return currentIndentSize + e1.width() + ParserUtil.calcIndentSize(i1) === ParserUtil.calcIndentSize(i2);
+      return currentIndentSize + e1[0].width() + ParserUtil.calcIndentSize(i1) === ParserUtil.calcIndentSize(i2);
     } /
     &{
       enumeratorStack.push(currentEnumerator);
-      currentEnumerator = e1;
+      currentEnumerator = e1[0];
       return true;
     }
     (
       SameIndent e2:Enumerator Whitespace+ RawLine &{
-        if (e1.isNext(e2)) {
+        if (e1[0].isNext(e2)) {
           currentEnumerator = enumeratorStack.pop();
           return true;
         }

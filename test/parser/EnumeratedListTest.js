@@ -294,54 +294,54 @@ Different enumeration formats:
            li(p(t('Item (3).\n')))),
       ],
     ],
-//     [
-//       'nested enumerated lists',
-//       `\
-// Nested enumerated lists:
+    [
+      'nested enumerated lists',
+      `\
+Nested enumerated lists:
 
-// 1. Item 1.
+1. Item 1.
 
-//    A) Item A).
-//    B) Item B).
-//    C) Item C).
+   A) Item A).
+   B) Item B).
+   C) Item C).
 
-// 2. Item 2.
+2. Item 2.
 
-//    (a) Item (a).
+   (a) Item (a).
 
-//        I) Item I).
-//        II) Item II).
-//        III) Item III).
+       I) Item I).
+       II) Item II).
+       III) Item III).
 
-//    (b) Item (b).
+   (b) Item (b).
 
-//    (c) Item (c).
+   (c) Item (c).
 
-//        (i) Item (i).
-//        (ii) Item (ii).
-//        (iii) Item (iii).
+       (i) Item (i).
+       (ii) Item (ii).
+       (iii) Item (iii).
 
-// 3. Item 3.
-// `,
-//       [
-//         p(t('Nested enumerated lists:\n')),
-//         ol(li(p(t('Item 1.\n')),
-//               ol(li(p(t('Item A).\n'))),
-//                  li(p(t('Item B).\n'))),
-//                  li(p(t('Item C).\n'))))),
-//            li(p(t('Item 2.\n')),
-//               ol(li(p(t('Item (a).\n')),
-//                     ol(li(p(t('Item I).\n'))),
-//                        li(p(t('Item II).\n'))),
-//                        li(p(t('Item III).\n'))))),
-//                  li(p(t('Item (b).\n'))),
-//                  li(p(t('Item (c).\n')),
-//                     ol(li(p(t('Item (i).\n'))),
-//                        li(p(t('Item (ii).\n'))),
-//                        li(p(t('Item (iii).\n'))))))),
-//            li(p(t('Item 3.\n')))),
-//       ],
-//     ],
+3. Item 3.
+`,
+      [
+        p(t('Nested enumerated lists:\n')),
+        ol(li(p(t('Item 1.\n')),
+              ol(li(p(t('Item A).\n'))),
+                 li(p(t('Item B).\n'))),
+                 li(p(t('Item C).\n'))))),
+           li(p(t('Item 2.\n')),
+              ol(li(p(t('Item (a).\n')),
+                    ol(li(p(t('Item I).\n'))),
+                       li(p(t('Item II).\n'))),
+                       li(p(t('Item III).\n'))))),
+                 li(p(t('Item (b).\n'))),
+                 li(p(t('Item (c).\n')),
+                    ol(li(p(t('Item (i).\n'))),
+                       li(p(t('Item (ii).\n'))),
+                       li(p(t('Item (iii).\n'))))))),
+           li(p(t('Item 3.\n')))),
+      ],
+    ],
     [
       'enumerated list with auto enumerator "#"',
       `\
