@@ -1,41 +1,36 @@
 BulletList =
   BlankLines?
-  &(SameIndent BulletListItemMarker NormalizedToWhitespace)
-  &{
-    bulletMarkerStack.push(currentBulletMarker);
-    currentBulletMarker = null;
-    return true;
-  }
+  &(SameIndent b:BulletListItemMarker NormalizedToWhitespace &{ bulletListState.pushBullet(b); return true; })
   head:BulletListItem
   tail:(BlankLines? BulletListItem)* {
-    currentBulletMarker = bulletMarkerStack.pop();
+    bulletListState.popBullet();
     var children = [head].concat(tail.map(function (t) { return t[1]; }));
     return new Elements.BulletList({ children: children });
   }
 
-BulletListItemMarker = c:('*' / '+' / '-' / '•' / '‣' / '⁃') { return c; }
+BulletListItemMarker = [*+\-•‣⁃]
 
 BulletListItem =
   SameIndent
-  marker:BulletListItemMarker
-  &{
-    if (_.isNull(currentBulletMarker)) {
-      currentBulletMarker = marker;
-      return true;
-    }
-    return marker === currentBulletMarker;
-  }
-  body:(EmptyBulletListItemBody / BulletListItemBody) {
+  b:BulletListItemMarker
+  &{ return bulletListState.isSameBullet(b); }
+  body:(BulletListItemBody / EmptyBulletListItemBody) {
     return new Elements.ListItem({ children: body })
   }
 
-EmptyBulletListItemBody = Whitespace* Endline { return []; }
 BulletListItemBody = (BulletListIndent body:BodyElement* Dedent) { return body; }
+EmptyBulletListItemBody = Whitespace* Endline { return []; }
 
 BulletListIndent =
-  i:Whitespace+ {
+  i:Whitespace+ &(!NormalizedToWhitespace .) {
     var nextIndentSize = currentIndentSize + ParserUtil.calcIndentSize(i) + 1;
     indentIgnoreLine = location().start.line;
+    indentSizeStack.push(currentIndentSize);
+    currentIndentSize = nextIndentSize;
+  } /
+  (Whitespace* Newline)+ &DeepIndent i:Whitespace+ &(!NormalizedToWhitespace .) {
+    var nextIndentSize = ParserUtil.calcIndentSize(i);
+    indentIgnoreLine = location().end.line;
     indentSizeStack.push(currentIndentSize);
     currentIndentSize = nextIndentSize;
   }

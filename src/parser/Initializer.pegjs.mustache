@@ -17,9 +17,23 @@
   var markupEndString = null;
   var attributesIndentList = [];
 
-  var bulletMarkerStack = [];
-  var currentBulletMarker = null;
-
   var enumeratorStack = [];
   var currentEnumerator = null;
+
+  var bulletListState = (function () {
+    var stack = [];
+    var current = null;
+    return {
+      pushBullet: function (bullet) {
+        stack.push(current);
+        current = bullet;
+      },
+      popBullet: function () {
+        current = stack.pop();
+      },
+      isSameBullet: function (bullet) {
+        return current === bullet;
+      },
+    };
+  }());
 }

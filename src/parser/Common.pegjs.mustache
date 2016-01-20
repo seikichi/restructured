@@ -54,3 +54,6 @@ SameIndent =
   } {
     return i.join('');
   }
+
+DeepIndent = i:Whitespace* &{ return ParserUtil.calcIndentSize(i) > currentIndentSize; }
+ShallowIndent = i:Whitespace* &{ return ParserUtil.calcIndentSize(i) < currentIndentSize; }

@@ -107,6 +107,18 @@ Unicode bullets:
         ul(li(p(t('HYPHEN BULLET\n')))),
       ],
     ],
+    [
+      'bullet list items begin with newline',
+      `\
+-
+   1
+-
+  2
+-
+ 3
+`,
+      [ul(li(p(t('1\n'))), li(p(t('2\n'))), li(p(t('3\n'))))],
+    ],
   ].forEach(([title, input, children]) => {
     it(`should parse ${title} correctly`, () => {
       assert.deepStrictEqual(RST.parse(input).toJS(), new Document({ children }).toJS());
