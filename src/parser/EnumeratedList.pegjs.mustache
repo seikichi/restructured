@@ -22,9 +22,7 @@ EnumerationSequence =
   LowerCaseAlphabetEnumerationSequence
 
 AutoEnumerationSequence =
-  &{
-    return _.isNull(currentEnumerator) || currentEnumerator.sequence.isAuto();
-  } '#' {
+  '#' {
     return new Elements.EnumeratorSequence({ type: 'auto', value: '#' });
   }
 

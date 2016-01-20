@@ -343,6 +343,47 @@ Nested enumerated lists:
       ],
     ],
     [
+      'enumerated list with arabic number and auto enumerator "#"',
+      `\
+1. Item one.
+
+#. Item two.
+
+#. Item three.
+`,
+      [
+        ol(li(p(t('Item one.\n'))),
+           li(p(t('Item two.\n'))),
+           li(p(t('Item three.\n')))),
+      ],
+    ],
+    [
+      'enumerated list with alphabet and auto enumerator "#"',
+      `\
+a. Item one.
+#. Item two.
+#. Item three.
+`,
+      [
+        ol(li(p(t('Item one.\n'))),
+           li(p(t('Item two.\n'))),
+           li(p(t('Item three.\n')))),
+      ],
+    ],
+    [
+      'enumerated list with roman and auto enumerator "#"',
+      `\
+i. Item one.
+ii. Item two.
+#. Item three.
+`,
+      [
+        ol(li(p(t('Item one.\n'))),
+           li(p(t('Item two.\n'))),
+           li(p(t('Item three.\n')))),
+      ],
+    ],
+    [
       'enumerated list with auto enumerator "#"',
       `\
 #. Item one.
@@ -354,6 +395,14 @@ Nested enumerated lists:
            li(p(t('Item two.\n'))),
            li(p(t('Item three.\n')))),
       ],
+    ],
+    [
+      'enumerated list like paragraph',
+      `\
+z.
+x
+`,
+      [p(t('z.\n'), t('x\n'))],
     ],
   ].forEach(([title, input, children]) => {
     it(`should parse ${title} correctly`, () => {

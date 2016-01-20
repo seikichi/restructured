@@ -120,7 +120,11 @@ export class Enumerator extends new Record({
   }
 
   isNext(e) {
-    if (this.format !== e.format || this.sequence.type !== e.sequence.type) {
+    if (this.format !== e.format) {
+      return false
+    } else if (e.sequence.isAuto()) {
+      return true;
+    } else if (this.sequence.type !== e.sequence.type) {
       return false;
     } else if (this.sequence.isArabicNumerals()) {
       return parseInt(this.sequence.value, 10) + 1 === parseInt(e.sequence.value, 10);
