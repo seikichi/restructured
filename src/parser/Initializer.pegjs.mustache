@@ -21,8 +21,26 @@
   var markupEndString = null;
   var attributesIndentList = [];
 
+  var nextEnumeratorType = null;
   var enumeratorStack = [];
   var currentEnumerator = null;
+
+  var enumeratedListState = (function () {
+    return {
+      startNewEnumeratedList: function () {
+        enumeratorStack.push(currentEnumerator);
+        currentEnumerator = null;
+        nextEnumeratorType = null;
+      },
+      pushEnumerator: function (enumerator) {
+        enumeratorStack.push(current);
+        currentEnumerator = enumerator;
+      },
+      popEnumerator: function () {
+        currentEnumerator = enumeratorStack.pop();
+      },
+    };
+  }());
 
   var indentState = (function () {
     return {

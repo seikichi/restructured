@@ -1,15 +1,18 @@
 EnumeratedList =
   BlankLines?
+  &{ nextEnumeratorType = null; return true; }
   &(IsEnumeratedListItem)
-  &{
-    enumeratorStack.push(currentEnumerator);
-    currentEnumerator = null;
-    return true;
-  }
+  &{ enumeratedListState.startNewEnumeratedList(); return true; }
   head:EnumeratedListItem
-  tail:(BlankLines? &(IsEnumeratedListItem) EnumeratedListItem)* {
-    currentEnumerator = enumeratorStack.pop();
-    var children = [head].concat(tail.map(function (t) { return t[2]; }));
+  tail:(
+    BlankLines?
+    &{ nextEnumeratorType = currentEnumerator.sequence.type; return true; }
+    &(IsEnumeratedListItem)
+    &{ nextEnumeratorType = currentEnumerator.sequence.type; return true; }
+    EnumeratedListItem
+  )* {
+    enumeratedListState.popEnumerator();
+    var children = [head].concat(mapByIndex(tail, 4));
     return new Elements.EnumeratedList({ children: children });
   }
 
@@ -28,40 +31,40 @@ AutoEnumerationSequence =
 
 ArabicNumeralsEnumerationSequence =
   &{
-    return _.isNull(currentEnumerator) || currentEnumerator.sequence.isArabicNumerals();
+    return _.isNull(nextEnumeratorType) || nextEnumeratorType === 'arabic_numerals';
   } head:[1-9] tail:[0-9]* {
     return new Elements.EnumeratorSequence({ type: 'arabic_numerals', value: [head].concat(tail).join('') });
   } /
   &{
-    return _.isNull(currentEnumerator) || currentEnumerator.sequence.isArabicNumerals();
+    return _.isNull(nextEnumeratorType) || nextEnumeratorType === 'arabic_numerals';
   } head:[0] {
     return new Elements.EnumeratorSequence({ type: 'arabic_numerals', value: head });
   }
 
 UpperCaseAlphabetEnumerationSequence =
   &{
-    return _.isNull(currentEnumerator) || currentEnumerator.sequence.isUppercaseAlphabet();
+    return _.isNull(nextEnumeratorType) || nextEnumeratorType === 'uppercase_alphabet';
   } s:[A-Z] {
     return new Elements.EnumeratorSequence({ type: 'uppercase_alphabet', value: s });
   }
 
 LowerCaseAlphabetEnumerationSequence =
   &{
-    return _.isNull(currentEnumerator) || currentEnumerator.sequence.isLowercaseAlphabet();
+    return _.isNull(nextEnumeratorType) || nextEnumeratorType === 'lowercase_alphabet';
   } s:[a-z] {
     return new Elements.EnumeratorSequence({ type: 'lowercase_alphabet', value: s });
   }
 
 UpperCaseRomanEnumerationSequence =
   &{
-    return _.isNull(currentEnumerator) || currentEnumerator.sequence.isUppercaseRoman();
+    return _.isNull(nextEnumeratorType) || nextEnumeratorType === 'uppercase_roman';
   } s:[IVXLCDM]+ &{ return ParserUtil.isUpperRomanNumber(s.join('')); } {
     return new Elements.EnumeratorSequence({ type: 'uppercase_roman', value: s.join('') });
   }
 
 LowerCaseRomanEnumerationSequence =
   &{
-    return _.isNull(currentEnumerator) || currentEnumerator.sequence.isLowercaseRoman();
+    return _.isNull(nextEnumeratorType) || nextEnumeratorType === 'lowercase_roman';
   } s:[ivxlcdm]+ &{ return ParserUtil.isLowerRomanNumber(s.join('')); } {
     return new Elements.EnumeratorSequence({ type: 'lowercase_roman', value: s.join('') });
   }
@@ -97,41 +100,16 @@ EnumeratedListItem =
 
 IsEnumeratedListItem =
   SameIndent
-  &{
-    enumeratorStack.push(currentEnumerator);
-    currentEnumerator = null;
-    return true;
-  }
-  e1:(Enumerator &{
-    currentEnumerator = enumeratorStack.pop();
-    return true;
-  } / &{
-    currentEnumerator = enumeratorStack.pop();
-    return false;
-  })
+  e1:Enumerator
   i1:Whitespace+ RawLine
   (
     BlankLines /
     i2:Whitespace+ RawLine &{
-      return currentIndentSize + e1[0].width() + ParserUtil.calcIndentSize(i1) === ParserUtil.calcIndentSize(i2);
+      return currentIndentSize + e1.width() + ParserUtil.calcIndentSize(i1) <= ParserUtil.calcIndentSize(i2);
     } /
-    &{
-      enumeratorStack.push(currentEnumerator);
-      currentEnumerator = e1[0];
-      return true;
+    &{ nextEnumeratorType = e1.sequence.type; return true; } SameIndent e2:Enumerator Whitespace+ RawLine &{
+      return e1.isNext(e2);
     }
-    (
-      SameIndent e2:Enumerator Whitespace+ RawLine &{
-        if (e1[0].isNext(e2)) {
-          currentEnumerator = enumeratorStack.pop();
-          return true;
-        }
-        return false;
-      } / &{
-        currentEnumerator = enumeratorStack.pop();
-        return false;
-      }
-    )
   )
 
 EmptyEnumeratedListItemBody = Whitespace* Endline { return []; }
@@ -139,8 +117,6 @@ EnumeratedListItemBody = (EnumeratedListIndent body:BodyElement* Dedent) { retur
 
 EnumeratedListIndent =
   i:Whitespace+ {
-    var nextIndentSize = currentIndentSize + ParserUtil.calcIndentSize(i) + currentEnumerator.width();
-    indentIgnoreLine = location().start.line;
-    indentSizeStack.push(currentIndentSize);
-    currentIndentSize = nextIndentSize;
+    indentState.push(currentIndentSize + ParserUtil.calcIndentSize(i) + currentEnumerator.width());
+    indentState.ignore(location().end.line);
   }
