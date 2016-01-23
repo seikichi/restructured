@@ -3,6 +3,10 @@
   var _ = require('lodash');
   var ParserUtil = require('./ParserUtil').default;
 
+  function mapByIndex(seq, index) {
+    return _.map(seq, function (v) { return v[index]; });
+  };
+
   // nodes
   var Elements = require('./Elements');
   var Text = Elements.Text;
@@ -19,6 +23,21 @@
 
   var enumeratorStack = [];
   var currentEnumerator = null;
+
+  var indentState = (function () {
+    return {
+      push: function (indentSize) {
+        indentSizeStack.push(currentIndentSize);
+        currentIndentSize = indentSize;
+      },
+      pop: function () {
+        currentIndentSize = indentSizeStack.pop();
+      },
+      ignore: function (line) {
+        indentIgnoreLine = line;
+      },
+    };
+  }());
 
   var bulletListState = (function () {
     var stack = [];
