@@ -121,7 +121,7 @@ export class Enumerator extends new Record({
 
   isNext(e) {
     if (this.format !== e.format) {
-      return false
+      return false;
     } else if (e.sequence.isAuto()) {
       return true;
     } else if (this.sequence.type !== e.sequence.type) {
