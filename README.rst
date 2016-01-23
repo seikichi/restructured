@@ -2,6 +2,9 @@
 rst.js
 ######
 
+.. image:: https://travis-ci.org/seikichi/rst.js.svg?branch=master  
+   :target: https://travis-ci.org/seikichi/rst.js
+
 作りかけ．
 
 A reStructuredText parser for JavaScript.
