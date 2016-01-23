@@ -50,7 +50,7 @@
     "build:parser:mustache": "mustache $(for f in src/parser/*.mustache; do echo -p \"$f\"; done) config/parser.json src/Parser.pegjs.mustache > src/Parser.pegjs",
     "build:parser:pegjs": "pegjs --allowed-start-rules Document src/Parser.pegjs lib/Parser.js",
     "lint": "eslint src test",
-    "test": "mocha --compilers js:espower-babel/guess test/*Test.js test/*/*Test.js",
+    "test": "npm run build && mocha --compilers js:espower-babel/guess test/*Test.js test/*/*Test.js",
     "watch": "nf start",
     "watch:build": "babel src --watch --source-maps inline --out-dir lib",
     "watch:build:parser": "watch 'npm run -s build:parser' src/parser -d --filter=config/filter.js",
