@@ -404,6 +404,46 @@ x
 `,
       [p(t('z.\n'), t('x\n'))],
     ],
+    [
+      'complicated indent enumerated list',
+      `\
+3-space indent, no trailing space:
+
+1.
+   foo
+
+2-space indent:
+
+1.
+  foo
+
+1-space indent:
+
+1.
+ foo
+
+0-space indent, not a list item:
+
+1.
+foo
+
+No item content:
+
+1.
+`,
+      [
+        p(t('3-space indent, no trailing space:\n')),
+        ol(li(p(t('foo\n')))),
+        p(t('2-space indent:\n')),
+        ol(li(p(t('foo\n')))),
+        p(t('1-space indent:\n')),
+        ol(li(p(t('foo\n')))),
+        p(t('0-space indent, not a list item:\n')),
+        p(t('1.\n'), t('foo\n')),
+        p(t('No item content:\n')),
+        ol(li()),
+      ],
+    ],
   ].forEach(([title, input, children]) => {
     it(`should parse ${title} correctly`, () => {
       assert.deepStrictEqual(RST.parse(input).toJS(), new Document({ children }).toJS());

@@ -12,7 +12,7 @@ BlankLines =
   Endline
 
 RawLine =
-  raw:(!Endline .)+ Endline {
+  raw:(!Endline .)* Endline {
     return { raw: _.map(raw, function (v) { return v[1]; }).join('') };
   }
 

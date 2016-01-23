@@ -94,20 +94,21 @@ EnumeratedListItem =
     currentEnumerator = e;
     return true;
   }
-  body:(EmptyEnumeratedListItemBody / EnumeratedListItemBody) {
+  body:(EnumeratedListItemBody / EmptyEnumeratedListItemBody) {
     return new Elements.ListItem({ children: body })
   }
 
 IsEnumeratedListItem =
   SameIndent
   e1:Enumerator
-  i1:Whitespace+ RawLine
+  i1:Whitespace* RawLine
   (
     BlankLines /
     i2:Whitespace+ RawLine &{
-      return currentIndentSize + e1.width() + ParserUtil.calcIndentSize(i1) <= ParserUtil.calcIndentSize(i2);
+      return currentIndentSize < ParserUtil.calcIndentSize(i2);
     } /
-    &{ nextEnumeratorType = e1.sequence.type; return true; } SameIndent e2:Enumerator Whitespace+ RawLine &{
+    &{ nextEnumeratorType = e1.sequence.type; return true; }
+    SameIndent e2:Enumerator Whitespace+ RawLine &{
       return e1.isNext(e2);
     }
   )
@@ -116,7 +117,11 @@ EmptyEnumeratedListItemBody = Whitespace* Endline { return []; }
 EnumeratedListItemBody = (EnumeratedListIndent body:BodyElement* Dedent) { return body; }
 
 EnumeratedListIndent =
-  i:Whitespace+ {
+  i:Whitespace+ &(!NormalizedToWhitespace .) {
     indentState.push(currentIndentSize + ParserUtil.calcIndentSize(i) + currentEnumerator.width());
+    indentState.ignore(location().end.line);
+  } /
+  (Whitespace* Newline)+ &DeepIndent i:Whitespace+ &(!NormalizedToWhitespace .) {
+    indentState.push(ParserUtil.calcIndentSize(i));
     indentState.ignore(location().end.line);
   }
