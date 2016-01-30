@@ -1,4 +1,4 @@
-import parser from './parser';
+import parser from './Parser';
 
 const RST = {
   parse(s) {
