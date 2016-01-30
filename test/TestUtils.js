@@ -1,11 +1,15 @@
 import {
   BulletList,
+  Definition,
+  DefinitionList,
+  DefinitionListItem,
   Emphasis,
   EnumeratedList,
   InlineLiteral,
   ListItem,
   Paragraph,
   StrongEmphasis,
+  Term,
   Text,
 } from '../lib/Elements';
 
@@ -39,4 +43,20 @@ export function strong(...children) {
 
 export function tt(...children) {
   return new InlineLiteral({ children });
+}
+
+export function dt(...children) {
+  return new Term({ children });
+}
+
+export function dd(...children) {
+  return new Definition({ children });
+}
+
+export function dli(term, definition) {
+  return new DefinitionListItem({ term, definition });
+}
+
+export function dl(...children) {
+  return new DefinitionList({ children });
 }
