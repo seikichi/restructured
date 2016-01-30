@@ -8,23 +8,27 @@ DefinitionList =
   }
 
 DefinitionListItem =
-  SameIndent term:DefinitionTerm Whitespace* (':' Whitespace* DefinitionClassifier Whitespace*)* Newline
+  SameIndent
+  term:DefinitionTerm
+  classifiers:(Whitespace+ ':' Whitespace+ DefinitionClassifier)* Whitespace* Newline
   Indent
   body:BodyElement+
   Dedent {
     return new Elements.DefinitionListItem({
       term: term,
+      classifiers: mapByIndex(classifiers, 3),
       definition: new Elements.Definition({ children: body }),
     });
   }
 
 DefinitionTerm =
-  term:(!Endline .)+ {
-    var text = term.map(function (t) { return t[1]; }).join('');
-    return new Elements.Term({children: [new Text({ text: text })]});
+  term:(!(Endline / Whitespace+ ':' Whitespace+) .)+ {
+    var text = mapByIndex(term, 1).join('');
+    return new Elements.Term({ children: [new Text({ text: text })]});
   }
 
 DefinitionClassifier =
-  term:Nonspacechar+ {
-    return term.map(function (t) { return t[1]; }).join('');
+  term:(!(Endline / Whitespace+ ':') .)+ {
+    var text = mapByIndex(term, 1).join('');
+    return new Elements.Classifier({ children: [new Text({ text: text }) ]});
   }

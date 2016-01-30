@@ -193,6 +193,15 @@ export class Term extends new Record({
   }
 }
 
+export class Classifier extends new Record({
+  type: 'classifier',
+  children: new List(),
+}) {
+  constructor({ children }) {
+    super({ children: new List(children) });
+  }
+}
+
 export class Definition extends new Record({
   type: 'definition',
   children: new List(),

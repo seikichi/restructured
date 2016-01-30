@@ -4,7 +4,7 @@ Newline = '\n' / ('\r' '\n'?)
 Whitespace = ' ' / '\v' / '\f' / '\t'
 Endline = Newline / Eof
 NormalizedToWhitespace = Whitespace / Newline
-Nonspacechar = !NormalizedToWhitespace .
+Nonspacechar = c:(!NormalizedToWhitespace .) { return c[1]; }
 
 BlankLines =
   (Whitespace* Newline &(Whitespace* Endline))*

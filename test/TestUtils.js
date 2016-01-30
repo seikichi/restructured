@@ -1,5 +1,6 @@
 import {
   BulletList,
+  Classifier,
   Definition,
   DefinitionList,
   DefinitionListItem,
@@ -53,8 +54,15 @@ export function dd(...children) {
   return new Definition({ children });
 }
 
-export function dli(term, definition) {
-  return new DefinitionListItem({ term, definition });
+export function classifier(...children) {
+  return new Classifier({ children });
+}
+
+export function dli(...children) {
+  const term = children[0];
+  const definition = children[children.length - 1];
+  const classifiers = children.slice(1, children.length - 1);
+  return new DefinitionListItem({ term, classifiers, definition });
 }
 
 export function dl(...children) {

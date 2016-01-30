@@ -1,7 +1,7 @@
 import assert from 'power-assert';
 import RST from '../../lib/RST';
 import { Document } from '../../lib/Elements';
-import { p, t, dl, dli, dt, dd } from '../TestUtils';
+import { p, t, dl, dli, dt, dd, classifier } from '../TestUtils';
 
 describe('RST.parse', () => {
   [
@@ -81,6 +81,35 @@ paragraph
                dd(p(t('definition 2\n'))))),
         p(t('paragraph\n')),
       ],
+    ],
+    [
+      'a simple definition list with classifier',
+      `\
+Term : classifier
+    The ' : ' indicates a classifier in
+    definition list item terms only.
+`,
+      [dl(dli(dt(t('Term')),
+              classifier(t('classifier')),
+              dd(p(t('The \' : \' indicates a classifier in\n'),
+                   t('definition list item terms only.\n')))))],
+    ],
+    [
+      'a simple definition list without classifier',
+      `\
+Term: not a classifier
+    Because there's no space before the colon.
+Term :not a classifier
+    Because there's no space after the colon.
+Term \\: not a classifier
+    Because the colon is escaped.
+`,
+      [dl(dli(dt(t('Term: not a classifier')),
+              dd(p(t('Because there\'s no space before the colon.\n')))),
+          dli(dt(t('Term :not a classifier')),
+              dd(p(t('Because there\'s no space after the colon.\n')))),
+          dli(dt(t('Term \\: not a classifier')),
+              dd(p(t('Because the colon is escaped.\n')))))],
     ],
   ].forEach(([title, input, children]) => {
     it(`should parse ${title} correctly`, () => {
