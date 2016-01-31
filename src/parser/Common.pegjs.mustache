@@ -57,3 +57,4 @@ SameIndent =
 
 DeepIndent = i:Whitespace* &{ return ParserUtil.calcIndentSize(i) > currentIndentSize; }
 ShallowIndent = i:Whitespace* &{ return ParserUtil.calcIndentSize(i) < currentIndentSize; }
+SameOrDeepIndent = i:Whitespace* &{ return ParserUtil.calcIndentSize(i) >= currentIndentSize; }

@@ -36,6 +36,24 @@ export class Paragraph extends new Record({
   }
 }
 
+export class LiteralBlock extends new Record({
+  type: 'literal_block',
+  children: new List(),
+}) {
+  constructor({ children }) {
+    super({ children: new List(children) });
+  }
+}
+
+export class LiteralBlockLine extends new Record({
+  type: 'literal_block_line',
+  text: '',
+}) {
+  constructor({ text }) {
+    super({ text });
+  }
+}
+
 export class BulletList extends new Record({
   type: 'bullet_list',
   children: new List(),

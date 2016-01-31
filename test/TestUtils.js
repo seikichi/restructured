@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import {
   BulletList,
   Classifier,
@@ -8,6 +9,8 @@ import {
   EnumeratedList,
   InlineLiteral,
   ListItem,
+  LiteralBlock,
+  LiteralBlockLine,
   Paragraph,
   StrongEmphasis,
   Term,
@@ -67,4 +70,8 @@ export function dli(...children) {
 
 export function dl(...children) {
   return new DefinitionList({ children });
+}
+
+export function pre(...children) {
+  return new LiteralBlock({ children: _.map(children, text => new LiteralBlockLine({ text })) });
 }

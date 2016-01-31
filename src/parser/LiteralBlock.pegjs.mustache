@@ -1,0 +1,43 @@
+LiteralBlock =
+  (
+    SameIndent '::' Whitespace* Newline
+    BlankLines &DeepIndent LiteralBlockIndent
+    lines:(
+      Whitespace* Newline /
+      &SameOrDeepIndent w:Whitespace+ RawLine
+    )+
+  ) {
+    var children = _.map(lines, function (line) {
+      if (line.length === 2) {
+        var indentSize = ParserUtil.calcIndentSize(line[0].join(''));
+        var text = _.repeat(' ', Math.max(0, indentSize - currentIndentSize));
+      } else {
+        var indentSize = ParserUtil.calcIndentSize(line[1].join(''));
+        var text = _.repeat(' ', indentSize - currentIndentSize) + line[2].raw;
+      }
+      return new Elements.LiteralBlockLine({ text: text } );
+    });
+
+    // dedent
+    currentIndentSize = indentSizeStack.pop();
+    return new Elements.LiteralBlock({ children: children });;
+  }
+
+LiteralBlockIndent = &(
+  &DeepIndent
+  w1:Whitespace+ RawLine &{
+    nextIndentSize = ParserUtil.calcIndentSize(w1);
+    return true;
+  }
+  (
+    (Whitespace* Newline) /
+      &DeepIndent w1:Whitespace+ RawLine &{
+        nextIndentSize = Math.min(nextIndentSize, ParserUtil.calcIndentSize(w1));
+        return true;
+      }
+  )* &{
+    indentSizeStack.push(currentIndentSize);
+    currentIndentSize = nextIndentSize;
+    return true;
+  }
+)
