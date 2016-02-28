@@ -1,7 +1,7 @@
 import assert from 'power-assert';
 import RST from '../../lib/RST';
 import { Document } from '../../lib/Elements';
-import { p, t, dl, dli, dt, dd, classifier } from '../TestUtils';
+import { p, t, tt, dl, dli, dt, dd, classifier } from '../TestUtils';
 
 describe('RST.parse', () => {
   [
@@ -110,6 +110,17 @@ Term \\: not a classifier
               dd(p(t('Because there\'s no space after the colon.\n')))),
           dli(dt(t('Term \\: not a classifier')),
               dd(p(t('Because the colon is escaped.\n')))))],
+    ],
+    [
+      'a definition list with term containing inline markup',
+      `\
+\`\`Term : not a classifier\`\`
+    Because the ' : ' is inside an inline literal.
+`,
+      [
+        dl(dli(dt(tt(t('Term : not a classifier'))),
+               dd(p(t("Because the ' : ' is inside an inline literal.\n"))))),
+      ],
     ],
   ].forEach(([title, input, children]) => {
     it(`should parse ${title} correctly`, () => {

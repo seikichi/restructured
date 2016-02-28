@@ -12,12 +12,18 @@ InlineMarkup =
   FootnoteReference /
   CitationReference
 
+// TODO(seikichi): support more inline literals
+InlineMarkupWithoutNewline =
+  StrongEmphasisWithoutNewline /
+  EmphasisWithoutNewline /
+  InlineLiteralWithoutNewline
+
 MarkupEndString =
   &{ return markupEndString.length == 1 } s:(.) &{ return s === markupEndString; } /
   &{ return markupEndString.length == 2 } s:(..) &{ return s.join('') === markupEndString; } /
   &{ return markupEndString.length == 3 } s:(...) &{ return s.join('') === markupEndString; }
 
-MarkupTextWithoutIndent =
+MarkupTextWithoutNewline =
   text:(
     !Newline
     !(
@@ -27,11 +33,25 @@ MarkupTextWithoutIndent =
       MarkupEndString
       InlineMarkupFollowing
     )
-    .)+
+  .)+ {
+    return new Text({ text: mapByIndex(text, 2).join('') });
+  }
+
+MarkupTextWithoutIndent =
+  text:MarkupTextWithoutNewline
   last:Newline? {
-    var textStr = mapByIndex(text, 2).join('');
-    if (!_.isNull(last)) { textStr += last; }
-    return new Text({ text: textStr });
+    if (!_.isNull(last)) {
+      text = new Text({ text: text.text + last})
+    }
+    return text;
+  }
+
+MarkupTailWithoutNewline =
+  text:MarkupTextWithoutNewline
+  !Endline !NormalizedToWhitespace last:.
+  MarkupEndString
+  &InlineMarkupFollowing {
+    return [new Text({ text: text.text + last })]
   }
 
 MarkupTail =
@@ -56,10 +76,24 @@ Emphasis =
     return new Elements.Emphasis({ children: children });
   }
 
+EmphasisWithoutNewline =
+  ('*' !'*' !NormalizedToWhitespace)
+  &{ markupEndString = '*'; return true; }
+  children:MarkupTailWithoutNewline {
+    return new Elements.Emphasis({ children: children });
+  }
+
 StrongEmphasis =
   ('**' !NormalizedToWhitespace)
   &{ markupEndString = '**'; return true; }
   children:MarkupTail {
+    return new Elements.StrongEmphasis({ children: children });
+  }
+
+StrongEmphasisWithoutNewline =
+  ('**' !NormalizedToWhitespace)
+  &{ markupEndString = '**'; return true; }
+  children:MarkupTailWithoutNewline {
     return new Elements.StrongEmphasis({ children: children });
   }
 
@@ -80,6 +114,13 @@ InlineLiteral =
   ('``' !NormalizedToWhitespace)
   &{ markupEndString = '``'; return true; }
   children:MarkupTail {
+    return new Elements.InlineLiteral({ children: children });
+  }
+
+InlineLiteralWithoutNewline =
+  ('``' !NormalizedToWhitespace)
+  &{ markupEndString = '``'; return true; }
+  children:MarkupTailWithoutNewline {
     return new Elements.InlineLiteral({ children: children });
   }
 
