@@ -17,24 +17,6 @@ MarkupEndString =
   &{ return markupEndString.length == 2 } s:(..) &{ return s.join('') === markupEndString; } /
   &{ return markupEndString.length == 3 } s:(...) &{ return s.join('') === markupEndString; }
 
-MarkupTextWithIndent =
-  indent:SameIndent
-  text:(
-    !Newline
-    !(
-      !NormalizedToWhitespace
-      (&{ return markupEndString === '``' } / !'\\')
-      .
-      MarkupEndString
-      InlineMarkupFollowing
-    )
-    .)+
-  last:Newline? {
-    var textStr = _.map(text, function (v) { return v[2]; }).join('');
-    if (!_.isNull(last)) { textStr += last; }
-    return new Text({ text: textStr, indent: indent });
-  }
-
 MarkupTextWithoutIndent =
   text:(
     !Newline
@@ -47,18 +29,18 @@ MarkupTextWithoutIndent =
     )
     .)+
   last:Newline? {
-    var textStr = _.map(text, function (v) { return v[2]; }).join('');
+    var textStr = mapByIndex(text, 2).join('');
     if (!_.isNull(last)) { textStr += last; }
     return new Text({ text: textStr });
   }
 
 MarkupTail =
   first:MarkupTextWithoutIndent?
-  middle:MarkupTextWithIndent*
+  middle:(SameIndent MarkupTextWithoutIndent)*
   !Endline !NormalizedToWhitespace last:.
   MarkupEndString
   &InlineMarkupFollowing {
-    var children = (_.isNull(first) ? [] : [first]).concat(middle);
+    var children = (_.isNull(first) ? [] : [first]).concat(mapByIndex(middle, 1));
     if (children.length == 0) {
       children.push(new Text({ text: '' }));
     }
