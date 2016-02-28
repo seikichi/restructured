@@ -41,7 +41,6 @@ DefinitionTermText =
   }
 
 DefinitionClassifier =
-  term:(!(Endline / Whitespace+ ':') .)+ {
-    var text = mapByIndex(term, 1).join('');
-    return new Elements.Classifier({ children: [new Text({ text: text }) ]});
+  children:(InlineMarkupWithoutNewline / DefinitionTermText)+ {
+    return new Elements.Classifier({ children: children });
   }
