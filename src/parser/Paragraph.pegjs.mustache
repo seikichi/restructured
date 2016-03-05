@@ -29,3 +29,8 @@ ParagraphText =
   } / text:(!Endline !InlineMarkupBeggining .)* last:InlineMarkupPreceding {
     return new Text({ text: mapByIndex(text, 2).join('') + last});
   }
+
+OnelineParagraph = (InlineMarkupWithoutNewline / OnelineText)+
+OnelineText = text:(!Endline !InlineMarkupBeggining .)+ {
+  return new Text({ text: mapByIndex(text, 2).join('')});
+}
