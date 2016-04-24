@@ -1,8 +1,9 @@
 Section =
   BlankLines?
-  section:(SectionWithOverline / SectionWithoutOverline)
-  &BlankLines {
-    return section;
+  title:(SectionWithOverline / SectionWithoutOverline)
+  BlankLines?
+  children:(!IsSection (Transition / BodyElement))* {
+    return new Elements.Section({ title: title, children: mapByIndex(children, 1) });
   }
 
 SectionWithOverline =
@@ -10,14 +11,17 @@ SectionWithOverline =
   overline:SectionLine
   Whitespace* children:OnelineParagraph Newline
   underline:SectionLine {
-    return new Elements.Section({ children: children });
+    return new Elements.SectionTitle({ children: children });
   }
+
+IsSection = &(BlankLines SectionLine !BlankLines RawLine SectionLine) /
+  &(BlankLines RawLine SectionLine)
 
 SectionWithoutOverline =
   &(!BlankLines RawLine SectionLine)
   children:OnelineParagraph Newline
   underline:SectionLine {
-    return new Elements.Section({ children: children });
+    return new Elements.SectionTitle({ children: children });
   }
 
 SectionLine =

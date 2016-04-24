@@ -12,6 +12,8 @@ import {
   LiteralBlock,
   LiteralBlockLine,
   Paragraph,
+  Section,
+  SectionTitle,
   StrongEmphasis,
   Term,
   Text,
@@ -74,4 +76,14 @@ export function dl(...children) {
 
 export function pre(...children) {
   return new LiteralBlock({ children: _.map(children, text => new LiteralBlockLine({ text })) });
+}
+
+export function section(...args) {
+  const title = args[0];
+  const children = args.slice(1);
+  return new Section({ title, children });
+}
+
+export function title(...children) {
+  return new SectionTitle({ children });
 }

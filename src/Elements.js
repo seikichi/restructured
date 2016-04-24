@@ -10,12 +10,22 @@ export class Document extends new Record({
   }
 }
 
-export class Section extends new Record({
-  type: 'section',
+export class SectionTitle extends new Record({
+  type: 'title',
   children: new List(),
 }) {
   constructor({ children }) {
     super({ children: new List(children) });
+  }
+}
+
+export class Section extends new Record({
+  type: 'section',
+  title: null,
+  children: new List(),
+}) {
+  constructor({ title, children }) {
+    super({ title, children: new List(children) });
   }
 }
 
