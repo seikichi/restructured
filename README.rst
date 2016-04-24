@@ -1,9 +1,9 @@
-######
-rst.js
-######
+############
+restructured
+############
 
-.. image:: https://travis-ci.org/seikichi/rst.js.svg?branch=master  
-   :target: https://travis-ci.org/seikichi/rst.js
+.. image:: https://travis-ci.org/seikichi/restructured.svg?branch=master
+   :target: https://travis-ci.org/seikichi/restructured
 
 作りかけ．
 
@@ -16,12 +16,12 @@ Consider the following script.
 
 .. code:: javascript
 
-   var RST = require('RST.js').default;
+   var rst = require('restructured')
 
-   var document = RST.parse([
-     '########',
-     ' rst.js ',
-     '########',
+   var document = rst.parse([
+     '#######',
+     ' Title ',
+     '#######',
      '',
      '**作りかけです!!**'
    ].join('\n'));
@@ -41,7 +41,7 @@ The above script outputs following JSON.
            [
              {
                "type": "text",
-               "text": "rst.js "
+               "text": "Title"
              }
            ]
          ],

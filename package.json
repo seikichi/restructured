@@ -1,10 +1,10 @@
 {
-  "name": "rst.js",
+  "name": "restructured",
   "description": "A reStructuredText parser for JavaScript",
   "version": "0.0.0",
   "author": "seikichi",
   "bugs": {
-    "url": "https://github.com/seikichi/rst.js/issues"
+    "url": "https://github.com/seikichi/restructured/issues"
   },
   "dependencies": {
     "immutable": "^3.7.6",
@@ -29,7 +29,7 @@
   "files": [
     "lib"
   ],
-  "homepage": "https://github.com/seikichi/rst.js",
+  "homepage": "https://github.com/seikichi/restructured",
   "keywords": [
     "reST",
     "reStructuredText",
@@ -42,7 +42,7 @@
   "main": "lib/RST.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/seikichi/rst.js.git"
+    "url": "https://github.com/seikichi/restructured.git"
   },
   "scripts": {
     "build": "mkdir -p lib/ && npm run build:parser && babel src --source-maps inline --out-dir lib",
