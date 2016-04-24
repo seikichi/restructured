@@ -73,4 +73,36 @@
       },
     };
   }());
+
+  var sectionState = (function () {
+    var stack = [];
+    var currentIndex = -1;
+    return {
+      isSubSection: function (c, overline) {
+        if (currentIndex == stack.length - 1) {
+          for (var i = 0, len = stack.length; i < len; i++) {
+            if (stack[i].c === c && stack[i].overline == overline) {
+              return false;
+            }
+          }
+          return true;
+        }
+        var next = stack[currentIndex + 1];
+        return next.c === c && next.overline === overline;
+      },
+      setNextSection: function (c, overline) {
+        for (var i = 0, len = stack.length; i < len; i++) {
+          if (stack[i].c === c && stack[i].overline == overline) {
+            currentIndex = i;
+            return;
+          }
+        }
+        stack.push({ c: c, overline: overline });
+        currentIndex = stack.length - 1;
+      },
+      popSection: function () {
+        --currentIndex;
+      },
+    };
+  }());
 }

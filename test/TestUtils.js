@@ -79,9 +79,7 @@ export function pre(...children) {
 }
 
 export function section(...args) {
-  const title = args[0];
-  const children = args.slice(1);
-  return new Section({ title, children });
+  return new Section({ title: args[0], children: args.slice(1) });
 }
 
 export function title(...children) {

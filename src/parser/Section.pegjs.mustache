@@ -1,26 +1,43 @@
 Section =
   BlankLines?
+  IsSubSection
   title:(SectionWithOverline / SectionWithoutOverline)
   BlankLines?
-  children:(!IsSection (Transition / BodyElement))* {
+  children:((IsSubSection Section) / (!IsSection Transition) / (!IsSection BodyElement))* {
+    sectionState.popSection();
     return new Elements.Section({ title: title, children: mapByIndex(children, 1) });
   }
+
+IsSection = &(BlankLines? SectionLine !BlankLines RawLine SectionLine) /
+  &(BlankLines? RawLine SectionLine)
+
+IsSubSection =
+  &(
+    BlankLines? overline:SectionLine !BlankLines RawLine underline:SectionLine &{
+      if (overline.line[0] !== underline.line[0]) { return false; }
+      return sectionState.isSubSection(underline.line[0], true);
+    }
+  ) /
+  &(
+    BlankLines? line:RawLine underline:SectionLine &{
+      return sectionState.isSubSection(underline.line[0], false);
+    }
+  )
 
 SectionWithOverline =
   &(SectionLine !BlankLines RawLine SectionLine)
   overline:SectionLine
   Whitespace* children:OnelineParagraph Newline
   underline:SectionLine {
+    sectionState.setNextSection(underline.line[0], true);
     return new Elements.SectionTitle({ children: children });
   }
-
-IsSection = &(BlankLines SectionLine !BlankLines RawLine SectionLine) /
-  &(BlankLines RawLine SectionLine)
 
 SectionWithoutOverline =
   &(!BlankLines RawLine SectionLine)
   children:OnelineParagraph Newline
   underline:SectionLine {
+    sectionState.setNextSection(underline.line[0], false);
     return new Elements.SectionTitle({ children: children });
   }
 

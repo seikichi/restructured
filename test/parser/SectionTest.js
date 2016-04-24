@@ -58,8 +58,36 @@ Test overline title.
 `,
       [section(title(t('Title')), p(t('Test overline title.\n')))],
     ],
-  ].forEach(([title, input, children]) => {
-    it(`should parse ${title} correctly`, () => {
+    [
+      'nested sections',
+      `\
+Title 1
+=======
+Paragraph 1.
+
+Title 2
+-------
+Paragraph 2.
+
+Title 3
+=======
+Paragraph 3.
+
+Title 4
+-------
+Paragraph 4.
+`,
+      [
+        section(title(t('Title 1')),
+                p(t('Paragraph 1.\n')),
+                section(title(t('Title 2')), p(t('Paragraph 2.\n')))),
+        section(title(t('Title 3')),
+                p(t('Paragraph 3.\n')),
+                section(title(t('Title 4')), p(t('Paragraph 4.\n')))),
+      ],
+    ],
+  ].forEach(([desc, input, children]) => {
+    it(`should parse ${desc} correctly`, () => {
       assert.deepStrictEqual(RST.parse(input).toJS(), new Document({ children }).toJS());
     });
   });
