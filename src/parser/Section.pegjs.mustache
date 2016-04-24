@@ -46,7 +46,7 @@ SectionLine =
         '*' / '+' / ',' / '-' / '.' / '/' / ':' / ';' / '<' /
         '=' / '>' / '?' / '@' / '[' / '\\' / ']' / '^' / '_' /
         '`' / '{' / '|' / '}' / '~')+ &{
-    return line.length >= 1 && _.uniq(line).length == 1
+    return line.length >= 2 && _.uniq(line).length == 1
   } Whitespace* Newline {
     return {line: line.join('')}
   }
