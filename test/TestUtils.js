@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import {
   BulletList,
+  BlockQuote,
   Classifier,
   Definition,
   DefinitionList,
@@ -84,4 +85,8 @@ export function section(...args) {
 
 export function title(...children) {
   return new SectionTitle({ children });
+}
+
+export function blockquote(...children) {
+  return new BlockQuote({ children });
 }

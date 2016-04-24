@@ -1,7 +1,15 @@
 import assert from 'power-assert';
 import RST from '../../lib/RST';
 import { Document } from '../../lib/Elements';
-import { p, t, em, strong, section, title } from '../TestUtils';
+import {
+  blockquote,
+  em,
+  p,
+  section,
+  strong,
+  t,
+  title,
+} from '../TestUtils';
 
 describe('RST.parse', () => {
   [
@@ -164,6 +172,78 @@ Paragraph.
                       t(' '),
                       strong(t('markup'))),
                 p(t('Paragraph.\n'))),
+      ],
+    ],
+    [
+      'numbered title',
+      `\
+1. Numbered Title
+=================
+
+Paragraph.
+`,
+      [
+        section(title(t('1. Numbered Title')),
+                p(t('Paragraph.\n'))),
+      ],
+    ],
+    [
+      'short title',
+      `\
+ABC
+===
+
+Short title.
+`,
+      [section(title(t('ABC')), p(t('Short title.\n')))],
+    ],
+    [
+      'blockquote like section',
+      `\
+Paragraph
+
+    ABC
+    ==
+
+    Underline too short.
+`,
+      [
+        p(t('Paragraph\n')),
+        blockquote(p(t('ABC\n'), t('==\n')), p(t('Underline too short.\n'))),
+      ],
+    ],
+    [
+      'empty section',
+      `\
+Empty Section
+=============
+`,
+      [section(title(t('Empty Section')))],
+    ],
+    [
+      'sections with short titles',
+      `\
+===
+One
+===
+
+The bubble-up parser strategy conflicts with short titles
+(<= 3 char-long over- & underlines).
+
+===
+Two
+===
+
+The parser currently contains a work-around kludge.
+Without it, the parser ends up in an infinite loop.
+`,
+      [
+        section(title(t('One')),
+                p(t('The bubble-up parser strategy conflicts with short titles\n'),
+                  t('(<= 3 char-long over- & underlines).\n'))),
+        section(title(t('Two')),
+                p(t('The parser currently contains a work-around kludge.\n'),
+                  t('Without it, the parser ends up in an infinite loop.\n'))),
       ],
     ],
   ].forEach(([desc, input, children]) => {
