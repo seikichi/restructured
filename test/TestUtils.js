@@ -18,6 +18,7 @@ import {
   StrongEmphasis,
   Term,
   Text,
+  Transition,
 } from '../lib/Elements';
 
 export function p(...children) {
@@ -89,4 +90,8 @@ export function title(...children) {
 
 export function blockquote(...children) {
   return new BlockQuote({ children });
+}
+
+export function transition() {
+  return new Transition({ });
 }
