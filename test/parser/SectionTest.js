@@ -1,7 +1,7 @@
 import assert from 'power-assert';
 import RST from '../../lib/RST';
 import { Document } from '../../lib/Elements';
-import { p, t, section, title } from '../TestUtils';
+import { p, t, em, strong, section, title } from '../TestUtils';
 
 describe('RST.parse', () => {
   [
@@ -84,6 +84,86 @@ Paragraph 4.
         section(title(t('Title 3')),
                 p(t('Paragraph 3.\n')),
                 section(title(t('Title 4')), p(t('Paragraph 4.\n')))),
+      ],
+    ],
+    [
+      'nested sections with overlines',
+      `\
+Test return to existing, highest-level section (Title 3, with overlines).
+
+=======
+Title 1
+=======
+Paragraph 1.
+
+-------
+Title 2
+-------
+Paragraph 2.
+
+=======
+Title 3
+=======
+Paragraph 3.
+
+-------
+Title 4
+-------
+Paragraph 4.
+`,
+      [
+        p(t('Test return to existing, highest-level section (Title 3, with overlines).\n')),
+        section(title(t('Title 1')),
+                p(t('Paragraph 1.\n')),
+                section(title(t('Title 2')), p(t('Paragraph 2.\n')))),
+        section(title(t('Title 3')),
+                p(t('Paragraph 3.\n')),
+                section(title(t('Title 4')), p(t('Paragraph 4.\n')))),
+      ],
+    ],
+    [
+      'nested sections with overlines (level 3)',
+      `\
+Title 1
+=======
+Paragraph 1.
+
+Title 2
+-------
+Paragraph 2.
+
+Title 3
++++++++
+Paragraph 3.
+
+Title 4
+-------
+Paragraph 4.
+`,
+      [
+        section(title(t('Title 1')),
+                p(t('Paragraph 1.\n')),
+                section(title(t('Title 2')),
+                        p(t('Paragraph 2.\n')),
+                        section(title(t('Title 3')),
+                                p(t('Paragraph 3.\n')))),
+                section(title(t('Title 4')), p(t('Paragraph 4.\n')))),
+      ],
+    ],
+    [
+      'title containing inline markup',
+      `\
+Title containing *inline* **markup**
+====================================
+
+Paragraph.
+`,
+      [
+        section(title(t('Title containing '),
+                      em(t('inline')),
+                      t(' '),
+                      strong(t('markup'))),
+                p(t('Paragraph.\n'))),
       ],
     ],
   ].forEach(([desc, input, children]) => {
