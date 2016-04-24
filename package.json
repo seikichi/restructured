@@ -1,0 +1,29 @@
+{
+  "name": "gh-pages-restructured",
+  "description": "A demo page for restructured",
+  "version": "1.0.0",
+  "author": "seikichi",
+  "bugs": {
+    "url": "https://github.com/seikichi/restructured/issues"
+  },
+  "dependencies": {
+    "restructured": "0.0.0"
+  },
+  "devDependencies": {},
+  "homepage": "https://github.com/seikichi/restructured",
+  "keywords": [
+    "reST",
+    "reStructuredText",
+    "rst"
+  ],
+  "license": {
+    "type": "MIT",
+    "url": "http://seikichi.mit-license.org/"
+  },
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seikichi/restructured.git"
+  },
+  "scripts": {}
+}
