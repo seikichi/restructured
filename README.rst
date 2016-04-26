@@ -16,7 +16,7 @@ Consider the following script.
 
 .. code:: javascript
 
-   var rst = require('restructured')
+   var rst = require('restructured').default;
 
    var document = rst.parse([
      '#######',
