@@ -6,6 +6,11 @@ import { p, t } from '../TestUtils';
 describe('RST.parse', () => {
   [
     [
+      'a single line paragraph without newline',
+      `A paragraph.`,
+      [p(t('A paragraph.'))],
+    ],
+    [
       'a single line paragraph',
       `\
 A paragraph.

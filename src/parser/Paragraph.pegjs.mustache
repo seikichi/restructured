@@ -16,10 +16,12 @@ Paragraph = children:(SameIndent ParagraphBlock)+ &(BlankLines / EndIndent) {
 ParagraphBlock =
   children:(!BlankLines (InlineMarkup / ParagraphText))+ last:Endline {
     var texts = mapByIndex(children, 1);
-    if (texts[texts.length - 1].type !== 'text') {
-      return texts.concat(new Text({ text: last }));
+    if (last) {
+      if (texts[texts.length - 1].type !== 'text') {
+        return texts.concat(new Text({ text: last }));
+      }
+      texts[texts.length - 1] = new Text({ text: texts[texts.length - 1].text + last });
     }
-    texts[texts.length - 1] = new Text({ text: texts[texts.length - 1].text + last });
     return texts;
   }
 
