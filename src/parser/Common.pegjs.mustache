@@ -16,6 +16,11 @@ RawLine =
     return { raw: _.map(raw, function (v) { return v[1]; }).join('') };
   }
 
+NotEmptyRawLine =
+  raw:(!Endline .)+ Endline {
+    return { raw: _.map(raw, function (v) { return v[1]; }).join('') };
+  }
+
 Indent =
   &(i:Whitespace+ &{
     var size = ParserUtil.calcIndentSize(i);

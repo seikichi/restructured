@@ -37,6 +37,15 @@ export class Transition extends new Record({
   }
 }
 
+export class Unknown extends new Record({
+  type: 'unknown',
+  children: new List(),
+}) {
+  constructor({ children }) {
+    super({ children: new List(children) });
+  }
+}
+
 export class Paragraph extends new Record({
   type: 'paragraph',
   children: new List(),
