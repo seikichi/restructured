@@ -3,6 +3,7 @@ import {
   BulletList,
   BlockQuote,
   Classifier,
+  Comment,
   Definition,
   DefinitionList,
   DefinitionListItem,
@@ -94,4 +95,8 @@ export function blockquote(...children) {
 
 export function transition() {
   return new Transition({ });
+}
+
+export function comment(...children) {
+  return new Comment({ children });
 }

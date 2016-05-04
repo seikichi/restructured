@@ -1,3 +1,35 @@
-// TODO(seikichi): implmenent non empty comment
-Comment =
-  SameIndent '..' Whitespace* Endline { return new Elements.Comment({ }); }
+Comment = CommentStartFromFirstLine / CommentStartFromNextLine
+
+CommentStartFromFirstLine =
+  BlankLines?
+  SameIndent '..' Whitespace+ &Nonspacechar head:RawLine tail:(BlankLines? CommentBlock)? {
+    var children = [new Elements.Text({ text: head.raw })];
+    if (!_.isNull(tail)) {
+      children = children.concat(tail[1].children.toArray());
+    }
+    return new Elements.Comment({ children: children });
+  }
+
+CommentStartFromNextLine =
+  BlankLines?
+  SameIndent '..' Whitespace* Newline comment:CommentBlock? {
+    if (!_.isNull(comment)) {
+      return comment;
+    }
+    return new Elements.Comment({ });
+  }
+
+CommentBlock =
+  indent:PushCommonIndent$
+  comments:(
+    (Whitespace* Newline { return null; } / SameOrDeepIndent NotEmptyRawLine)+ /
+      FailbackIndent$
+  )
+  PopIndent$ {
+    var children = _.map(_.reject(comments, _.isNull), function (v) {
+      var ws = v[0], raw = v[1].raw;
+      var text = _.repeat(' ', ws.length - indent.indentSize) + raw;
+      return new Elements.Text({ text: text });
+    });
+    return new Elements.Comment({ children: children });
+  }

@@ -62,4 +62,37 @@ SameIndent =
 
 DeepIndent = i:Whitespace* &{ return ParserUtil.calcIndentSize(i) > currentIndentSize; }
 ShallowIndent = i:Whitespace* &{ return ParserUtil.calcIndentSize(i) < currentIndentSize; }
-SameOrDeepIndent = i:Whitespace* &{ return ParserUtil.calcIndentSize(i) >= currentIndentSize; }
+SameOrDeepIndent = i:Whitespace* &{ return ParserUtil.calcIndentSize(i) >= currentIndentSize; } {
+  return i.join('');
+}
+
+Fail$ = &{ return false; }
+
+PopIndent$ = &{
+  currentIndentSize = indentSizeStack.pop();
+  return true;
+}
+
+FailbackIndent$ = PopIndent$ Fail$
+
+PushCommonIndent$ =
+  &DeepIndent
+  &(
+    w1:Whitespace+ RawLine &{
+      nextIndentSize = ParserUtil.calcIndentSize(w1);
+      return true;
+    }
+    (
+      (Whitespace* Newline) /
+        (&DeepIndent w1:Whitespace+ RawLine &{
+          nextIndentSize = Math.min(nextIndentSize, ParserUtil.calcIndentSize(w1));
+          return true;
+        })
+    )* &{
+      indentSizeStack.push(currentIndentSize);
+      currentIndentSize = nextIndentSize;
+      return true;
+    }
+  ) {
+    return { indentSize: currentIndentSize };
+  }
