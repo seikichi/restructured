@@ -15,7 +15,7 @@ Consider the following script.
 ```javascript
 import restructured from 'restructured';
 
-const parsed = rst.parse(`
+const parsed = restructured.parse(`
 =====
 Title
 =====
