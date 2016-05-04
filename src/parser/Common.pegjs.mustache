@@ -21,31 +21,6 @@ NotEmptyRawLine =
     return { raw: _.map(raw, function (v) { return v[1]; }).join('') };
   }
 
-Indent =
-  &(i:Whitespace+ &{
-    var size = ParserUtil.calcIndentSize(i);
-    if (size <= currentIndentSize) { return false; }
-    nextIndentSize = size;
-    return true;
-  })
-  &((Whitespace* Newline / i:Whitespace+ RawLine &{
-    var size = ParserUtil.calcIndentSize(i);
-    if (size <= currentIndentSize) { return false; }
-    nextIndentSize = Math.min(nextIndentSize, size);
-    return true;
-  })*)
-  &{
-    indentSizeStack.push(currentIndentSize);
-    currentIndentSize = nextIndentSize;
-    return true;
-  }
-
-Dedent =
-  &{
-    currentIndentSize = indentSizeStack.pop();
-    return true;
-  }
-
 EndIndent = &(
   BlankLines?
   i:Whitespace* !NormalizedToWhitespace . &{
@@ -60,18 +35,23 @@ SameIndent =
     return i.join('');
   }
 
-DeepIndent = i:Whitespace* &{ return ParserUtil.calcIndentSize(i) > currentIndentSize; }
-ShallowIndent = i:Whitespace* &{ return ParserUtil.calcIndentSize(i) < currentIndentSize; }
+DeepIndent = i:Whitespace+ &{ return ParserUtil.calcIndentSize(i) > currentIndentSize; } {
+  return i.join('');
+}
+ShallowIndent = i:Whitespace* &{ return ParserUtil.calcIndentSize(i) < currentIndentSize; } {
+  return i.join('');
+}
 SameOrDeepIndent = i:Whitespace* &{ return ParserUtil.calcIndentSize(i) >= currentIndentSize; } {
   return i.join('');
 }
 
-Fail$ = &{ return false; }
+Fail$ = &{ return false; } .
 
 PopIndent$ = &{
   currentIndentSize = indentSizeStack.pop();
   return true;
 }
+
 
 FailbackIndent$ = PopIndent$ Fail$
 
@@ -96,3 +76,13 @@ PushCommonIndent$ =
   ) {
     return { indentSize: currentIndentSize };
   }
+
+PushFirstIndent$ =
+  &(i:DeepIndent c:Nonspacechar &{
+    indentState.push(ParserUtil.calcIndentSize(i));
+    return true;
+  }) {
+    return { indentSize: currentIndentSize };
+  }
+
+SkipIndentCheck$ = &{ indentState.ignore(location().start.line); return true; }

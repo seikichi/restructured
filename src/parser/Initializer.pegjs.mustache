@@ -21,23 +21,32 @@
   var markupEndString = null;
   var attributesIndentList = [];
 
-  var nextEnumeratorType = null;
-  var enumeratorStack = [];
-  var currentEnumerator = null;
-
   var enumeratedListState = (function () {
+    var nextEnumeratorType = null;
+    var enumeratorStack = [];
+    var currentEnumerator = null;
+
     return {
-      startNewEnumeratedList: function () {
+      begin: function () {
         enumeratorStack.push(currentEnumerator);
         currentEnumerator = null;
         nextEnumeratorType = null;
       },
-      pushEnumerator: function (enumerator) {
-        enumeratorStack.push(current);
-        currentEnumerator = enumerator;
-      },
-      popEnumerator: function () {
+      end: function () {
         currentEnumerator = enumeratorStack.pop();
+        if (!_.isNull(currentEnumerator)) {
+          nextEnumeratorType = currentEnumerator.sequence.type;
+        }
+      },
+      set: function (e) {
+        currentEnumerator = e;
+        nextEnumeratorType = currentEnumerator.sequence.type;
+      },
+      isNext: function (e) {
+        return _.isNull(currentEnumerator) || currentEnumerator.isNext(e);
+      },
+      isNextType: function (type) {
+        return _.isNull(currentEnumerator) || nextEnumeratorType === type;
       },
     };
   }());
@@ -79,9 +88,9 @@
     var currentIndex = -1;
     return {
       isSubSection: function (c, overline) {
-        if (currentIndex == stack.length - 1) {
+        if (currentIndex === stack.length - 1) {
           for (var i = 0, len = stack.length; i < len; i++) {
-            if (stack[i].c === c && stack[i].overline == overline) {
+            if (stack[i].c === c && stack[i].overline === overline) {
               return false;
             }
           }
@@ -92,7 +101,7 @@
       },
       setNextSection: function (c, overline) {
         for (var i = 0, len = stack.length; i < len; i++) {
-          if (stack[i].c === c && stack[i].overline == overline) {
+          if (stack[i].c === c && stack[i].overline === overline) {
             currentIndex = i;
             return;
           }

@@ -1,31 +1,13 @@
-BulletList =
-  BlankLines?
-  &(SameIndent b:Bullet NormalizedToWhitespace &{ bulletListState.pushBullet(b); return true; })
-  head:BulletListItem
-  tail:(BlankLines? BulletListItem)* {
-    bulletListState.popBullet();
-    return new Elements.BulletList({ children: [head].concat(mapByIndex(tail, 1)) });
-  }
+BulletList = PushBullet$ items:((BlankLines? BulletListItem)+ / PopBullet$ Fail$) PopBullet$ {
+  return new Elements.BulletList({ children: mapByIndex(items, 1) });
+}
 
 Bullet = [*+\-•‣⁃]
+SameBullet = b:Bullet &{ return bulletListState.isSameBullet(b); }
 
-BulletListItem =
-  SameIndent
-  b:Bullet
-  &{ return bulletListState.isSameBullet(b); }
-  body:(BulletListItemBody / EmptyBulletListItemBody) {
-    return new Elements.ListItem({ children: body })
-  }
+PushBullet$ = &(BlankLines? SameIndent b:Bullet &{ bulletListState.pushBullet(b); return true })
+PopBullet$ = &{ bulletListState.popBullet(); return true; }
 
-BulletListItemBody = (BulletListIndent body:BodyElement* Dedent) { return body; }
-EmptyBulletListItemBody = Whitespace* Endline { return []; }
-
-BulletListIndent =
-  i:Whitespace+ &(!NormalizedToWhitespace .) {
-    indentState.push(currentIndentSize + ParserUtil.calcIndentSize(i) + 1);
-    indentState.ignore(location().end.line);
-  } /
-  (Whitespace* Newline)+ &DeepIndent i:Whitespace+ &(!NormalizedToWhitespace .) {
-    indentState.push(ParserUtil.calcIndentSize(i));
-    indentState.ignore(location().end.line);
-  }
+BulletListItem = SameIndent SameBullet body:ListItemBody {
+  return new Elements.ListItem({ children: body })
+}

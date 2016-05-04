@@ -19,9 +19,9 @@ InlineMarkupWithoutNewline =
   InlineLiteralWithoutNewline
 
 MarkupEndString =
-  &{ return markupEndString.length == 1 } s:(.) &{ return s === markupEndString; } /
-  &{ return markupEndString.length == 2 } s:(..) &{ return s.join('') === markupEndString; } /
-  &{ return markupEndString.length == 3 } s:(...) &{ return s.join('') === markupEndString; }
+  &{ return markupEndString.length === 1 } s:(.) &{ return s === markupEndString; } /
+  &{ return markupEndString.length === 2 } s:(..) &{ return s.join('') === markupEndString; } /
+  &{ return markupEndString.length === 3 } s:(...) &{ return s.join('') === markupEndString; }
 
 MarkupTextWithoutNewline =
   text:(
@@ -61,7 +61,7 @@ MarkupTail =
   MarkupEndString
   &InlineMarkupFollowing {
     var children = (_.isNull(first) ? [] : [first]).concat(mapByIndex(middle, 1));
-    if (children.length == 0) {
+    if (children.length === 0) {
       children.push(new Text({ text: '' }));
     }
     var lastText = children[children.length - 1];

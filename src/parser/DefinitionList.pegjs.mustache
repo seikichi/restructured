@@ -1,26 +1,14 @@
-DefinitionList =
-  BlankLines?
-  IsDefinitionListItem
-  head:DefinitionListItem
-  tail:(BlankLines? IsDefinitionListItem DefinitionListItem)*
-  &(BlankLines) {
-    var children = [head].concat(mapByIndex(tail, 2));
-    return new Elements.DefinitionList({ children: children });
-  }
-
-IsDefinitionListItem =
-  &(
-    SameIndent !NormalizedToWhitespace RawLine
-    DeepIndent !NormalizedToWhitespace RawLine
-  )
+DefinitionList = items:(BlankLines? DefinitionListItem)+ &BlankLines {
+  return new Elements.DefinitionList({ children: mapByIndex(items, 1) });
+}
 
 DefinitionListItem =
   SameIndent
   term:DefinitionTerm
   classifiers:(Whitespace+ ':' Whitespace+ DefinitionClassifier)* Whitespace* Newline
-  Indent
-  body:BodyElement+
-  Dedent {
+  PushFirstIndent$
+  body:(BodyElement+ / FailbackIndent$)
+  PopIndent$ {
     return new Elements.DefinitionListItem({
       term: term,
       classifiers: mapByIndex(classifiers, 3),
@@ -28,19 +16,16 @@ DefinitionListItem =
     });
   }
 
-DefinitionTerm =
-  children:(InlineMarkupWithoutNewline / DefinitionTermText)+ {
-    return new Elements.Term({ children: children });
-  }
+DefinitionTerm = children:(InlineMarkupWithoutNewline / DefinitionTermText)+ {
+  return new Elements.Term({ children: children });
+}
 
 DefinitionClassifierBeggining = Whitespace+ ':' Whitespace+
 
-DefinitionTermText =
-  text:(!Endline !DefinitionClassifierBeggining !InlineMarkupBeggining .)+ {
-    return new Text({ text: mapByIndex(text, 3).join('')});
-  }
+DefinitionTermText = text:(!Endline !DefinitionClassifierBeggining !InlineMarkupBeggining .)+ {
+  return new Text({ text: mapByIndex(text, 3).join('')});
+}
 
-DefinitionClassifier =
-  children:(InlineMarkupWithoutNewline / DefinitionTermText)+ {
-    return new Elements.Classifier({ children: children });
-  }
+DefinitionClassifier = children:(InlineMarkupWithoutNewline / DefinitionTermText)+ {
+  return new Elements.Classifier({ children: children });
+}

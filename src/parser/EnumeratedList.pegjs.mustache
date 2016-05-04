@@ -1,127 +1,63 @@
 EnumeratedList =
-  BlankLines?
-  &{ nextEnumeratorType = null; return true; }
-  &(IsEnumeratedListItem)
-  &{ enumeratedListState.startNewEnumeratedList(); return true; }
-  head:EnumeratedListItem
-  tail:(
-    BlankLines?
-    &{ nextEnumeratorType = currentEnumerator.sequence.type; return true; }
-    &(IsEnumeratedListItem)
-    &{ nextEnumeratorType = currentEnumerator.sequence.type; return true; }
-    EnumeratedListItem
-  )* {
-    enumeratedListState.popEnumerator();
-    var children = [head].concat(mapByIndex(tail, 4));
-    return new Elements.EnumeratedList({ children: children });
+  BeginEnumeratedList$
+    items:((BlankLines? EnumeratedListItem)+ / EndEnumeratedList$ Fail$)
+  EndEnumeratedList$
+  &BlankLines {
+    return new Elements.EnumeratedList({ children: mapByIndex(items, 1) });
   }
+
+BeginEnumeratedList$ = &(BlankLines? &{ enumeratedListState.begin(); return true; })
+EndEnumeratedList$ = &{ enumeratedListState.end(); return true; }
+
+EnumeratedListItem = SameIndent e:NextEnumerator body:ListItemBody {
+  return new Elements.ListItem({ children: body })
+}
+
+Enumerator =
+  s:EnumerationSequence '.' { return new Elements.Enumerator({ sequence: s, format: 'period' }); } /
+  s:EnumerationSequence ')' { return new Elements.Enumerator({ sequence: s, format: 'right_parenthesis' }); } /
+  '(' s:EnumerationSequence ')' { return new Elements.Enumerator({ sequence: s, format: 'parentheses' }); }
+
+NextEnumerator = e:Enumerator &{
+  if (!enumeratedListState.isNext(e)) { return false; }
+  enumeratedListState.set(e);
+  return true;
+} { return e; }
 
 EnumerationSequence =
   AutoEnumerationSequence /
-  ArabicNumeralsEnumerationSequence /
-  UpperCaseRomanEnumerationSequence /
-  LowerCaseRomanEnumerationSequence /
-  UpperCaseAlphabetEnumerationSequence /
-  LowerCaseAlphabetEnumerationSequence
+  AcceptNumeral$ e:ArabicNumeralsEnumerationSequence { return e; } /
+  AcceptUpperCaseRoman$ e:UpperCaseRomanEnumerationSequence { return e; } /
+  AcceptLowerCaseRoman$ e:LowerCaseRomanEnumerationSequence { return e; } /
+  AcceptUpperCaseAlphabet$ e:UpperCaseAlphabetEnumerationSequence { return e; } /
+  AcceptLowerCaseAlphabet$ e:LowerCaseAlphabetEnumerationSequence { return e; }
 
-AutoEnumerationSequence =
-  '#' {
-    return new Elements.EnumeratorSequence({ type: 'auto', value: '#' });
-  }
+AcceptNumeral$ = &{ return enumeratedListState.isNextType('arabic_numerals'); }
+AcceptUpperCaseRoman$ = &{ return enumeratedListState.isNextType('uppercase_roman'); }
+AcceptLowerCaseRoman$ = &{ return enumeratedListState.isNextType('lowercase_roman'); }
+AcceptUpperCaseAlphabet$ = &{ return enumeratedListState.isNextType('uppercase_alphabet'); }
+AcceptLowerCaseAlphabet$ = &{ return enumeratedListState.isNextType('lowercase_alphabet'); }
 
-ArabicNumeralsEnumerationSequence =
-  &{
-    return _.isNull(nextEnumeratorType) || nextEnumeratorType === 'arabic_numerals';
-  } head:[1-9] tail:[0-9]* {
-    return new Elements.EnumeratorSequence({ type: 'arabic_numerals', value: [head].concat(tail).join('') });
-  } /
-  &{
-    return _.isNull(nextEnumeratorType) || nextEnumeratorType === 'arabic_numerals';
-  } head:[0] {
-    return new Elements.EnumeratorSequence({ type: 'arabic_numerals', value: head });
-  }
+AutoEnumerationSequence = '#' { return new Elements.EnumeratorSequence({ type: 'auto', value: '#' }); }
 
-UpperCaseAlphabetEnumerationSequence =
-  &{
-    return _.isNull(nextEnumeratorType) || nextEnumeratorType === 'uppercase_alphabet';
-  } s:[A-Z] {
-    return new Elements.EnumeratorSequence({ type: 'uppercase_alphabet', value: s });
-  }
+ArabicNumeralsEnumerationSequence = head:[1-9] tail:[0-9]* {
+  return new Elements.EnumeratorSequence({ type: 'arabic_numerals', value: [head].concat(tail).join('') });
+} / head:[0] {
+  return new Elements.EnumeratorSequence({ type: 'arabic_numerals', value: head });
+}
 
-LowerCaseAlphabetEnumerationSequence =
-  &{
-    return _.isNull(nextEnumeratorType) || nextEnumeratorType === 'lowercase_alphabet';
-  } s:[a-z] {
-    return new Elements.EnumeratorSequence({ type: 'lowercase_alphabet', value: s });
-  }
+UpperCaseAlphabetEnumerationSequence = s:[A-Z] {
+  return new Elements.EnumeratorSequence({ type: 'uppercase_alphabet', value: s });
+}
 
-UpperCaseRomanEnumerationSequence =
-  &{
-    return _.isNull(nextEnumeratorType) || nextEnumeratorType === 'uppercase_roman';
-  } s:[IVXLCDM]+ &{ return ParserUtil.isUpperRomanNumber(s.join('')); } {
-    return new Elements.EnumeratorSequence({ type: 'uppercase_roman', value: s.join('') });
-  }
+LowerCaseAlphabetEnumerationSequence = s:[a-z] {
+  return new Elements.EnumeratorSequence({ type: 'lowercase_alphabet', value: s });
+}
 
-LowerCaseRomanEnumerationSequence =
-  &{
-    return _.isNull(nextEnumeratorType) || nextEnumeratorType === 'lowercase_roman';
-  } s:[ivxlcdm]+ &{ return ParserUtil.isLowerRomanNumber(s.join('')); } {
-    return new Elements.EnumeratorSequence({ type: 'lowercase_roman', value: s.join('') });
-  }
+UpperCaseRomanEnumerationSequence = s:[IVXLCDM]+ &{ return ParserUtil.isUpperRomanNumber(s.join('')); } {
+  return new Elements.EnumeratorSequence({ type: 'uppercase_roman', value: s.join('') });
+}
 
-Enumerator =
-  s:EnumerationSequence '.' {
-    return new Elements.Enumerator({ sequence: s, format: 'period' });
-  } /
-  s:EnumerationSequence ')' {
-    return new Elements.Enumerator({ sequence: s, format: 'right_parenthesis' });
-  } /
-  '(' s:EnumerationSequence ')' {
-    return new Elements.Enumerator({ sequence: s, format: 'parentheses' });
-  }
-
-EnumeratedListItem =
-  SameIndent
-  e:Enumerator
-  &{
-    if (_.isNull(currentEnumerator)) {
-      currentEnumerator = e;
-      return true;
-    }
-    if (!currentEnumerator.isNext(e)) {
-      return false;
-    }
-    currentEnumerator = e;
-    return true;
-  }
-  body:(EnumeratedListItemBody / EmptyEnumeratedListItemBody) {
-    return new Elements.ListItem({ children: body })
-  }
-
-IsEnumeratedListItem =
-  SameIndent
-  e1:Enumerator
-  i1:Whitespace* RawLine
-  (
-    BlankLines /
-    i2:Whitespace+ RawLine &{
-      return currentIndentSize < ParserUtil.calcIndentSize(i2);
-    } /
-    &{ nextEnumeratorType = e1.sequence.type; return true; }
-    SameIndent e2:Enumerator Whitespace+ RawLine &{
-      return e1.isNext(e2);
-    }
-  )
-
-EmptyEnumeratedListItemBody = Whitespace* Endline { return []; }
-EnumeratedListItemBody = (EnumeratedListIndent body:BodyElement* Dedent) { return body; }
-
-EnumeratedListIndent =
-  i:Whitespace+ &(!NormalizedToWhitespace .) {
-    indentState.push(currentIndentSize + ParserUtil.calcIndentSize(i) + currentEnumerator.width());
-    indentState.ignore(location().end.line);
-  } /
-  (Whitespace* Newline)+ &DeepIndent i:Whitespace+ &(!NormalizedToWhitespace .) {
-    indentState.push(ParserUtil.calcIndentSize(i));
-    indentState.ignore(location().end.line);
-  }
+LowerCaseRomanEnumerationSequence = s:[ivxlcdm]+ &{ return ParserUtil.isLowerRomanNumber(s.join('')); } {
+  return new Elements.EnumeratorSequence({ type: 'lowercase_roman', value: s.join('') });
+}

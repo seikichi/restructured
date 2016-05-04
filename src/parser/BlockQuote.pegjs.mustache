@@ -1,62 +1,12 @@
 BlockQuote = NestedBlockQuote / SimpleBlockQuote
 
-BlockQuoteBody =
-  head:BodyElementExceptBlockQuote
-  tail:(!Attribution BodyElement)* {
-    return [head].concat(_.map(tail, function (v) { return v[1]; }));
-  }
-
-Attribution =
-  BlankLines
-  SameIndent ('---' / '--' / '\u2014') Whitespace* &(!Endline .)
-  AttributionIndent
-  &{ indentIgnoreLine = location().start.line; return true; }
-  body:Paragraph
-  Dedent {
-    return new Elements.Attribution({ children: body.children });
-  }
-
-AttributionIndent =
-  &(
-    RawLine // skip first line
-    &{ attributesIndentList = []; return true; }
-    (
-      i:Whitespace+
-      !Endline
-      RawLine
-      &{
-        var size = ParserUtil.calcIndentSize(i);
-        if (size < currentIndentSize) { return false; }
-        attributesIndentList.push(size);
-        return true;
-      }
-    )*
-    &{
-      if (_.uniq(attributesIndentList).length > 1) {
-        return false;
-      }
-      nextIndentSize = 10000;
-      if (attributesIndentList.length != 0) {
-        nextIndentSize = attributesIndentList[0];
-      }
-      indentSizeStack.push(currentIndentSize);
-      currentIndentSize = nextIndentSize;
-      return true;
-    }
-  )
-
 NestedBlockQuote =
   BlankLines?
-  BlockQuoteIndent
-  nested:BlockQuoteBody
-  attribution:Attribution?
-  &{ prevIndentSize = currentIndentSize; return true; }
-  Dedent
-  &(
-    BlankLines
-    i:Whitespace*
-    &{ return ParserUtil.calcIndentSize(i) < prevIndentSize; }
-  )
+  PushFirstIndent$
+    nested:(BlockQuoteBody / FailbackIndent$)
+    attribution:Attribution?
+    &(BlankLines ShallowIndent / FailbackIndent$)
+  PopIndent$
   outer:BlockQuote {
     var children = [
       new Elements.BlockQuote({ children: nested, attribution: attribution }),
@@ -66,19 +16,30 @@ NestedBlockQuote =
 
 SimpleBlockQuote =
   BlankLines?
-  BlockQuoteIndent
-  children:BlockQuoteBody
-  attribution:Attribution?
-  Dedent {
+  PushFirstIndent$
+    children:(BlockQuoteBody / FailbackIndent$)
+    attribution:Attribution?
+  PopIndent$ {
     return new Elements.BlockQuote({ children: children, attribution: attribution });
   }
 
-BlockQuoteIndent =
-  &(i:Whitespace+
-    &{
-      var indentSize = ParserUtil.calcIndentSize(i);
-      if (indentSize <= currentIndentSize) { return false; }
-      indentSizeStack.push(currentIndentSize);
-      currentIndentSize = indentSize;
-      return true;
-    })
+BlockQuoteBody =
+  head:BodyElementExceptBlockQuote
+  tail:(!Attribution BodyElement)* {
+    return [head].concat(_.map(tail, function (v) { return v[1]; }));
+  }
+
+Attribution =
+  BlankLines
+  SameIndent ('---' / '--' / '\u2014') Whitespace* &(!Endline .)
+  body:(AttributionBodyWithIndent / AttributionBodyWithoutIndent) {
+    return new Elements.Attribution({ children: body.children });
+  }
+
+PushAttributionIndent$ = &(RawLine PushFirstIndent$)
+
+AttributionBodyWithIndent = PushAttributionIndent$ SkipIndentCheck$ body:(Paragraph / FailbackIndent$) PopIndent$ {
+  return body;
+}
+
+AttributionBodyWithoutIndent = SkipIndentCheck$ body:Paragraph { return body; }

@@ -10,7 +10,7 @@ TransitionMarker =
         '*' / '+' / ',' / '-' / '.' / '/' / ':' / ';' / '<' /
         '=' / '>' / '?' / '@' / '[' / '\\' / ']' / '^' / '_' /
         '`' / '{' / '|' / '}' / '~')+ &{
-    return line.length >= 4 && _.uniq(line).length == 1
+    return line.length >= 4 && _.uniq(line).length === 1
   } {
     return line;
   }

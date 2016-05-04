@@ -1,0 +1,14 @@
+ListItemBody = NonEmptyListItemBody / EmptyListItemBody
+
+PushListItemIndent$ = &(
+  i:Whitespace+ &Nonspacechar SkipIndentCheck$ &{
+    indentState.push(location().start.column - 1);
+    return true;
+  }) / &(BlankLines PushFirstIndent$)
+
+NonEmptyListItemBody =
+  PushListItemIndent$
+    BlankLines?
+    body:(BodyElement+ / FailbackIndent$)
+  PopIndent$ { return body; }
+EmptyListItemBody = Whitespace* Endline { return []; }
