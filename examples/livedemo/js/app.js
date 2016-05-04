@@ -9,14 +9,17 @@ injectTapEventPlugin();
 import App from './components/App';
 
 const text = `
-タイトル
-========
+=====
+Title
+=====
 
-ぽよ
-----
+Subtitle
+--------
 
-こんにちは!こんにちは!
+This is a paragraph.
+
+- This is item 1
+- This is item 2
 `;
-
 
 ReactDOM.render(<App text={text} />, document.getElementById('main'));
