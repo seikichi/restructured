@@ -18,19 +18,20 @@ export default class App extends React.Component {
 
   render() {
     return (
-      <Grid>
-        <Row>
-          <AppBar title="reStructuredText parser demo" iconClassNameRight="muidocs-icon-navigation-expand-more"/>
-        </Row>
-        <Row>
-          <Col xs={6}>
-            <ReSTTextField defaultValue={this.props.text} onChange={(event) => { this.onTextChange(event); }} />
-          </Col>
-          <Col xs={6}>
-            <ReST element={this.state.element} />
-          </Col>
-        </Row>
-      </Grid>
+      <div>
+        <AppBar style={{ margin: 0 }} title="reStructuredText parser demo" iconClassNameRight="muidocs-icon-navigation-expand-more" />
+        <Grid>
+          <Row>
+            <Col xs={6}>
+              <ReSTTextField defaultValue={this.props.text}
+                             onChange={(event) => { this.onTextChange(event); }} />
+            </Col>
+            <Col xs={6} style={{ backgroundColor: 'rgb(230, 230, 230)' }}>
+              <ReST element={this.state.element} />
+            </Col>
+          </Row>
+        </Grid>
+      </div>
     );
   }
 }
