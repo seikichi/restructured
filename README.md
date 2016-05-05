@@ -114,7 +114,7 @@ The above script outputs the following JSON.
 
 ## Progress
 
-- [ ] Document Structure
+- [x] Document Structure
   - [x] Document
   - [x] Sections
   - [x] Transitions
@@ -146,7 +146,7 @@ The above script outputs the following JSON.
       - [ ] Anonymous Hyperlinks
     - [ ] Directives
     - [ ] Substitution Definitions
-    - [ ] Comments
+    - [x] Comments
 - [ ] Implicit Hyperlink Targets
 - [ ] Inline Markup
   - [x] Emphasis
