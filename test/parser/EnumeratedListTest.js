@@ -76,22 +76,6 @@ Scrambled:
       ],
     ],
     [
-      'skipping enumerated item',
-      `\
-Skipping item 3:
-
-1. Item 1.
-2. Item 2.
-4. Item 4.
-`,
-      [
-        p(t('Skipping item 3:\n')),
-        ol(li(p(t('Item 1.\n')))),
-        p(t('2. Item 2.\n'),
-          t('4. Item 4.\n')),
-      ],
-    ],
-    [
       'enumerated list start with non-ordinal-1',
       `\
 Start with non-ordinal-1:
