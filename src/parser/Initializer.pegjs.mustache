@@ -13,13 +13,13 @@
 
   // variables
   var currentIndentSize = 0;
-  var indentSizeStack = [];
   var indentIgnoreLine = null;
   var nextIndentSize = null;
-  var prevIndentSize = null;
 
   var markupEndString = null;
   var attributesIndentList = [];
+
+  var literalBlockQuoting = null;
 
   var enumeratedListState = (function () {
     var nextEnumeratorType = null;
@@ -52,6 +52,8 @@
   }());
 
   var indentState = (function () {
+    var indentSizeStack = [];
+
     return {
       push: function (indentSize) {
         indentSizeStack.push(currentIndentSize);

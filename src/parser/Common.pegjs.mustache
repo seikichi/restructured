@@ -47,11 +47,7 @@ SameOrDeepIndent = i:Whitespace* &{ return ParserUtil.calcIndentSize(i) >= curre
 
 Fail$ = &{ return false; } .
 
-PopIndent$ = &{
-  currentIndentSize = indentSizeStack.pop();
-  return true;
-}
-
+PopIndent$ = &{ indentState.pop(); return true; }
 
 FailbackIndent$ = PopIndent$ Fail$
 
@@ -68,11 +64,7 @@ PushCommonIndent$ =
           nextIndentSize = Math.min(nextIndentSize, ParserUtil.calcIndentSize(w1));
           return true;
         })
-    )* &{
-      indentSizeStack.push(currentIndentSize);
-      currentIndentSize = nextIndentSize;
-      return true;
-    }
+    )* &{ indentState.push(nextIndentSize); return true; }
   ) {
     return { indentSize: currentIndentSize };
   }
