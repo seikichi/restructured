@@ -1,14 +1,18 @@
-ExpandedLiteralBlock =
-  SameIndent '::' Whitespace* Newline
+LiteralBlock = SameIndent block:LiteralBlockWithoutIndent { return block; }
+
+LiteralBlockWithoutIndent = IndentedLiteralBlockWithoutIndent / QuotedLiteralBlockWithoutIndent
+
+IndentedLiteralBlockWithoutIndent =
+  '::' Whitespace* Newline
   BlankLines
   indent:PushCommonIndent$
     lines:((
-      Whitespace* Newline /
+      Whitespace* Newline !(BlankLines? ShallowIndent) /
       &SameOrDeepIndent w:Whitespace+ RawLine
     )+ / FailbackIndent$)
   PopIndent$ {
     var children = _.map(lines, function (line) {
-      if (line.length === 2) {
+      if (!_.isUndefined(line[0])) {
         var indentSize = ParserUtil.calcIndentSize(line[0].join(''));
         var text = _.repeat(' ', Math.max(0, indentSize - indent.indentSize));
       } else {
@@ -19,3 +23,22 @@ ExpandedLiteralBlock =
     });
     return new Elements.LiteralBlock({ children: children });
   }
+
+QuotedLiteralBlockWithoutIndent =
+  '::' Whitespace* Newline BlankLines
+  SetQuoting$
+    lines:(SameIndent IsValidQuoting$ NotEmptyRawLine)+
+  &BlankLines {
+    var children = _.map(lines, function (line) {
+      return new Elements.LiteralBlockLine({ text: line[2].raw } );
+    });
+    return new Elements.LiteralBlock({ children: children });
+  }
+
+Quoting = ('!' / '"' / '#' / '$' / '%' / '&'/ "'" / '(' / ')' /
+           '*' / '+' / ',' / '-' / '.' / '/' / ':' / ';' / '<' /
+           '=' / '>' / '?' / '@' / '[' / '\\' / ']' / '^' / '_' /
+           '`' / '{' / '|' / '}' / '~')
+
+SetQuoting$ = &(SameIndent q:Quoting  &{ literalBlockQuoting = q; return true; })
+IsValidQuoting$ = &(q:Quoting  &{ return literalBlockQuoting === q; })

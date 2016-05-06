@@ -9,12 +9,17 @@ InlineMarkupBeggining =
                              AnonymousSimpleHyperlinkReference /
                              NamedSimpleHyperlinkReference)
 
-Paragraph = children:(SameIndent ParagraphBlock)+ &(BlankLines / EndIndent) {
+Paragraph = children:(SameIndent ParagraphBlock)+ &((LiteralBlockWithoutIndent  SkipIndentCheck$) / BlankLines / EndIndent) {
   return new Elements.Paragraph({ children: _.flatten(mapByIndex(children, 1)) });
 }
 
 ParagraphBlock =
-  children:(!BlankLines (InlineMarkup / ParagraphText))+ last:Endline {
+  children:(
+    !(BlankLines / LiteralBlockWithoutIndent)
+    (InlineMarkup / ParagraphText)
+  )+
+  Whitespace*
+  last:(Endline / &LiteralBlockWithoutIndent) {
     var texts = mapByIndex(children, 1);
     if (last) {
       if (texts[texts.length - 1].type !== 'text') {
@@ -26,7 +31,7 @@ ParagraphBlock =
   }
 
 ParagraphText =
-  text:(!Endline !InlineMarkupBeggining .)+ &Endline {
+  text:(!(Endline / LiteralBlockWithoutIndent) !InlineMarkupBeggining .)+ &(Endline / LiteralBlockWithoutIndent) {
     return new Text({ text: mapByIndex(text, 2).join('') });
   } / text:(!Endline !InlineMarkupBeggining .)* last:InlineMarkupPreceding {
     return new Text({ text: mapByIndex(text, 2).join('') + last});
