@@ -127,9 +127,9 @@ The above script outputs the following JSON.
     - [ ] Bibliographic Fields
     - [ ] RCS Keywords
   - [ ] Option Lists
-  - [ ] Literal Blocks
-    - [ ] Indented Literal Blocks
-    - [ ] Quoted Literal Blocks
+  - [x] Literal Blocks
+    - [x] Indented Literal Blocks
+    - [x] Quoted Literal Blocks
   - [ ] Line Blocks
   - [x] Block Quotes
   - [ ] Doctest Blocks
