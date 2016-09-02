@@ -169,14 +169,16 @@ Paragraph.
         new BlockQuote({
           children: [new Paragraph({ children: [new Text({ text: 'Block quote.\n' })] })],
           attribution: new Attribution({
-            children: [new Text({ text: 'Attribution line one\n' }), new Text({ text: 'and line two\n' })],
+            children: [new Text({ text: 'Attribution line one\n' }),
+                       new Text({ text: 'and line two\n' })],
           }),
         }),
         new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
         new BlockQuote({
           children: [new Paragraph({ children: [new Text({ text: 'Block quote.\n' })] })],
           attribution: new Attribution({
-            children: [new Text({ text: 'Attribution line one\n' }), new Text({ text: 'and line two\n' })],
+            children: [new Text({ text: 'Attribution line one\n' }),
+                       new Text({ text: 'and line two\n' })],
           }),
         }),
         new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
@@ -299,7 +301,9 @@ Paragraph.
             new DefinitionList({
               children: [
                 new DefinitionListItem({
-                  term: new Term({ children: [new Text({ text: '-- Not an attribution line one' })] }),
+                  term: new Term({ children: [
+                    new Text({ text: '-- Not an attribution line one' }),
+                  ] }),
                   definition: new Definition({
                     children: [
                       new DefinitionList({
@@ -308,7 +312,9 @@ Paragraph.
                             term: new Term({ children: [new Text({ text: 'and line two' })] }),
                             definition: new Definition({
                               children: [
-                                new Paragraph({ children: [new Text({ text: 'and line three\n' })] }),
+                                new Paragraph({ children: [
+                                  new Text({ text: 'and line three\n' }),
+                                ] }),
                               ],
                             }),
                           }),

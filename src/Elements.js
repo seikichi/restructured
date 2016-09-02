@@ -32,7 +32,7 @@ export class Section extends new Record({
 export class Transition extends new Record({
   type: 'transition',
 }) {
-  constructor({ }) {
+  constructor() {
     super({ });
   }
 }

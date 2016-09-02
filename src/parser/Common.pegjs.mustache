@@ -60,8 +60,8 @@ PushCommonIndent$ =
     }
     (
       (Whitespace* Newline) /
-        (&DeepIndent w1:Whitespace+ RawLine &{
-          nextIndentSize = Math.min(nextIndentSize, ParserUtil.calcIndentSize(w1));
+        (&DeepIndent w2:Whitespace+ RawLine &{
+          nextIndentSize = Math.min(nextIndentSize, ParserUtil.calcIndentSize(w2));
           return true;
         })
     )* &{ indentState.push(nextIndentSize); return true; }

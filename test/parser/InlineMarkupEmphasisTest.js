@@ -55,7 +55,7 @@ what about *this**?
           t('('), emphasis, t('), ['), emphasis,
           t('], <'), emphasis, t('>, {'), emphasis, t('} (open/close pairs)\n'),
           emphasis, t('., '), emphasis, t(',, '), emphasis,
-          t('!, and '), emphasis, t('\ (closing delimiters),\n')),
+          t('!, and '), emphasis, t(' (closing delimiters),\n')),
         p(t('but not\n'),
           t(')*emphasis*(, ]*emphasis*[, >*emphasis*>, }*emphasis*{ (close/open pairs),\n'),
           t('(*), [*], \'*\' or \'"*"\' ("quoted" start-string),\n'),

@@ -77,14 +77,15 @@ const PunctuationStartStringPrefix =
       new RegExp(`\\s|[${PunctuationOpeners}${PunctuationDelimiters}]`);
 
 const PunctuationEndStringSuffix =
-      new RegExp(`\\s|[${PunctuationClosingDelimiters}${PunctuationDelimiters}${PunctuationClosers}]`);
+        new RegExp(`\\s|[${PunctuationClosingDelimiters}` +
+                   `${PunctuationDelimiters}${PunctuationClosers}]`);
 
 const ParserUtil = {
   calcIndentSize(str) {
     const tabStop = 8;
     return _.reduce(str, (total, c) => {
       if (c === '\t') {
-        return total + tabStop - (total + tabStop) % tabStop;
+        return (total + tabStop) - ((total + tabStop) % tabStop);
       }
       return total + 1;
     }, 0);
@@ -131,7 +132,7 @@ const ParserUtil = {
     let result = 0;
     let str = s;
 
-    for (let i = 0; i < values.length; i ++) {
+    for (let i = 0; i < values.length; i++) {
       const [key, value] = values[i];
       const regex = new RegExp(`^${key}`);
       while (str.match(regex)) {

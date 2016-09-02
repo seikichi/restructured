@@ -37,7 +37,8 @@ describe('RST.parse', () => {
         'quoted \xab``literal``\xbb\n',
       [
         p(t('quoted \''), tt(t('literal')), t('\', quoted "'), tt(t('literal')), t('"\n'),
-          t('quoted \u2018'), tt(t('literal')), t('\u2019, quoted \u201c'), tt(t('literal')), t('\u201d,\n'),
+          t('quoted \u2018'), tt(t('literal')), t('\u2019, quoted \u201c'),
+          tt(t('literal')), t('\u201d,\n'),
           t('quoted \xab'), tt(t('literal')), t('\xbb\n')),
       ],
     ],
@@ -48,7 +49,8 @@ describe('RST.parse', () => {
         '``\xabliteral\xbb`` with quotes\n',
       [
         p(tt(t('\'literal\'')), t(' with quotes, '), tt(t('"literal"')), t(' with quotes,\n'),
-          tt(t('\u2018literal\u2019')), t(' with quotes, '), tt(t('\u201cliteral\u201d')), t(' with quotes,\n'),
+          tt(t('\u2018literal\u2019')), t(' with quotes, '),
+          tt(t('\u201cliteral\u201d')), t(' with quotes,\n'),
           tt(t('\xabliteral\xbb')), t(' with quotes\n')),
       ],
     ],

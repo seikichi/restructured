@@ -7,7 +7,7 @@ describe('RST.parse', () => {
   [
     [
       'a single line paragraph without newline',
-      `A paragraph.`,
+      'A paragraph.',
       [p(t('A paragraph.'))],
     ],
     [
