@@ -8,7 +8,6 @@ PushListItemIndent$ = &(
 
 NonEmptyListItemBody =
   PushListItemIndent$
-    BlankLines?
     body:(BodyElement+ / FailbackIndent$)
   PopIndent$ { return body; }
 EmptyListItemBody = Whitespace* Endline { return []; }
