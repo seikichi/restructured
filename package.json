@@ -33,6 +33,7 @@
     "watch": "^0.19.2"
   },
   "files": [
+    "bin",
     "lib"
   ],
   "homepage": "https://github.com/seikichi/restructured",
