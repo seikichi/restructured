@@ -22,6 +22,13 @@ function element(type, options = {}) {
       }
       return this.set('_location', locationFn());
     }
+
+    bullet(b, { bullet = false }) {
+      if (!bullet) {
+        return this;
+      }
+      return this.set('_bullet', b);
+    }
   }
   return Element;
 }
@@ -37,7 +44,10 @@ export class LiteralBlock extends element('literal_block', { children: emptyList
 export class LiteralBlockLine extends element('literal_block_line', { children: emptyList }) { }
 export class BulletList extends element('bullet_list', { children: emptyList }) { }
 export class EnumeratedList extends element('enumerated_list', { children: emptyList }) { }
-export class ListItem extends element('list_item', { children: emptyList }) { }
+export class ListItem extends element('list_item', {
+  _bullet: undefined,
+  children: emptyList,
+}) { }
 export class DefinitionList extends element('definition_list', { children: emptyList }) { }
 export class DefinitionListItem extends element('definition_list_item', {
   term: null,

@@ -3,11 +3,11 @@ BulletList = PushBullet$ items:(BulletListItem+ / PopBullet$ Fail$) PopBullet$ {
 }
 
 Bullet = [*+\-•‣⁃]
-SameBullet = b:Bullet &{ return bulletListState.isSameBullet(b); }
+SameBullet = b:Bullet &{ return bulletListState.isSameBullet(b); } { return b; }
 
 PushBullet$ = &(BlankLines? SameIndent b:Bullet &{ bulletListState.pushBullet(b); return true })
 PopBullet$ = &{ bulletListState.popBullet(); return true; }
 
-BulletListItem = BlankLines? SameIndent SameBullet body:ListItemBody {
-  return new Elements.ListItem({ children: body }).location(location, options);
+BulletListItem = BlankLines? SameIndent b:SameBullet body:ListItemBody {
+  return new Elements.ListItem({ children: body }).bullet(b, options).location(location, options);
 }
