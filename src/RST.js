@@ -1,4 +1,4 @@
-import parser from './Parser'; // eslint-disable-line import/no-unresolved
+import parser from './Parser';
 
 const RST = {
   parse(s, options = {}) {
