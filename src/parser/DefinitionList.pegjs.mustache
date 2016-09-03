@@ -1,8 +1,9 @@
-DefinitionList = items:(BlankLines? DefinitionListItem)+ &BlankLines {
-  return new Elements.DefinitionList({ children: mapByIndex(items, 1) });
+DefinitionList = items:DefinitionListItem+ &BlankLines {
+  return new Elements.DefinitionList({ children: items });
 }
 
 DefinitionListItem =
+  BlankLines?
   SameIndent
   term:DefinitionTerm
   classifiers:(Whitespace+ ':' Whitespace+ DefinitionClassifier)* Whitespace* Newline

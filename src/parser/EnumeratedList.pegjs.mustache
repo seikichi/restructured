@@ -1,15 +1,15 @@
 EnumeratedList =
   BeginEnumeratedList$
-    items:((BlankLines? EnumeratedListItem)+ / EndEnumeratedList$ Fail$)
+    items:(EnumeratedListItem+ / EndEnumeratedList$ Fail$)
   EndEnumeratedList$
   &BlankLines {
-    return new Elements.EnumeratedList({ children: mapByIndex(items, 1) });
+    return new Elements.EnumeratedList({ children: items });
   }
 
 BeginEnumeratedList$ = &(BlankLines? &{ enumeratedListState.begin(); return true; })
 EndEnumeratedList$ = &{ enumeratedListState.end(); return true; }
 
-EnumeratedListItem = SameIndent e:NextEnumerator body:ListItemBody {
+EnumeratedListItem = BlankLines? SameIndent e:NextEnumerator body:ListItemBody {
   return new Elements.ListItem({ children: body }).location(location, options);
 }
 

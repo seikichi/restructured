@@ -1,5 +1,5 @@
-BulletList = PushBullet$ items:((BlankLines? BulletListItem)+ / PopBullet$ Fail$) PopBullet$ {
-  return new Elements.BulletList({ children: mapByIndex(items, 1) });
+BulletList = PushBullet$ items:(BulletListItem+ / PopBullet$ Fail$) PopBullet$ {
+  return new Elements.BulletList({ children: items });
 }
 
 Bullet = [*+\-•‣⁃]
@@ -8,6 +8,6 @@ SameBullet = b:Bullet &{ return bulletListState.isSameBullet(b); }
 PushBullet$ = &(BlankLines? SameIndent b:Bullet &{ bulletListState.pushBullet(b); return true })
 PopBullet$ = &{ bulletListState.popBullet(); return true; }
 
-BulletListItem = SameIndent SameBullet body:ListItemBody {
+BulletListItem = BlankLines? SameIndent SameBullet body:ListItemBody {
   return new Elements.ListItem({ children: body }).location(location, options);
 }
