@@ -1,13 +1,20 @@
-ListItemBody = NonEmptyListItemBody / EmptyListItemBody
+ListItem = item:(NonEmptyListItem / EmptyListItem) {
+  return item.withLoc(location, options);
+}
 
-PushListItemIndent$ = &(
-  i:Whitespace+ &Nonspacechar SkipIndentCheck$ &{
-    indentState.push(location().start.column - 1);
-    return true;
-  }) / &(BlankLines PushFirstIndent$)
+PushListItemIndent$ = (
+  &(
+    i:Whitespace+ &Nonspacechar SkipIndentCheck$
+    &{ indentState.push(location().start.column - 1); return true; }
+  ) / &(BlankLines PushFirstIndent$)
+) {
+  return { size: currentIndentSize, diff: indentState.lastIndentDiff() };
+}
 
-NonEmptyListItemBody =
-  PushListItemIndent$
-    body:(BodyElement+ / FailbackIndent$)
-  PopIndent$ { return body; }
-EmptyListItemBody = Whitespace* Endline { return []; }
+NonEmptyListItem = indent:PushListItemIndent$ children:(BodyElement+ / FailbackIndent$) PopIndent$ {
+  return new Elements.ListItem({ children: children }).withIndent(indent, options);
+}
+
+EmptyListItem = Whitespace* Endline {
+  return new Elements.ListItem({ children: [] });
+}

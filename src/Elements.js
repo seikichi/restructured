@@ -49,7 +49,11 @@ export const LiteralBlock = node('literal_block', { children: emptyList });
 export const LiteralBlockLine = node('literal_block_line', { children: emptyList });
 export const BulletList = node('bullet_list', { children: emptyList });
 export const EnumeratedList = node('enumerated_list', { children: emptyList });
-export const ListItem = node('list_item', { bullet: undefined, children: emptyList });
+export const ListItem = node('list_item', {
+  bullet: undefined,
+  children: emptyList,
+  indent: undefined,
+});
 export const DefinitionList = node('definition_list', { children: emptyList });
 export const DefinitionListItem = node('definition_list_item', {
   term: null,

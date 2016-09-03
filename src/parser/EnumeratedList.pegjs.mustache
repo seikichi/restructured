@@ -9,8 +9,8 @@ EnumeratedList =
 BeginEnumeratedList$ = &(BlankLines? &{ enumeratedListState.begin(); return true; })
 EndEnumeratedList$ = &{ enumeratedListState.end(); return true; }
 
-EnumeratedListItem = BlankLines? SameIndent e:NextEnumerator body:ListItemBody {
-  return new Elements.ListItem({ children: body }).withLoc(location, options);
+EnumeratedListItem = BlankLines? SameIndent e:NextEnumerator item:ListItem {
+  return item;
 }
 
 Enumerator =
