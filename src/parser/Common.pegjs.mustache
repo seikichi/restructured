@@ -66,7 +66,7 @@ PushCommonIndent$ =
         })
     )* &{ indentState.push(nextIndentSize); return true; }
   ) {
-    return { indentSize: currentIndentSize };
+    return { size: currentIndentSize, diff: indentState.lastIndentDiff() };
   }
 
 PushFirstIndent$ =
@@ -74,7 +74,7 @@ PushFirstIndent$ =
     indentState.push(ParserUtil.calcIndentSize(i));
     return true;
   }) {
-    return { indentSize: currentIndentSize };
+    return { size: currentIndentSize, diff: indentState.lastIndentDiff() };
   }
 
 SkipIndentCheck$ = &{ indentState.ignore(location().start.line); return true; }

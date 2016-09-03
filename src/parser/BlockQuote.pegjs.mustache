@@ -2,25 +2,28 @@ BlockQuote = NestedBlockQuote / SimpleBlockQuote
 
 NestedBlockQuote =
   BlankLines?
-  PushFirstIndent$
+  indent:PushFirstIndent$
     nested:(BlockQuoteBody / FailbackIndent$)
     attribution:Attribution?
     &(BlankLines ShallowIndent / FailbackIndent$)
   PopIndent$
   outer:BlockQuote {
-    var children = [
-      new Elements.BlockQuote({ children: nested, attribution: attribution }),
-    ].concat(outer.children.toArray());
-    return new Elements.BlockQuote({ children: children });
+    var first = new Elements.BlockQuote({ children: nested, attribution: attribution });
+    if (options.indent) {
+      first = first.withIndent({ size: indent.size, diff: indent.size - outer.indent.size }, options);
+    }
+    var children = [first].concat(outer.children.toArray());
+    return new Elements.BlockQuote({ children: children }).withIndent(outer.indent, options);
   }
 
 SimpleBlockQuote =
   BlankLines?
-  PushFirstIndent$
+  indent:PushFirstIndent$
     children:(BlockQuoteBody / FailbackIndent$)
     attribution:Attribution?
   PopIndent$ {
-    return new Elements.BlockQuote({ children: children, attribution: attribution });
+    return new Elements.BlockQuote({ children: children, attribution: attribution })
+      .withIndent(indent, options);
   }
 
 BlockQuoteBody =

@@ -8,6 +8,7 @@ program
   .usage('[options] < file.rst')
   .option('--loc')
   .option('--bullet')
+  .option('--indent')
   .parse(process.argv)
 
 var input = fs.readFileSync('/dev/stdin', 'utf8');

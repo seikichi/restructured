@@ -65,6 +65,13 @@
       ignore: function (line) {
         indentIgnoreLine = line;
       },
+
+      lastIndentDiff: function () {
+        if (indentSizeStack.length === 0) {
+          return currentIndentSize;
+        }
+        return currentIndentSize - indentSizeStack[indentSizeStack.length - 1];
+      },
     };
   }());
 

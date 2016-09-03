@@ -7,14 +7,14 @@ DefinitionListItem =
   SameIndent
   term:DefinitionTerm
   classifiers:(Whitespace+ ':' Whitespace+ DefinitionClassifier)* Whitespace* Newline
-  PushFirstIndent$
+  indent:PushFirstIndent$
   body:(BodyElement+ / FailbackIndent$)
   PopIndent$ {
     return new Elements.DefinitionListItem({
       term: term,
       classifiers: mapByIndex(classifiers, 3),
       definition: new Elements.Definition({ children: body }),
-    }).withLoc(location, options);
+    }).withLoc(location, options).withIndent(indent, options);
   }
 
 DefinitionTerm = children:(InlineMarkupWithoutNewline / DefinitionTermText)+ {

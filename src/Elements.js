@@ -30,6 +30,11 @@ function node(type, values = {}) {
       if (!options.bullet) { return this; }
       return this.set('bullet', bullet);
     }
+
+    withIndent(indent, options) {
+      if (!options.indent) { return this; }
+      return this.set('indent', indent);
+    }
   }
   return Node;
 }
@@ -50,6 +55,7 @@ export const DefinitionListItem = node('definition_list_item', {
   term: null,
   classifiers: emptyList,
   definition: null,
+  indent: undefined,
 });
 export const Comment = node('comment', { children: emptyList });
 export const Term = node('term', { children: emptyList });
@@ -58,6 +64,7 @@ export const Definition = node('definition', { children: emptyList });
 export const BlockQuote = node('block_quote', {
   children: emptyList,
   attribution: null,
+  indent: undefined,
 });
 export const Attribution = node('attribution', { children: emptyList });
 export const Text = node('text', { text: null });
