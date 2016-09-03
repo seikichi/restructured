@@ -2,7 +2,7 @@ Transition =
   BlankLines? // TODO(seikichi): refactor handling of blanklines
   marker:TransitionMarker Whitespace* Newline
   &(BlankLines) {
-    return new Elements.Transition({ marker: marker });
+    return new Elements.Transition(params).location(location, options);
   }
 
 TransitionMarker =

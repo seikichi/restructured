@@ -15,6 +15,13 @@ function element(type, options = {}) {
       p.children = new List(p.children);
       super(p);
     }
+
+    location(locationFn, options) {
+      if (!options.location) {
+        return this;
+      }
+      return this.set('_location', locationFn());
+    }
   }
   return Element;
 }
