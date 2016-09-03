@@ -16,8 +16,8 @@ function element(type, options = {}) {
       super(p);
     }
 
-    location(locationFn, options) {
-      if (!options.location) {
+    location(locationFn, { location = false }) {
+      if (!location) {
         return this;
       }
       return this.set('_location', locationFn());
