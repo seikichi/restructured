@@ -9,5 +9,5 @@ PushBullet$ = &(BlankLines? SameIndent b:Bullet &{ bulletListState.pushBullet(b)
 PopBullet$ = &{ bulletListState.popBullet(); return true; }
 
 BulletListItem = BlankLines? SameIndent b:SameBullet body:ListItemBody {
-  return new Elements.ListItem({ children: body }).bullet(b, options).location(location, options);
+  return new Elements.ListItem({ children: body }).withBullet(b, options).withLoc(location, options);
 }

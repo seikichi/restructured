@@ -9,8 +9,5 @@ BodyElementExceptBlockQuote =
 BodyElement =
   BlankLines?
   element:(BodyElementExceptBlockQuote / BlockQuote) {
-    if (options.location) {
-      element = element.set('_location', location());
-    }
-    return element;
+    return element.withLoc(location, options);
   }

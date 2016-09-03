@@ -14,7 +14,7 @@ DefinitionListItem =
       term: term,
       classifiers: mapByIndex(classifiers, 3),
       definition: new Elements.Definition({ children: body }),
-    }).location(location, options);
+    }).withLoc(location, options);
   }
 
 DefinitionTerm = children:(InlineMarkupWithoutNewline / DefinitionTermText)+ {

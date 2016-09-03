@@ -6,7 +6,7 @@ var restructured = require('../lib/RST.js').default;
 
 program
   .usage('[options] < file.rst')
-  .option('--location')
+  .option('--loc')
   .option('--bullet')
   .parse(process.argv)
 

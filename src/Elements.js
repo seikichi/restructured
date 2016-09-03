@@ -3,85 +3,77 @@ import { List, Record } from 'immutable';
 import ParserUtil from './ParserUtil';
 
 const emptyList = new List();
-const elementValues = {
-  _location: undefined,
-};
+const listKeys = ['children', 'classifiers'];
 
-function element(type, options = {}) {
-  const values = _.extend({ type }, elementValues, options);
-  class Element extends new Record(values) {
+function node(type, values = {}) {
+  const valuesWithType = _.assign({
+    type,
+    loc: undefined,
+  }, values);
+
+  class Node extends new Record(valuesWithType) {
     constructor(params) {
       const p = _.pick(params, _.keys(values));
-      p.children = new List(p.children);
+      _.forEach(listKeys, k => {
+        if (!p[k]) { return; }
+        p[k] = new List(p[k]);
+      });
       super(p);
     }
 
-    location(locationFn, { location = false }) {
-      if (!location) {
-        return this;
-      }
-      return this.set('_location', locationFn());
+    withLoc(locFn, options) {
+      if (!options.loc) { return this; }
+      return this.set('loc', locFn());
     }
 
-    bullet(b, { bullet = false }) {
-      if (!bullet) {
-        return this;
-      }
-      return this.set('_bullet', b);
+    withBullet(bullet, options) {
+      if (!options.bullet) { return this; }
+      return this.set('bullet', bullet);
     }
   }
-  return Element;
+  return Node;
 }
 
-export class Document extends element('document', { children: emptyList }) { }
-export class SectionTitle extends element('title', { children: emptyList }) { }
-export class Section extends element('section', { children: emptyList }) { }
-export class Transition extends element('transition') { }
-export class Unknown extends element('unknown', { children: emptyList }) { }
-
-export class Paragraph extends element('paragraph', { children: emptyList }) { }
-export class LiteralBlock extends element('literal_block', { children: emptyList }) { }
-export class LiteralBlockLine extends element('literal_block_line', { children: emptyList }) { }
-export class BulletList extends element('bullet_list', { children: emptyList }) { }
-export class EnumeratedList extends element('enumerated_list', { children: emptyList }) { }
-export class ListItem extends element('list_item', {
-  _bullet: undefined,
-  children: emptyList,
-}) { }
-export class DefinitionList extends element('definition_list', { children: emptyList }) { }
-export class DefinitionListItem extends element('definition_list_item', {
+export const Document = node('document', { children: emptyList });
+export const SectionTitle = node('title', { children: emptyList });
+export const Section = node('section', { children: emptyList });
+export const Transition = node('transition');
+export const Unknown = node('unknown', { children: emptyList });
+export const Paragraph = node('paragraph', { children: emptyList });
+export const LiteralBlock = node('literal_block', { children: emptyList });
+export const LiteralBlockLine = node('literal_block_line', { children: emptyList });
+export const BulletList = node('bullet_list', { children: emptyList });
+export const EnumeratedList = node('enumerated_list', { children: emptyList });
+export const ListItem = node('list_item', { bullet: undefined, children: emptyList });
+export const DefinitionList = node('definition_list', { children: emptyList });
+export const DefinitionListItem = node('definition_list_item', {
   term: null,
   classifiers: emptyList,
   definition: null,
-}) { }
-export class Comment extends element('comment', { children: emptyList }) { }
-export class Term extends element('term', { children: emptyList }) { }
-export class Classifier extends element('classifier', { children: emptyList }) { }
-export class Definition extends element('definition', { children: emptyList }) { }
-export class BlockQuote extends element('block_quote', {
+});
+export const Comment = node('comment', { children: emptyList });
+export const Term = node('term', { children: emptyList });
+export const Classifier = node('constifier', { children: emptyList });
+export const Definition = node('definition', { children: emptyList });
+export const BlockQuote = node('block_quote', {
   children: emptyList,
   attribution: null,
-}) { }
-export class Attribution extends element('attribution', { children: emptyList }) { }
-export class Text extends element('text', { children: emptyList, text: null }) { }
-export class Emphasis extends element('emphasis', { children: emptyList }) { }
-export class StrongEmphasis extends element('strong', { children: emptyList }) { }
-export class InterpretedText extends element('interpreted_text', {
-  role: null,
-  children: emptyList,
-}) { }
-export class InlineLiteral extends element('literal', { children: emptyList }) { }
-export class HyperlinkReference extends element('reference', {
+});
+export const Attribution = node('attribution', { children: emptyList });
+export const Text = node('text', { text: null });
+export const Emphasis = node('emphasis', { children: emptyList });
+export const StrongEmphasis = node('strong', { children: emptyList });
+export const InterpretedText = node('interpreted_text', { role: null, children: emptyList });
+export const InlineLiteral = node('literal', { children: emptyList });
+export const HyperlinkReference = node('reference', {
   children: emptyList,
   simple: false,
   anonymous: false,
-}) { }
-export class InlineInternalTarget extends element('target', { children: emptyList }) { }
-export class FootnoteReference extends element('footnote_reference', { children: emptyList }) { }
-export class CitationReference extends element('citation_reference', { children: emptyList }) { }
-export class SubstitutionReference extends element('substitution_reference', {
-  children: emptyList,
-}) { }
+});
+export const InlineInternalTarget = node('target', { children: emptyList });
+export const FootnoteReference = node('footnote_reference', { children: emptyList });
+export const CitationReference = node('citation_reference', { children: emptyList });
+export const SubstitutionReference = node('substitution_reference', { children: emptyList });
 
 export class EnumeratorSequence extends new Record({
   type: '',

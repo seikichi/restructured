@@ -7,7 +7,7 @@ Section =
     sectionState.popSection();
 
     return new Elements.Section({ title: title, children: mapByIndex(children, 1) })
-      .location(location, options);
+      .withLoc(location, options);
   }
 
 IsSection = &(BlankLines? SectionLine !BlankLines RawLine SectionLine) /

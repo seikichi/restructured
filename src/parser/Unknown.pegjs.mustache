@@ -1,4 +1,4 @@
 Unknown = BlankLines? children:(!BlankLines NotEmptyRawLine)+ {
   return new Elements.Unknown({ children: _.flatten(mapByIndex(children, 1)) })
-    .location(location, options);
+    .withLoc(location, options);
 }
