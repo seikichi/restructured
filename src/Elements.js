@@ -1,95 +1,70 @@
+import _ from 'lodash';
 import { List, Record } from 'immutable';
 import ParserUtil from './ParserUtil';
 
-export class Document extends new Record({
-  type: 'document',
-  children: new List(),
-}) {
-  constructor({ children }) {
-    super({ children: new List(children) });
+const emptyList = new List();
+const elementValues = {
+  _location: undefined,
+};
+
+function element(type, options = {}) {
+  const values = _.extend({ type }, elementValues, options);
+  class Element extends new Record(values) {
+    constructor(params) {
+      const p = _.pick(params, _.keys(values));
+      p.children = new List(p.children);
+      super(p);
+    }
   }
+  return Element;
 }
 
-export class SectionTitle extends new Record({
-  type: 'title',
-  children: new List(),
-}) {
-  constructor({ children }) {
-    super({ children: new List(children) });
-  }
-}
+export class Document extends element('document', { children: emptyList }) { }
+export class SectionTitle extends element('title', { children: emptyList }) { }
+export class Section extends element('section', { children: emptyList }) { }
+export class Transition extends element('transition') { }
+export class Unknown extends element('unknown', { children: emptyList }) { }
 
-export class Section extends new Record({
-  type: 'section',
-  title: null,
-  children: new List(),
-}) {
-  constructor({ title, children }) {
-    super({ title, children: new List(children) });
-  }
-}
-
-export class Transition extends new Record({
-  type: 'transition',
-}) {
-  constructor() {
-    super({ });
-  }
-}
-
-export class Unknown extends new Record({
-  type: 'unknown',
-  children: new List(),
-}) {
-  constructor({ children }) {
-    super({ children: new List(children) });
-  }
-}
-
-export class Paragraph extends new Record({
-  type: 'paragraph',
-  children: new List(),
-}) {
-  constructor({ children }) {
-    super({ children: new List(children) });
-  }
-}
-
-export class LiteralBlock extends new Record({
-  type: 'literal_block',
-  children: new List(),
-}) {
-  constructor({ children }) {
-    super({ children: new List(children) });
-  }
-}
-
-export class LiteralBlockLine extends new Record({
-  type: 'literal_block_line',
-  text: '',
-}) {
-  constructor({ text }) {
-    super({ text });
-  }
-}
-
-export class BulletList extends new Record({
-  type: 'bullet_list',
-  children: new List(),
-}) {
-  constructor({ children }) {
-    super({ children: new List(children) });
-  }
-}
-
-export class EnumeratedList extends new Record({
-  type: 'enumerated_list',
-  children: new List(),
-}) {
-  constructor({ children }) {
-    super({ children: new List(children) });
-  }
-}
+export class Paragraph extends element('paragraph', { children: emptyList }) { }
+export class LiteralBlock extends element('literal_block', { children: emptyList }) { }
+export class LiteralBlockLine extends element('literal_block_line', { children: emptyList }) { }
+export class BulletList extends element('bullet_list', { children: emptyList }) { }
+export class EnumeratedList extends element('enumerated_list', { children: emptyList }) { }
+export class ListItem extends element('list_item', { children: emptyList }) { }
+export class DefinitionList extends element('definition_list', { children: emptyList }) { }
+export class DefinitionListItem extends element('definition_list_item', {
+  term: null,
+  classifiers: emptyList,
+  definition: null,
+}) { }
+export class Comment extends element('comment', { children: emptyList }) { }
+export class Term extends element('term', { children: emptyList }) { }
+export class Classifier extends element('classifier', { children: emptyList }) { }
+export class Definition extends element('definition', { children: emptyList }) { }
+export class BlockQuote extends element('block_quote', {
+  children: emptyList,
+  attribution: null,
+}) { }
+export class Attribution extends element('attribution', { children: emptyList }) { }
+export class Text extends element('text', { children: emptyList, text: null }) { }
+export class Emphasis extends element('emphasis', { children: emptyList }) { }
+export class StrongEmphasis extends element('strong', { children: emptyList }) { }
+export class InterpretedText extends element('interpreted_text', {
+  role: null,
+  children: emptyList,
+}) { }
+export class InlineLiteral extends element('literal', { children: emptyList }) { }
+export class HyperlinkReference extends element('reference', {
+  children: emptyList,
+  simple: false,
+  anonymous: false,
+}) { }
+export class InlineInternalTarget extends element('target', { children: emptyList }) { }
+export class FootnoteReference extends element('footnote_reference', { children: emptyList }) { }
+export class CitationReference extends element('citation_reference', { children: emptyList }) { }
+export class SubstitutionReference extends element('substitution_reference', {
+  children: emptyList,
+}) { }
 
 export class EnumeratorSequence extends new Record({
   type: '',
@@ -180,180 +155,5 @@ export class Enumerator extends new Record({
       return value === 'i' || value === 'I' || value.length === 2;
     }
     return true;
-  }
-}
-
-export class ListItem extends new Record({
-  type: 'list_item',
-  children: new List(),
-}) {
-  constructor({ children }) {
-    super({ children: new List(children) });
-  }
-}
-
-export class DefinitionList extends new Record({
-  type: 'definition_list',
-  children: new List(),
-}) {
-  constructor({ children }) {
-    super({ children: new List(children) });
-  }
-}
-
-export class DefinitionListItem extends new Record({
-  type: 'definition_list_item',
-  term: null,
-  classifiers: new List(),
-  definition: null,
-}) {
-  constructor({ term, classifiers = [], definition }) {
-    super({ term, classifiers: new List(classifiers), definition });
-  }
-}
-
-export class Comment extends new Record({
-  type: 'comment',
-  children: new List(),
-}) {
-  constructor({ children }) {
-    super({ children: new List(children) });
-  }
-}
-
-export class Term extends new Record({
-  type: 'term',
-  children: new List(),
-}) {
-  constructor({ children }) {
-    super({ children: new List(children) });
-  }
-}
-
-export class Classifier extends new Record({
-  type: 'classifier',
-  children: new List(),
-}) {
-  constructor({ children }) {
-    super({ children: new List(children) });
-  }
-}
-
-export class Definition extends new Record({
-  type: 'definition',
-  children: new List(),
-}) {
-  constructor({ children }) {
-    super({ children: new List(children) });
-  }
-}
-
-export class BlockQuote extends new Record({
-  type: 'block_quote',
-  children: new List(),
-  attribution: null,
-}) {
-  constructor({ children, attribution = null }) {
-    super({ children: new List(children), attribution });
-  }
-}
-
-export class Attribution extends new Record({
-  type: 'attribution',
-  children: new List(),
-}) {
-  constructor({ children }) {
-    super({ children: new List(children) });
-  }
-}
-
-export class Text extends new Record({
-  type: 'text',
-  text: null,
-}) {
-  constructor({ text }) { super({ text }); }
-}
-
-export class Emphasis extends new Record({
-  type: 'emphasis',
-  children: new List(),
-}) {
-  constructor({ children }) {
-    super({ children: new List(children) });
-  }
-}
-
-export class StrongEmphasis extends new Record({
-  type: 'strong',
-  children: new List(),
-}) {
-  constructor({ children }) {
-    super({ children: new List(children) });
-  }
-}
-
-export class InterpretedText extends new Record({
-  type: 'interpreted_text',
-  role: null,
-  children: new List(),
-}) {
-  constructor({ children, role = null }) {
-    super({ role, children: new List(children) });
-  }
-}
-
-export class InlineLiteral extends new Record({
-  type: 'literal',
-  children: new List(),
-}) {
-  constructor({ children }) {
-    super({ children: new List(children) });
-  }
-}
-
-export class HyperlinkReference extends new Record({
-  type: 'reference',
-  children: new List(),
-  simple: false,
-  anonymous: false,
-}) {
-  constructor({ simple, anonymous, children }) {
-    super({ simple, anonymous, children: new List(children) });
-  }
-}
-
-export class InlineInternalTarget extends new Record({
-  type: 'target',
-  children: new List(),
-}) {
-  constructor({ children }) {
-    super({ children: new List(children) });
-  }
-}
-
-export class FootnoteReference extends new Record({
-  type: 'footnote_reference',
-  children: new List(),
-}) {
-  constructor({ children }) {
-    super({ children: new List(children) });
-  }
-}
-
-export class CitationReference extends new Record({
-  type: 'citation_reference',
-  children: new List(),
-}) {
-  constructor({ children }) {
-    super({ children: new List(children) });
-  }
-}
-
-export class SubstitutionReference extends new Record({
-  type: 'substitution_reference',
-  children: new List(),
-}) {
-  constructor({ children }) {
-    super({ children: new List(children) });
   }
 }
