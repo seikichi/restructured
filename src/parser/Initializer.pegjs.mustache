@@ -75,6 +75,30 @@
     };
   }());
 
+  var literalBlockState = (function () {
+    var currentIndentSize = -1;
+    var indentSizeStack = [];
+
+    return {
+      current: function() {
+        return currentIndentSize;
+      },
+      push: function (indentSize) {
+        indentSizeStack.push(currentIndentSize);
+        currentIndentSize = indentSize;
+      },
+      pop: function () {
+        currentIndentSize = indentSizeStack.pop();
+      },
+      diff: function () {
+        if (indentSizeStack.length === 0) {
+          return currentIndentSize;
+        }
+        return currentIndentSize - indentSizeStack[indentSizeStack.length - 1];
+      },
+    };
+  }());
+
   var bulletListState = (function () {
     var stack = [];
     var current = null;
