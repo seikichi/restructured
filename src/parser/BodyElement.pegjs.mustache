@@ -1,13 +1,16 @@
 BodyElementExceptBlockQuote =
-  Comment /
-  LiteralBlock /
-  BulletList /
-  EnumeratedList /
-  DefinitionList /
-  Paragraph
+  blanks:BlankLines? element:(
+    Comment /
+    LiteralBlock /
+    BulletList /
+    EnumeratedList /
+    DefinitionList /
+    Paragraph
+  ) {
+    return element.withBlankLines(blanks, [], options);
+  }
 
 BodyElement =
-  BlankLines?
   element:(BodyElementExceptBlockQuote / BlockQuote) {
     return element.withLoc(location, options);
   }

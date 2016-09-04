@@ -1,15 +1,17 @@
 AlphanumericAscii = [A-Za-z0-9]
 Eof = !.
-Newline = '\n' / ('\r' '\n'?)
+Newline = '\n' / last:('\r' '\n'?) { return last[0] + (last[1] || ''); }
 Whitespace = ' ' / '\v' / '\f' / '\t'
 Endline = Newline / Eof
 NormalizedToWhitespace = Whitespace / Newline
 Nonspacechar = c:(!NormalizedToWhitespace .) { return c[1]; }
 
 BlankLines =
-  (Whitespace* Newline &(Whitespace* Endline))*
-  Whitespace*
-  Endline
+  lines:(Whitespace* Newline &(Whitespace* Endline))*
+  last:(Whitespace* Endline) {
+    var ret = _.map(lines, function (line) { return line[0].join('') + line[1]; });
+    return ret.concat(last[0].join('') + (last[1] || ''));
+  }
 
 RawLine =
   raw:(!Endline .)* Endline {

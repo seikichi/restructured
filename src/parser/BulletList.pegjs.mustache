@@ -8,6 +8,6 @@ SameBullet = b:Bullet &{ return bulletListState.isSameBullet(b); } { return b; }
 PushBullet$ = &(BlankLines? SameIndent b:Bullet &{ bulletListState.pushBullet(b); return true })
 PopBullet$ = &{ bulletListState.popBullet(); return true; }
 
-BulletListItem = BlankLines? SameIndent b:SameBullet item:ListItem {
-  return item.withBullet(b, options);
+BulletListItem = blanks:BlankLines? SameIndent b:SameBullet item:ListItem {
+  return item.withBullet(b, options).withBlankLines(blanks, [], options);;
 }

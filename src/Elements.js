@@ -9,6 +9,7 @@ function node(type, values = {}) {
   const valuesWithType = _.assign({
     type,
     loc: undefined,
+    blanklines: undefined,
   }, values);
 
   class Node extends new Record(valuesWithType) {
@@ -34,6 +35,14 @@ function node(type, values = {}) {
     withIndent(indent, options) {
       if (!options.indent) { return this; }
       return this.set('indent', indent);
+    }
+
+    withBlankLines(preceding, following, options) {
+      if (!options.blanklines) { return this; }
+      return this.set('blanklines', {
+        preceding: preceding || [],
+        following: following || [],
+      });
     }
   }
   return Node;

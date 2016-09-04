@@ -1,7 +1,6 @@
 Comment = CommentStartFromFirstLine / CommentStartFromNextLine
 
 CommentStartFromFirstLine =
-  BlankLines?
   SameIndent '..' Whitespace+ &Nonspacechar head:RawLine tail:(BlankLines? CommentBlock)? {
     var children = [new Elements.Text({ text: head.raw })];
     if (!_.isNull(tail)) {
@@ -11,7 +10,6 @@ CommentStartFromFirstLine =
   }
 
 CommentStartFromNextLine =
-  BlankLines?
   SameIndent '..' Whitespace* Newline comment:CommentBlock? {
     if (!_.isNull(comment)) {
       return comment;

@@ -2,7 +2,6 @@ Section =
   BlankLines?
   IsSubSection
   title:(SectionWithOverline / SectionWithoutOverline)
-  BlankLines?
   children:((IsSubSection Section) / (!IsSection Transition) / (!IsSection BodyElement))* {
     sectionState.popSection();
 

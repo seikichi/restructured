@@ -1,29 +1,34 @@
 BlockQuote = NestedBlockQuote / SimpleBlockQuote
 
 NestedBlockQuote =
-  BlankLines?
+  blanks:BlankLines?
   indent:PushFirstIndent$
     nested:(BlockQuoteBody / FailbackIndent$)
     attribution:Attribution?
     &(BlankLines ShallowIndent / FailbackIndent$)
   PopIndent$
   outer:BlockQuote {
-    var first = new Elements.BlockQuote({ children: nested, attribution: attribution });
+    var first = new Elements.BlockQuote({ children: nested, attribution: attribution })
+        .withLoc(location, options)
+        .withBlankLines([], [], options);
     if (options.indent) {
       first = first.withIndent({ size: indent.size, diff: indent.size - outer.indent.size }, options);
     }
     var children = [first].concat(outer.children.toArray());
-    return new Elements.BlockQuote({ children: children }).withIndent(outer.indent, options);
+    return new Elements.BlockQuote({ children: children })
+      .withIndent(outer.indent, options)
+      .withBlankLines(blanks, [], options);
   }
 
 SimpleBlockQuote =
-  BlankLines?
+  blanks:BlankLines?
   indent:PushFirstIndent$
     children:(BlockQuoteBody / FailbackIndent$)
     attribution:Attribution?
   PopIndent$ {
     return new Elements.BlockQuote({ children: children, attribution: attribution })
-      .withIndent(indent, options);
+      .withIndent(indent, options)
+      .withBlankLines(blanks, [], options);
   }
 
 BlockQuoteBody =

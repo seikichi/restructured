@@ -3,7 +3,7 @@ DefinitionList = items:DefinitionListItem+ &BlankLines {
 }
 
 DefinitionListItem =
-  BlankLines?
+  blanks:BlankLines?
   SameIndent
   term:DefinitionTerm
   classifiers:(Whitespace+ ':' Whitespace+ DefinitionClassifier)* Whitespace* Newline
@@ -14,7 +14,7 @@ DefinitionListItem =
       term: term,
       classifiers: mapByIndex(classifiers, 3),
       definition: new Elements.Definition({ children: body }),
-    }).withLoc(location, options).withIndent(indent, options);
+    }).withLoc(location, options).withIndent(indent, options).withBlankLines(blanks, [], options);
   }
 
 DefinitionTerm = children:(InlineMarkupWithoutNewline / DefinitionTermText)+ {
