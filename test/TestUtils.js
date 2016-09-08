@@ -10,6 +10,8 @@ import {
   Emphasis,
   EnumeratedList,
   InlineLiteral,
+  Line,
+  LineBlock,
   ListItem,
   LiteralBlock,
   LiteralBlockLine,
@@ -99,4 +101,12 @@ export function transition() {
 
 export function comment(...children) {
   return new Comment({ children });
+}
+
+export function line(...children) {
+  return new Line({ children });
+}
+
+export function lineblock(...children) {
+  return new LineBlock({ children });
 }
