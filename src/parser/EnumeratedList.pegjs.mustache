@@ -1,16 +1,16 @@
 EnumeratedList =
   BeginEnumeratedList$
-    items:(EnumeratedListItem+ / EndEnumeratedList$ Fail$)
+    children:(EnumeratedListItem+ / EndEnumeratedList$ Fail$)
   EndEnumeratedList$
   &BlankLines {
-    return new Elements.EnumeratedList({ children: items });
+    return new Elements.EnumeratedList({ children });
   }
 
 BeginEnumeratedList$ = &(BlankLines? &{ enumeratedListState.begin(); return true; })
 EndEnumeratedList$ = &{ enumeratedListState.end(); return true; }
 
 EnumeratedListItem = blanks:BlankLines? SameIndent e:NextEnumerator item:ListItem {
-  return item.withBlankLines(blanks, [], options);
+  return item;
 }
 
 Enumerator =

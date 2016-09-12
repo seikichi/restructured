@@ -1,5 +1,5 @@
-DefinitionList = items:DefinitionListItem+ &BlankLines {
-  return new Elements.DefinitionList({ children: items });
+DefinitionList = children:DefinitionListItem+ &BlankLines {
+  return new Elements.DefinitionList({ children });
 }
 
 DefinitionListItem =
@@ -10,23 +10,21 @@ DefinitionListItem =
   indent:PushFirstIndent$
   body:(BodyElement+ / FailbackIndent$)
   PopIndent$ {
-    return new Elements.DefinitionListItem({
-      term: term,
-      classifiers: mapByIndex(classifiers, 3),
-      definition: new Elements.Definition({ children: body }),
-    }).withLoc(location, options).withIndent(indent, options).withBlankLines(blanks, [], options);
+    var classifiers = mapByIndex(classifiers, 3);
+    var definition = new Elements.Definition({ children: body });
+    return new Elements.DefinitionListItem({ children: [term, ...classifiers, definition] });
   }
 
 DefinitionTerm = children:(InlineMarkupWithoutNewline / DefinitionTermText)+ {
-  return new Elements.Term({ children: children });
+  return new Elements.Term({ children });
 }
 
 DefinitionClassifierBeggining = Whitespace+ ':' Whitespace+
 
 DefinitionTermText = text:(!Endline !DefinitionClassifierBeggining !InlineMarkupBeggining .)+ {
-  return new Text({ text: mapByIndex(text, 3).join('')});
+  return new Elements.Text({ value: mapByIndex(text, 3).join('') });
 }
 
 DefinitionClassifier = children:(InlineMarkupWithoutNewline / DefinitionTermText)+ {
-  return new Elements.Classifier({ children: children });
+  return new Elements.Classifier({ children });
 }

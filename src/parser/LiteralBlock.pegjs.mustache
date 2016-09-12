@@ -19,9 +19,9 @@ IndentedLiteralBlockWithoutIndent =
         var indentSize = ParserUtil.calcIndentSize(line[1].join(''));
         var text = _.repeat(' ', indentSize - indent.size) + line[2].raw;
       }
-      return new Elements.LiteralBlockLine({ text: text } );
+      return new Elements.Text({ value: text } );
     });
-    return new Elements.LiteralBlock({ children: children });
+    return new Elements.LiteralBlock({ children });
   }
 
 QuotedLiteralBlockWithoutIndent =
@@ -30,9 +30,9 @@ QuotedLiteralBlockWithoutIndent =
     lines:(SameIndent IsValidQuoting$ NotEmptyRawLine)+
   &BlankLines {
     var children = _.map(lines, function (line) {
-      return new Elements.LiteralBlockLine({ text: line[2].raw } );
+      return new Elements.Text({ value: line[2].raw } );
     });
-    return new Elements.LiteralBlock({ children: children });
+    return new Elements.LiteralBlock({ children });
   }
 
 Quoting = ('!' / '"' / '#' / '$' / '%' / '&'/ "'" / '(' / ')' /

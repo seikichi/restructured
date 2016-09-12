@@ -1,13 +1,5 @@
-import assert from 'power-assert';
-import RST from '../../lib/RST';
-import {
-  Definition,
-  DefinitionList,
-  DefinitionListItem,
-  Document,
-  Term,
-} from '../../lib/Elements';
-import { p, ol, li, t } from '../TestUtils';
+import Elements from '../../lib/Elements';
+import { assertNode, p, ol, li, t } from '../TestUtils';
 
 describe('RST.parse', () => {
   [
@@ -193,11 +185,13 @@ iiii. iiii
         ol(li(p(t('i\n'))),
            li(p(t('ii\n'))),
            li(p(t('iii\n')))),
-        new DefinitionList({
+        new Elements.DefinitionList({
           children: [
-            new DefinitionListItem({
-              term: new Term({ children: [t('iiii. iiii')] }),
-              definition: new Definition({ children: [p(t('second line\n'))] }),
+            new Elements.DefinitionListItem({
+              children: [
+                new Elements.Term({ children: [t('iiii. iiii')] }),
+                new Elements.Definition({ children: [p(t('second line\n'))] }),
+              ],
             }),
           ],
         }),
@@ -429,8 +423,6 @@ No item content:
       ],
     ],
   ].forEach(([title, input, children]) => {
-    it(`should parse ${title} correctly`, () => {
-      assert.deepStrictEqual(RST.parse(input).toJS(), new Document({ children }).toJS());
-    });
+    it(`should parse ${title} correctly`, () => assertNode(input, children));
   });
 });

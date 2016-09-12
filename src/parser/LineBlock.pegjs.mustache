@@ -5,29 +5,23 @@ NestedLineBlock =
   head:Line tail:(Line / LineBlock)*
   PopLiteralBlockIndent$
   outer:LineBlock {
-    var first = new Elements.LineBlock({ children: [head].concat(tail) })
-        .withLoc(location, options);
-    if (options.indent) {
-      first = first.withIndent({ size: indent.size, diff: indent.size - outer.indent.size }, options);
-    }
-    var children = [first].concat(outer.children.toArray());
-    return new Elements.LineBlock({ children: children })
-      .withIndent(outer.indent, options);
+    var first = new Elements.LineBlock({ children: [head].concat(tail) });
+    var children = [first].concat(outer.children);
+    return new Elements.LineBlock({ children });
 }
 
 SimpleLineBlock = indent:PushLiteralBlockIndent$ block:(LineBolockMain / FailbackLiteralBlockIndent$) PopLiteralBlockIndent$ {
-  if (indent.size === 0) { indent.diff = 0; }
-  return block.withIndent(indent, options);
+  return block;
 }
 
 LineBolockMain = head:Line tail:(Line / LineBlock)* &BlankLines {
-  return new Elements.LineBlock({ children: [head].concat(tail) });
+  return new Elements.LineBlock({ children: [head, ...tail] });
 }
 
 Line = NonEmptyLine / EmptyLine
 
 NonEmptyLine = SameIndent '| ' SameLiteralBlockIndent children:OnelineParagraph Newline {
-  return new Elements.Line({ children: children });
+  return new Elements.Line({ children });
 }
 
 EmptyLine = SameIndent '|' Whitespace* Newline {

@@ -8,10 +8,10 @@ BodyElementExceptBlockQuote =
     LineBlock /
     Paragraph
   ) {
-    return element.withBlankLines(blanks, [], options);
+    return element;
   }
 
 BodyElement =
   element:(BodyElementExceptBlockQuote / BlockQuote) {
-    return element.withLoc(location, options);
+    return element;
   }

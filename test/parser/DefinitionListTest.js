@@ -1,7 +1,4 @@
-import assert from 'power-assert';
-import RST from '../../lib/RST';
-import { Document } from '../../lib/Elements';
-import { p, t, tt, strong, dl, dli, dt, dd, classifier } from '../TestUtils';
+import { assertNode, p, t, tt, strong, dl, dli, dt, dd, classifier } from '../TestUtils';
 
 describe('RST.parse', () => {
   [
@@ -149,8 +146,6 @@ Term : **classifier one**  :  classifier two
       ],
     ],
   ].forEach(([title, input, children]) => {
-    it(`should parse ${title} correctly`, () => {
-      assert.deepStrictEqual(RST.parse(input).toJS(), new Document({ children }).toJS());
-    });
+    it(`should parse ${title} correctly`, () => assertNode(input, children));
   });
 });

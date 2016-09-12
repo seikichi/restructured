@@ -1,7 +1,5 @@
 Document =
   children:(Section / Transition / BodyElement / Unknown)*
   blanks:BlankLines {
-    return new Elements.Document({ children: children })
-      .withLoc(location, options)
-      .withBlankLines([], blanks, options);
+    return new Elements.Document({ children, position: location() });
   }

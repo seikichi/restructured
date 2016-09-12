@@ -34,14 +34,14 @@ MarkupTextWithoutNewline =
       InlineMarkupFollowing
     )
   .)+ {
-    return new Text({ text: mapByIndex(text, 2).join('') });
+    return new Text({ value: mapByIndex(text, 2).join('') });
   }
 
 MarkupTextWithoutIndent =
   text:MarkupTextWithoutNewline
   last:Newline? {
     if (!_.isNull(last)) {
-      text = new Text({ text: text.text + last})
+      text = new Text({ value: text.value + last})
     }
     return text;
   }
@@ -51,7 +51,7 @@ MarkupTailWithoutNewline =
   !Endline !NormalizedToWhitespace last:.
   MarkupEndString
   &InlineMarkupFollowing {
-    return [new Text({ text: text.text + last })]
+    return [new Text({ value: text.value + last })]
   }
 
 MarkupTail =
@@ -62,10 +62,10 @@ MarkupTail =
   &InlineMarkupFollowing {
     var children = (_.isNull(first) ? [] : [first]).concat(mapByIndex(middle, 1));
     if (children.length === 0) {
-      children.push(new Text({ text: '' }));
+      children.push(new Text({ value: '' }));
     }
     var lastText = children[children.length - 1];
-    children[children.length - 1] = new Text({ text: lastText.text + last });
+    children[children.length - 1] = new Text({ value: lastText.value + last });
     return children;
   }
 
@@ -73,28 +73,28 @@ Emphasis =
   ('*' !'*' !NormalizedToWhitespace)
   &{ markupEndString = '*'; return true; }
   children:MarkupTail {
-    return new Elements.Emphasis({ children: children });
+    return new Elements.Emphasis({ children });
   }
 
 EmphasisWithoutNewline =
   ('*' !'*' !NormalizedToWhitespace)
   &{ markupEndString = '*'; return true; }
   children:MarkupTailWithoutNewline {
-    return new Elements.Emphasis({ children: children });
+    return new Elements.Emphasis({ children });
   }
 
 StrongEmphasis =
   ('**' !NormalizedToWhitespace)
   &{ markupEndString = '**'; return true; }
   children:MarkupTail {
-    return new Elements.StrongEmphasis({ children: children });
+    return new Elements.Strong({ children });
   }
 
 StrongEmphasisWithoutNewline =
   ('**' !NormalizedToWhitespace)
   &{ markupEndString = '**'; return true; }
   children:MarkupTailWithoutNewline {
-    return new Elements.StrongEmphasis({ children: children });
+    return new Elements.Strong({ children });
   }
 
 InterpretedText =
@@ -106,7 +106,7 @@ InterpretedText =
     if (!_.isNull(role)) {
       roleStr = _.map(role[1], function (v) { return v[3]; }).join('');
     }
-    return new Elements.InterpretedText({ role: roleStr, children: children });
+    return new Elements.InterpretedText({ role: roleStr, children });
   }
 
 // TODO(seikichi): unescaped backslash preceding a start-string end-string
@@ -114,28 +114,28 @@ InlineLiteral =
   ('``' !NormalizedToWhitespace)
   &{ markupEndString = '``'; return true; }
   children:MarkupTail {
-    return new Elements.InlineLiteral({ children: children });
+    return new Elements.Literal({ children });
   }
 
 InlineLiteralWithoutNewline =
   ('``' !NormalizedToWhitespace)
   &{ markupEndString = '``'; return true; }
   children:MarkupTailWithoutNewline {
-    return new Elements.InlineLiteral({ children: children });
+    return new Elements.Literal({ children });
   }
 
 SubstitutionReference =
   ('|' !NormalizedToWhitespace)
   &{ markupEndString = '|'; return true; }
   children:MarkupTail {
-    return new Elements.SubstitutionReference({ children: children });
+    return new Elements.SubstitutionReference({ children });
   }
 
 InlineInternalTarget =
   ('_`' !NormalizedToWhitespace)
   &{ markupEndString = '`'; return true; }
   children:MarkupTail {
-    return new Elements.InlineInternalTarget({  children: children });
+    return new Elements.InlineInternalTarget({  children });
   }
 
 FootnoteLabel =
@@ -148,12 +148,12 @@ FootnoteLabel =
 
 FootnoteReference =
   '[' label:FootnoteLabel ']_' &InlineMarkupFollowing {
-    return new Elements.FootnoteReference({ children: [new Text({ text: label })] });
+    return new Elements.FootnoteReference({ children: [new Text({ value: label })] });
   }
 
 CitationReference =
   '[' label:ReferenceName ']_' &InlineMarkupFollowing {
-    return new Elements.CitationReference({ children: [new Text({ text: label })] });
+    return new Elements.CitationReference({ children: [new Text({ value: label })] });
   }
 
 HyperlinkReference =
@@ -166,25 +166,25 @@ NamedHyperlinkReference =
   ('`' !NormalizedToWhitespace)
   &{ markupEndString = '`_'; return true; }
   children:MarkupTail {
-    return new Elements.HyperlinkReference({ anonymous: false, simple: false, children: children });
+    return new Elements.HyperlinkReference({ anonymous: false, simple: false, children });
   }
 
 NamedSimpleHyperlinkReference =
   ref:HyperlinkReferenceName '_' &InlineMarkupFollowing {
-    return new Elements.HyperlinkReference({ anonymous: false, simple: true, children: [new Text({ text: ref })] });
+    return new Elements.HyperlinkReference({ anonymous: false, simple: true, children: [new Text({ value: ref })] });
   }
 
 AnonymousHyperlinkReference =
   ('`' !NormalizedToWhitespace)
   &{ markupEndString = '`__'; return true; }
   children:MarkupTail {
-    return new Elements.HyperlinkReference({ anonymous: true, simple: false, children: children });
-    return {children: children};
+    return new Elements.HyperlinkReference({ anonymous: true, simple: false, children });
+    return {children};
   }
 
 AnonymousSimpleHyperlinkReference =
   ref:HyperlinkReferenceName '__' &InlineMarkupFollowing {
-    return new Elements.HyperlinkReference({ anonymous: true, simple: true, children: [new Text({ text: ref })] });
+    return new Elements.HyperlinkReference({ anonymous: true, simple: true, children: [new Text({ value: ref })] });
   }
 
 // Reference

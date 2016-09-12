@@ -1,5 +1,5 @@
 ListItem = item:(NonEmptyListItem / EmptyListItem) {
-  return item.withLoc(location, options);
+  return item;
 }
 
 PushListItemIndent$ = (
@@ -12,7 +12,7 @@ PushListItemIndent$ = (
 }
 
 NonEmptyListItem = indent:PushListItemIndent$ children:(BodyElement+ / FailbackIndent$) PopIndent$ {
-  return new Elements.ListItem({ children: children }).withIndent(indent, options);
+  return new Elements.ListItem({ children });
 }
 
 EmptyListItem = Whitespace* Endline {

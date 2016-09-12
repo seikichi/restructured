@@ -1,7 +1,5 @@
-import assert from 'power-assert';
-import RST from '../../lib/RST';
-import { Document } from '../../lib/Elements';
 import {
+  assertNode,
   blockquote,
   comment,
   dd,
@@ -201,8 +199,6 @@ term 2
       [ul(li(p(t('bullet\n')), comment(t('trailing comment'))))],
     ],
   ].forEach(([title, input, children]) => {
-    it(`should parse ${title} correctly`, () => {
-      assert.deepStrictEqual(RST.parse(input).toJS(), new Document({ children }).toJS());
-    });
+    it(`should parse ${title} correctly`, () => assertNode(input, children));
   });
 });

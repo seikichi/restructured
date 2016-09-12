@@ -1,7 +1,5 @@
-import assert from 'power-assert';
-import RST from '../../lib/RST';
-import { Document } from '../../lib/Elements';
 import {
+  assertNode,
   blockquote,
   em,
   p,
@@ -247,8 +245,6 @@ Without it, the parser ends up in an infinite loop.
       ],
     ],
   ].forEach(([desc, input, children]) => {
-    it(`should parse ${desc} correctly`, () => {
-      assert.deepStrictEqual(RST.parse(input).toJS(), new Document({ children }).toJS());
-    });
+    it(`should parse ${desc} correctly`, () => assertNode(input, children));
   });
 });

@@ -20,8 +20,12 @@ RawLine =
 
 NotEmptyRawLine =
   raw:(!Endline .)+ Endline {
-    return { raw: _.map(raw, function (v) { return v[1]; }).join('') };
+    return { raw: _.map(raw, function (v) { return v[1]; }).join(''), position: location() };
   }
+
+UnknownLine = line:NotEmptyRawLine {
+  return new Elements.UnknownLine({ value: line.raw });
+}
 
 EndIndent = &(
   BlankLines?

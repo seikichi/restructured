@@ -11,9 +11,9 @@
   },
   "dependencies": {
     "commander": "^2.9.0",
-    "immutable": "^3.7.6",
     "lodash": "^4.0.0",
-    "power-assert": "^1.2.0"
+    "power-assert": "^1.2.0",
+    "unist-util-remove-position": "^1.1.0"
   },
   "devDependencies": {
     "babel": "^6.3.26",

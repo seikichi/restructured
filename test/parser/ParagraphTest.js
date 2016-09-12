@@ -1,7 +1,4 @@
-import assert from 'power-assert';
-import RST from '../../lib/RST';
-import { Document } from '../../lib/Elements';
-import { p, t } from '../TestUtils';
+import { p, t, assertNode } from '../TestUtils';
 
 describe('RST.parse', () => {
   [
@@ -60,8 +57,6 @@ smart dude.
       [p(t('A. Einstein was a really\n'), t('smart dude.\n'))],
     ],
   ].forEach(([title, input, children]) => {
-    it(`should parse ${title} correctly`, () => {
-      assert.deepStrictEqual(RST.parse(input).toJS(), new Document({ children }).toJS());
-    });
+    it(`should parse ${title} correctly`, () => assertNode(input, children));
   });
 });

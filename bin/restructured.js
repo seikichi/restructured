@@ -6,10 +6,7 @@ var restructured = require('../lib/RST.js').default;
 
 program
   .usage('[options] < file.rst')
-  .option('--blanklines')
-  .option('--bullet')
-  .option('--indent')
-  .option('--loc')
+  .option('--position')
   .parse(process.argv)
 
 var input = fs.readFileSync('/dev/stdin', 'utf8');

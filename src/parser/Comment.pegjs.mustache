@@ -2,11 +2,11 @@ Comment = CommentStartFromFirstLine / CommentStartFromNextLine
 
 CommentStartFromFirstLine =
   SameIndent '..' Whitespace+ &Nonspacechar head:RawLine tail:(BlankLines? CommentBlock)? {
-    var children = [new Elements.Text({ text: head.raw })];
+    var children = [new Elements.Text({ value: head.raw })];
     if (!_.isNull(tail)) {
-      children = children.concat(tail[1].children.toArray());
+      children = children.concat(tail[1].children);
     }
-    return new Elements.Comment({ children: children });
+    return new Elements.Comment({ children });
   }
 
 CommentStartFromNextLine =
@@ -27,7 +27,7 @@ CommentBlock =
     var children = _.map(_.reject(comments, _.isNull), function (v) {
       var ws = v[0], raw = v[1].raw;
       var text = _.repeat(' ', ws.length - indent.size) + raw;
-      return new Elements.Text({ text: text });
+      return new Elements.Text({ value: text });
     });
-    return new Elements.Comment({ children: children });
+    return new Elements.Comment({ children });
   }

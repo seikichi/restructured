@@ -5,8 +5,7 @@ Section =
   children:((IsSubSection Section) / (!IsSection Transition) / (!IsSection BodyElement))* {
     sectionState.popSection();
 
-    return new Elements.Section({ title: title, children: mapByIndex(children, 1) })
-      .withLoc(location, options);
+    return new Elements.Section({ children: [title].concat(mapByIndex(children, 1)), position: location() });
   }
 
 IsSection = &(BlankLines? SectionLine !BlankLines RawLine SectionLine) /
@@ -31,7 +30,7 @@ SectionWithOverline =
   Whitespace* children:OnelineParagraph Newline
   underline:SectionLine {
     sectionState.setNextSection(underline.line[0], true);
-    return new Elements.SectionTitle({ children: children });
+    return new Elements.Title({ children });
   }
 
 SectionWithoutOverline =
@@ -39,7 +38,7 @@ SectionWithoutOverline =
   children:OnelineParagraph Newline
   underline:SectionLine {
     sectionState.setNextSection(underline.line[0], false);
-    return new Elements.SectionTitle({ children: children });
+    return new Elements.Title({ children });
   }
 
 SectionLine =

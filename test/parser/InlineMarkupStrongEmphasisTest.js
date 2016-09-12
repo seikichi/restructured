@@ -1,7 +1,4 @@
-import assert from 'power-assert';
-import RST from '../../lib/RST';
-import { Document } from '../../lib/Elements';
-import { p, t, strong } from '../TestUtils';
+import { assertNode, p, t, strong } from '../TestUtils';
 
 const s = strong(t('strong'));
 
@@ -48,8 +45,6 @@ Strong double asterisk: ******
       ],
     ],
   ].forEach(([title, input, children]) => {
-    it(`should parse ${title} correctly`, () => {
-      assert.deepStrictEqual(RST.parse(input).toJS(), new Document({ children }).toJS());
-    });
+    it(`should parse ${title} correctly`, () => assertNode(input, children));
   });
 });

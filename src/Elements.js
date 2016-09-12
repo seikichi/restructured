@@ -1,108 +1,37 @@
 import _ from 'lodash';
-import { List, Record } from 'immutable';
+import Type from './Type';
 import ParserUtil from './ParserUtil';
 
-const emptyList = new List();
-const listKeys = ['children', 'classifiers'];
+const Elements = {};
 
-function node(type, values = {}) {
-  const valuesWithType = _.assign({
-    type,
-    loc: undefined,
-    blanklines: undefined,
-  }, values);
-
-  class Node extends new Record(valuesWithType) {
-    constructor(params) {
-      const p = _.pick(params, _.keys(values));
-      _.forEach(listKeys, k => {
-        if (!p[k]) { return; }
-        p[k] = new List(p[k]);
-      });
-      super(p);
-    }
-
-    withLoc(locFn, options) {
-      if (!options.loc) { return this; }
-      return this.set('loc', locFn());
-    }
-
-    withBullet(bullet, options) {
-      if (!options.bullet) { return this; }
-      return this.set('bullet', bullet);
-    }
-
-    withIndent(indent, options) {
-      if (!options.indent) { return this; }
-      return this.set('indent', indent);
-    }
-
-    withBlankLines(preceding, following, options) {
-      if (!options.blanklines) { return this; }
-      return this.set('blanklines', {
-        preceding: preceding || [],
-        following: following || [],
-      });
-    }
-  }
-  return Node;
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-export const Document = node('document', { children: emptyList });
-export const SectionTitle = node('title', { children: emptyList });
-export const Section = node('section', { children: emptyList });
-export const Transition = node('transition');
-export const Unknown = node('unknown', { children: emptyList });
-export const Paragraph = node('paragraph', { children: emptyList });
-export const LiteralBlock = node('literal_block', { children: emptyList });
-export const LiteralBlockLine = node('literal_block_line', { children: emptyList });
-export const LineBlock = node('line_block', { children: emptyList, indent: undefined });
-export const Line = node('line', { children: emptyList });
-export const BulletList = node('bullet_list', { children: emptyList });
-export const EnumeratedList = node('enumerated_list', { children: emptyList });
-export const ListItem = node('list_item', {
-  bullet: undefined,
-  children: emptyList,
-  indent: undefined,
+_.forEach(Type.valueTypes, (type, name) => {
+  Elements[capitalize(name)] = class {
+    constructor({ value, position }) {
+      this.type = type;
+      this.value = value;
+      this.position = position;
+    }
+  };
 });
-export const DefinitionList = node('definition_list', { children: emptyList });
-export const DefinitionListItem = node('definition_list_item', {
-  term: null,
-  classifiers: emptyList,
-  definition: null,
-  indent: undefined,
-});
-export const Comment = node('comment', { children: emptyList });
-export const Term = node('term', { children: emptyList });
-export const Classifier = node('constifier', { children: emptyList });
-export const Definition = node('definition', { children: emptyList });
-export const BlockQuote = node('block_quote', {
-  children: emptyList,
-  attribution: null,
-  indent: undefined,
-});
-export const Attribution = node('attribution', { children: emptyList });
-export const Text = node('text', { text: null });
-export const Emphasis = node('emphasis', { children: emptyList });
-export const StrongEmphasis = node('strong', { children: emptyList });
-export const InterpretedText = node('interpreted_text', { role: null, children: emptyList });
-export const InlineLiteral = node('literal', { children: emptyList });
-export const HyperlinkReference = node('reference', {
-  children: emptyList,
-  simple: false,
-  anonymous: false,
-});
-export const InlineInternalTarget = node('target', { children: emptyList });
-export const FootnoteReference = node('footnote_reference', { children: emptyList });
-export const CitationReference = node('citation_reference', { children: emptyList });
-export const SubstitutionReference = node('substitution_reference', { children: emptyList });
 
-export class EnumeratorSequence extends new Record({
-  type: '',
-  value: '',
-}) {
+_.forEach(Type.parentTypes, (type, name) => {
+  Elements[capitalize(name)] = class {
+    constructor({ children = [], position }) {
+      this.type = type;
+      this.children = children;
+      this.position = position;
+    }
+  };
+});
+
+Elements.EnumeratorSequence = class {
   constructor({ type, value }) {
-    super({ type, value });
+    this.type = type;
+    this.value = value;
   }
 
   width() {
@@ -132,15 +61,12 @@ export class EnumeratorSequence extends new Record({
   isLowercaseRoman() {
     return this.type === 'lowercase_roman';
   }
-}
+};
 
-export class Enumerator extends new Record({
-  type: 'enumerator',
-  sequence: '',
-  format: '',
-}) {
+Elements.Enumerator = class {
   constructor({ sequence, format }) {
-    super({ sequence, format });
+    this.sequence = sequence;
+    this.format = format;
   }
 
   width() {
@@ -187,4 +113,6 @@ export class Enumerator extends new Record({
     }
     return true;
   }
-}
+};
+
+export default Elements;

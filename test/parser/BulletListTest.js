@@ -1,7 +1,4 @@
-import assert from 'power-assert';
-import RST from '../../lib/RST';
-import { Document } from '../../lib/Elements';
-import { p, ul, li, t } from '../TestUtils';
+import { assertNode, p, ul, li, t } from '../TestUtils';
 
 describe('RST.parse', () => {
   [
@@ -120,8 +117,6 @@ Unicode bullets:
       [ul(li(p(t('1\n'))), li(p(t('2\n'))), li(p(t('3\n'))))],
     ],
   ].forEach(([title, input, children]) => {
-    it(`should parse ${title} correctly`, () => {
-      assert.deepStrictEqual(RST.parse(input).toJS(), new Document({ children }).toJS());
-    });
+    it(`should parse ${title} correctly`, () => assertNode(input, children));
   });
 });

@@ -1,7 +1,4 @@
-import assert from 'power-assert';
-import RST from '../../lib/RST';
-import { Document } from '../../lib/Elements';
-import { em, t, line, lineblock } from '../TestUtils';
+import { em, t, line, lineblock, assertNode } from '../TestUtils';
 
 describe('RST.parse', () => {
   [
@@ -43,8 +40,6 @@ describe('RST.parse', () => {
       ],
     ],
   ].forEach(([title, input, children]) => {
-    it(`should parse ${title} correctly`, () => {
-      assert.deepStrictEqual(RST.parse(input).toJS(), new Document({ children }).toJS());
-    });
+    it(`should parse ${title} correctly`, () => assertNode(input, children));
   });
 });

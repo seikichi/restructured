@@ -1,112 +1,100 @@
 import _ from 'lodash';
-import {
-  BulletList,
-  BlockQuote,
-  Classifier,
-  Comment,
-  Definition,
-  DefinitionList,
-  DefinitionListItem,
-  Emphasis,
-  EnumeratedList,
-  InlineLiteral,
-  Line,
-  LineBlock,
-  ListItem,
-  LiteralBlock,
-  LiteralBlockLine,
-  Paragraph,
-  Section,
-  SectionTitle,
-  StrongEmphasis,
-  Term,
-  Text,
-  Transition,
-} from '../lib/Elements';
+import assert from 'power-assert';
+import removePosition from 'unist-util-remove-position';
+import RST from '../lib/RST';
+import Elements from '../lib/Elements';
+
+export function assertNode(input, children) {
+  const actual = removePosition(new Elements.Document({ children }), true);
+  assert.deepStrictEqual(RST.parse(input), actual);
+}
 
 export function p(...children) {
-  return new Paragraph({ children });
+  return new Elements.Paragraph({ children });
 }
 
 export function ul(...children) {
-  return new BulletList({ children });
+  return new Elements.BulletList({ children });
 }
 
 export function ol(...children) {
-  return new EnumeratedList({ children });
+  return new Elements.EnumeratedList({ children });
 }
 
 export function li(...children) {
-  return new ListItem({ children });
+  return new Elements.ListItem({ children });
 }
 
-export function t(text) {
-  return new Text({ text });
+export function t(value) {
+  return new Elements.Text({ value });
 }
 
 export function em(...children) {
-  return new Emphasis({ children });
+  return new Elements.Emphasis({ children });
 }
 
 export function strong(...children) {
-  return new StrongEmphasis({ children });
+  return new Elements.Strong({ children });
 }
 
 export function tt(...children) {
-  return new InlineLiteral({ children });
+  return new Elements.Literal({ children });
 }
 
 export function dt(...children) {
-  return new Term({ children });
+  return new Elements.Term({ children });
 }
 
 export function dd(...children) {
-  return new Definition({ children });
+  return new Elements.Definition({ children });
 }
 
 export function classifier(...children) {
-  return new Classifier({ children });
+  return new Elements.Classifier({ children });
 }
 
 export function dli(...children) {
-  const term = children[0];
-  const definition = children[children.length - 1];
-  const classifiers = children.slice(1, children.length - 1);
-  return new DefinitionListItem({ term, classifiers, definition });
+  return new Elements.DefinitionListItem({ children });
 }
 
 export function dl(...children) {
-  return new DefinitionList({ children });
+  return new Elements.DefinitionList({ children });
 }
 
 export function pre(...children) {
-  return new LiteralBlock({ children: _.map(children, text => new LiteralBlockLine({ text })) });
+  return new Elements.LiteralBlock({
+    children: _.map(children, value => new Elements.Text({ value })),
+  });
 }
 
-export function section(...args) {
-  return new Section({ title: args[0], children: args.slice(1) });
+export function section(...children) {
+  return new Elements.Section({ children });
 }
 
 export function title(...children) {
-  return new SectionTitle({ children });
+  return new Elements.Title({ children });
 }
 
 export function blockquote(...children) {
-  return new BlockQuote({ children });
+  return new Elements.BlockQuote({ children });
+}
+
+export function attribution(...children) {
+  return new Elements.Attribution({ children });
 }
 
 export function transition() {
-  return new Transition({ });
+  return new Elements.Transition({ });
 }
 
 export function comment(...children) {
-  return new Comment({ children });
+  return new Elements.Comment({ children });
 }
 
 export function line(...children) {
-  return new Line({ children });
+  return new Elements.Line({ children });
 }
 
 export function lineblock(...children) {
-  return new LineBlock({ children });
+  return new Elements.LineBlock({ children });
 }

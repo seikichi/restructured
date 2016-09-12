@@ -1,17 +1,15 @@
-import assert from 'power-assert';
-import RST from '../../lib/RST';
 import {
-  Attribution,
-  BlockQuote,
-  Comment,
-  Definition,
-  DefinitionList,
-  DefinitionListItem,
-  Document,
-  Paragraph,
-  Term,
-  Text,
-} from '../../lib/Elements';
+  assertNode,
+  attribution,
+  blockquote,
+  comment,
+  dd,
+  dl,
+  dli,
+  dt,
+  p,
+  t,
+} from '../TestUtils';
 
 describe('RST.parse', () => {
   [
@@ -24,15 +22,8 @@ Line 2.
    Indented.
 `,
       [
-        new Paragraph({
-          children: [
-            new Text({ text: 'Line 1.\n' }),
-            new Text({ text: 'Line 2.\n' }),
-          ],
-        }),
-        new BlockQuote({
-          children: [new Paragraph({ children: [new Text({ text: 'Indented.\n' })] })],
-        }),
+        p(t('Line 1.\n'), t('Line 2.\n')),
+        blockquote(p(t('Indented.\n'))),
       ],
     ],
     [
@@ -46,17 +37,8 @@ Line 2.
       Indented 2.
 `,
       [
-        new Paragraph({
-          children: [new Text({ text: 'Line 1.\n' }), new Text({ text: 'Line 2.\n' })],
-        }),
-        new BlockQuote({
-          children: [
-            new Paragraph({ children: [new Text({ text: 'Indented 1.\n' })] }),
-            new BlockQuote({
-              children: [new Paragraph({ children: [new Text({ text: 'Indented 2.\n' })] })],
-            }),
-          ],
-        }),
+        p(t('Line 1.\n'), t('Line 2.\n')),
+        blockquote(p(t('Indented 1.\n')), blockquote(p(t('Indented 2.\n')))),
       ],
     ],
     [
@@ -72,21 +54,11 @@ Is this correct? Should it generate a warning?
 Yes, it is correct, no warning necessary.
 `,
       [
-        new Paragraph({ children: [new Text({ text: 'Here is a paragraph.\n' })] }),
-        new BlockQuote({
-          children: [
-            new BlockQuote({
-              children: [new Paragraph({ children: [new Text({ text: 'Indent 8 spaces.\n' })] })],
-            }),
-            new Paragraph({ children: [new Text({ text: 'Indent 4 spaces.\n' })] }),
-          ],
-        }),
-        new Paragraph({
-          children: [
-            new Text({ text: 'Is this correct? Should it generate a warning?\n' }),
-            new Text({ text: 'Yes, it is correct, no warning necessary.\n' }),
-          ],
-        }),
+        p(t('Here is a paragraph.\n')),
+        blockquote(blockquote(p(t('Indent 8 spaces.\n'))),
+                   p(t('Indent 4 spaces.\n'))),
+        p(t('Is this correct? Should it generate a warning?\n'),
+          t('Yes, it is correct, no warning necessary.\n')),
       ],
     ],
     [
@@ -105,16 +77,12 @@ Paragraph.
    --Attribution
 `,
       [
-        new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
-        new BlockQuote({
-          children: [new Paragraph({ children: [new Text({ text: 'Block quote.\n' })] })],
-          attribution: new Attribution({ children: [new Text({ text: 'Attribution\n' })] }),
-        }),
-        new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
-        new BlockQuote({
-          children: [new Paragraph({ children: [new Text({ text: 'Block quote.\n' })] })],
-          attribution: new Attribution({ children: [new Text({ text: 'Attribution\n' })] }),
-        }),
+        p(t('Paragraph.\n')),
+        blockquote(p(t('Block quote.\n')),
+                   attribution(t('Attribution\n'))),
+        p(t('Paragraph.\n')),
+        blockquote(p(t('Block quote.\n')),
+                   attribution(t('Attribution\n'))),
       ],
     ],
     [
@@ -133,16 +101,12 @@ Alternative: three hyphens.
    --- Attribution
 `,
       [
-        new Paragraph({ children: [new Text({ text: 'Alternative: true em-dash.\n' })] }),
-        new BlockQuote({
-          children: [new Paragraph({ children: [new Text({ text: 'Block quote.\n' })] })],
-          attribution: new Attribution({ children: [new Text({ text: 'Attribution\n' })] }),
-        }),
-        new Paragraph({ children: [new Text({ text: 'Alternative: three hyphens.\n' })] }),
-        new BlockQuote({
-          children: [new Paragraph({ children: [new Text({ text: 'Block quote.\n' })] })],
-          attribution: new Attribution({ children: [new Text({ text: 'Attribution\n' })] }),
-        }),
+        p(t('Alternative: true em-dash.\n')),
+        blockquote(p(t('Block quote.\n')),
+                   attribution(t('Attribution\n'))),
+        p(t('Alternative: three hyphens.\n')),
+        blockquote(p(t('Block quote.\n')),
+                   attribution(t('Attribution\n'))),
       ],
     ],
     [
@@ -165,23 +129,15 @@ Paragraph.
 Paragraph.
 `,
       [
-        new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
-        new BlockQuote({
-          children: [new Paragraph({ children: [new Text({ text: 'Block quote.\n' })] })],
-          attribution: new Attribution({
-            children: [new Text({ text: 'Attribution line one\n' }),
-                       new Text({ text: 'and line two\n' })],
-          }),
-        }),
-        new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
-        new BlockQuote({
-          children: [new Paragraph({ children: [new Text({ text: 'Block quote.\n' })] })],
-          attribution: new Attribution({
-            children: [new Text({ text: 'Attribution line one\n' }),
-                       new Text({ text: 'and line two\n' })],
-          }),
-        }),
-        new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
+        p(t('Paragraph.\n')),
+        blockquote(p(t('Block quote.\n')),
+                   attribution(t('Attribution line one\n'),
+                               t('and line two\n'))),
+        p(t('Paragraph.\n')),
+        blockquote(p(t('Block quote.\n')),
+                   attribution(t('Attribution line one\n'),
+                               t('and line two\n'))),
+        p(t('Paragraph.\n')),
       ],
     ],
     [
@@ -198,15 +154,11 @@ Paragraph.
    -- Attribution 2
 `,
       [
-        new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
-        new BlockQuote({
-          children: [new Paragraph({ children: [new Text({ text: 'Block quote 1.\n' })] })],
-          attribution: new Attribution({ children: [new Text({ text: 'Attribution 1\n' })] }),
-        }),
-        new BlockQuote({
-          children: [new Paragraph({ children: [new Text({ text: 'Block quote 2.\n' })] })],
-          attribution: new Attribution({ children: [new Text({ text: 'Attribution 2\n' })] }),
-        }),
+        p(t('Paragraph.\n')),
+        blockquote(p(t('Block quote 1.\n')),
+                   attribution(t('Attribution 1\n'))),
+        blockquote(p(t('Block quote 2.\n')),
+                   attribution(t('Attribution 2\n'))),
       ],
     ],
     [
@@ -221,14 +173,10 @@ Paragraph.
    Block quote 2.
 `,
       [
-        new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
-        new BlockQuote({
-          children: [new Paragraph({ children: [new Text({ text: 'Block quote 1.\n' })] })],
-          attribution: new Attribution({ children: [new Text({ text: 'Attribution 1\n' })] }),
-        }),
-        new BlockQuote({
-          children: [new Paragraph({ children: [new Text({ text: 'Block quote 2.\n' })] })],
-        }),
+        p(t('Paragraph.\n')),
+        blockquote(p(t('Block quote 1.\n')),
+                   attribution(t('Attribution 1\n'))),
+        blockquote(p(t('Block quote 2.\n'))),
       ],
     ],
     [
@@ -247,18 +195,12 @@ Unindented paragraph.
     Block quote 3.
 `,
       [
-        new Paragraph({ children: [new Text({ text: 'Unindented paragraph.\n' })] }),
-        new BlockQuote({
-          children: [new Paragraph({ children: [new Text({ text: 'Block quote 1.\n' })] })],
-          attribution: new Attribution({ children: [new Text({ text: 'Attribution 1\n' })] }),
-        }),
-        new BlockQuote({
-          children: [new Paragraph({ children: [new Text({ text: 'Block quote 2.\n' })] })],
-        }),
-        new Comment({ }),
-        new BlockQuote({
-          children: [new Paragraph({ children: [new Text({ text: 'Block quote 3.\n' })] })],
-        }),
+        p(t('Unindented paragraph.\n')),
+        blockquote(p(t('Block quote 1.\n')),
+                   attribution(t('Attribution 1\n'))),
+        blockquote(p(t('Block quote 2.\n'))),
+        comment(),
+        blockquote(p(t('Block quote 3.\n'))),
       ],
     ],
     [
@@ -283,50 +225,16 @@ Paragraph.
           and line three
 `,
       [
-        new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
-        new BlockQuote({
-          children: [new Paragraph({ children: [new Text({ text: '-- Not an attribution\n' })] })],
-        }),
-        new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
-        new BlockQuote({
-          children: [
-            new Paragraph({ children: [new Text({ text: 'Block quote.\n' })] }),
-            new Paragraph({ children: [new Text({ text: '\\-- Not an attribution\n' })] }),
-          ],
-        }),
-        new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
-        new BlockQuote({
-          children: [
-            new Paragraph({ children: [new Text({ text: 'Block quote.\n' })] }),
-            new DefinitionList({
-              children: [
-                new DefinitionListItem({
-                  term: new Term({ children: [
-                    new Text({ text: '-- Not an attribution line one' }),
-                  ] }),
-                  definition: new Definition({
-                    children: [
-                      new DefinitionList({
-                        children: [
-                          new DefinitionListItem({
-                            term: new Term({ children: [new Text({ text: 'and line two' })] }),
-                            definition: new Definition({
-                              children: [
-                                new Paragraph({ children: [
-                                  new Text({ text: 'and line three\n' }),
-                                ] }),
-                              ],
-                            }),
-                          }),
-                        ],
-                      }),
-                    ],
-                  }),
-                }),
-              ],
-            }),
-          ],
-        }),
+        p(t('Paragraph.\n')),
+        blockquote(p(t('-- Not an attribution\n'))),
+        p(t('Paragraph.\n')),
+        blockquote(p(t('Block quote.\n')),
+                   p(t('\\-- Not an attribution\n'))),
+        p(t('Paragraph.\n')),
+        blockquote(p(t('Block quote.\n')),
+                   dl(dli(dt(t('-- Not an attribution line one')),
+                          dd(dl(dli(dt(t('and line two')),
+                                    dd(p(t('and line three\n'))))))))),
       ],
     ],
     [
@@ -347,34 +255,16 @@ Paragraph.
    --Attribution 2
 `,
       [
-        new Paragraph({ children: [new Text({ text: 'Paragraph.\n' })] }),
-        new BlockQuote({
-          children: [
-            new Paragraph({ children: [new Text({ text: '-- Not a valid attribution\n' })] }),
-            new Paragraph({ children: [new Text({ text: 'Block quote 1.\n' })] }),
-          ],
-          attribution: new Attribution({
-            children: [
-              new Text({ text: 'Attribution 1\n' }),
-            ],
-          }),
-        }),
-        new BlockQuote({
-          children: [
-            new Paragraph({ children: [new Text({ text: '--Invalid attribution\n' })] }),
-            new Paragraph({ children: [new Text({ text: 'Block quote 2.\n' })] }),
-          ],
-          attribution: new Attribution({
-            children: [
-              new Text({ text: 'Attribution 2\n' }),
-            ],
-          }),
-        }),
+        p(t('Paragraph.\n')),
+        blockquote(p(t('-- Not a valid attribution\n')),
+                   p(t('Block quote 1.\n')),
+                   attribution(t('Attribution 1\n'))),
+        blockquote(p(t('--Invalid attribution\n')),
+                   p(t('Block quote 2.\n')),
+                   attribution(t('Attribution 2\n'))),
       ],
     ],
   ].forEach(([title, input, children]) => {
-    it(`should parse ${title} correctly`, () => {
-      assert.deepStrictEqual(RST.parse(input).toJS(), new Document({ children }).toJS());
-    });
+    it(`should parse ${title} correctly`, () => assertNode(input, children));
   });
 });
