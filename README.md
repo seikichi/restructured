@@ -10,6 +10,25 @@ A reStructuredText parser for JavaScript.
 
 ## Example
 
+```bash
+> npm install -g restructured
+> echo 'Hello, world' | restructured | jq
+{
+  "type": "document",
+  "children": [
+    {
+      "type": "paragraph",
+      "children": [
+        {
+          "type": "text",
+          "value": "Hello, world\n"
+        }
+      ]
+    }
+  ]
+}
+```
+
 Consider the following script.
 
 ```javascript
@@ -40,34 +59,34 @@ The above script outputs the following JSON.
   "children": [
     {
       "type": "section",
-      "title": {
-        "type": "title",
-        "children": [
-          {
-            "type": "text",
-            "text": "Title"
-          }
-        ]
-      },
       "children": [
         {
-          "type": "section",
-          "title": {
-            "type": "title",
-            "children": [
-              {
-                "type": "text",
-                "text": "Subtitle"
-              }
-            ]
-          },
+          "type": "title",
           "children": [
+            {
+              "type": "text",
+              "value": "Title"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "children": [
+            {
+              "type": "title",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "Subtitle"
+                }
+              ]
+            },
             {
               "type": "paragraph",
               "children": [
                 {
                   "type": "text",
-                  "text": "This is a paragraph.\n"
+                  "value": "This is a paragraph.\n"
                 }
               ]
             },
@@ -82,7 +101,7 @@ The above script outputs the following JSON.
                       "children": [
                         {
                           "type": "text",
-                          "text": "This is item 1\n"
+                          "value": "This is item 1\n"
                         }
                       ]
                     }
@@ -96,7 +115,7 @@ The above script outputs the following JSON.
                       "children": [
                         {
                           "type": "text",
-                          "text": "This is item 2\n"
+                          "value": "This is item 2\n"
                         }
                       ]
                     }
@@ -110,6 +129,7 @@ The above script outputs the following JSON.
     }
   ]
 }
+
 ```
 
 ## Progress
