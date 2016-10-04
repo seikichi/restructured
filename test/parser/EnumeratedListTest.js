@@ -1,5 +1,4 @@
-import Elements from '../../lib/Elements';
-import { assertNode, p, ol, li, t } from '../TestUtils';
+import { assertNode, p, ol, li, t, dl, dli, dt, dd } from '../TestUtils';
 
 describe('RST.parse', () => {
   [
@@ -185,16 +184,7 @@ iiii. iiii
         ol(li(p(t('i\n'))),
            li(p(t('ii\n'))),
            li(p(t('iii\n')))),
-        new Elements.DefinitionList({
-          children: [
-            new Elements.DefinitionListItem({
-              children: [
-                new Elements.Term({ children: [t('iiii. iiii')] }),
-                new Elements.Definition({ children: [p(t('second line\n'))] }),
-              ],
-            }),
-          ],
-        }),
+        dl(dli(dt(t('iiii. iiii')), dd(p(t('second line\n'))))),
         p(t('(LCD) is an acronym made up of Roman numerals\n')),
         p(t('(livid) is a word made up of Roman numerals\n')),
         p(t('(CIVIL) is another such word\n')),
