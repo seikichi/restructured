@@ -10,7 +10,7 @@ InlineMarkupBeggining =
                              NamedSimpleHyperlinkReference)
 
 Paragraph = children:(SameIndent ParagraphBlock)+ &((LiteralBlockWithoutIndent  SkipIndentCheck$) / BlankLines / EndIndent) {
-  return new Elements.Paragraph({ children: _.flatten(mapByIndex(children, 1)), position: location() });
+  return new Elements.Paragraph({ children: _.flatten(mapByIndex(children, 1)) });
 }
 
 ParagraphBlock =
@@ -23,18 +23,18 @@ ParagraphBlock =
     var texts = mapByIndex(children, 1);
     if (last) {
       if (texts[texts.length - 1].type !== 'text') {
-        return texts.concat(new Text({ value: last, position: location() }));
+        return texts.concat(new Text({ value: last }));
       }
-      texts[texts.length - 1] = new Text({ value: texts[texts.length - 1].value + last, position: location() });
+      texts[texts.length - 1] = new Text({ value: texts[texts.length - 1].value + last });
     }
     return texts;
   }
 
 ParagraphText =
   text:(!(Endline / LiteralBlockWithoutIndent) !InlineMarkupBeggining .)+ &(Endline / LiteralBlockWithoutIndent) {
-    return new Text({ value: mapByIndex(text, 2).join(''), position: location() });
+    return new Text({ value: mapByIndex(text, 2).join('') });
   } / text:(!Endline !InlineMarkupBeggining .)* last:InlineMarkupPreceding {
-    return new Text({ value: mapByIndex(text, 2).join('') + last, position: location() });
+    return new Text({ value: mapByIndex(text, 2).join('') + last });
   }
 
 OnelineParagraph = (InlineMarkupWithoutNewline / OnelineText)+
@@ -43,8 +43,8 @@ OnelineText =
   text:(!Endline !InlineMarkupBeggining .)+ last:(!Endline InlineMarkupPreceding)? {
     var s = mapByIndex(text, 2).join('');
     if (!_.isNull(last)) { s += last[1]; }
-    return new Text({ value: s, position: location() });
+    return new Text({ value: s });
   } / text:(!Endline !InlineMarkupBeggining .)* last:(!Endline InlineMarkupPreceding) {
     var s = mapByIndex(text, 2).join('') + last[1];
-    return new Text({ value: s, position: location() });
+    return new Text({ value: s });
   }

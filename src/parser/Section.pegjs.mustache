@@ -5,7 +5,7 @@ Section =
   children:((IsSubSection Section) / (!IsSection Transition) / (!IsSection BodyElement))* {
     sectionState.popSection();
 
-    return new Elements.Section({ children: [title].concat(mapByIndex(children, 1)), position: location() });
+    return new Elements.Section({ children: [title].concat(mapByIndex(children, 1)) });
   }
 
 IsSection = &(BlankLines? SectionLine !BlankLines RawLine SectionLine) /

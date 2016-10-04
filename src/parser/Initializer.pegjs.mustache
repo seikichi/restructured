@@ -8,7 +8,15 @@
   };
 
   // nodes
-  var Elements = require('./Elements').default;
+  var Elements = {};
+  _.forEach(require('./Elements').default, (ctor, name) => {
+    function wrapped(params) {
+      ctor.apply(this, [Object.assign({ }, { position: location() }, params)]);
+    }
+    wrapped.prototype = ctor.prototype;
+    Elements[name] = wrapped;
+  });
+
   var Text = Elements.Text;
 
   // variables

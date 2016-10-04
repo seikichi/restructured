@@ -20,7 +20,7 @@ RawLine =
 
 NotEmptyRawLine =
   raw:(!Endline .)+ Endline {
-    return { raw: _.map(raw, function (v) { return v[1]; }).join(''), position: location() };
+    return { raw: _.map(raw, function (v) { return v[1]; }).join('') };
   }
 
 UnknownLine = line:NotEmptyRawLine {
