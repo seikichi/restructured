@@ -1,7 +1,7 @@
 {
   "name": "restructured",
   "description": "A reStructuredText parser for JavaScript",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "author": "seikichi",
   "bin": {
     "restructured": "bin/restructured.js"
