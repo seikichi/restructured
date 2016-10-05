@@ -4,7 +4,8 @@ InlineMarkupStartString = '**' / '*' / '``' / '`' / '|' / '_`'
 InlineMarkupBeggining =
   p:InlineMarkupPreceding s:InlineMarkupStartString !Endline !Whitespace f:. &{
     return !(p === '*' && s === '*') && !ParserUtil.isMatchPunctuations(p, f);
-  } / InlineMarkupPreceding (FootnoteReference /
+  } / InlineMarkupPreceding (InterpretedText /
+                             FootnoteReference /
                              CitationReference /
                              AnonymousSimpleHyperlinkReference /
                              NamedSimpleHyperlinkReference)

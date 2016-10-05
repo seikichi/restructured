@@ -12,6 +12,11 @@ describe('RST.parse', () => {
       ':title:`interpreted`',
       [p(interpreted('title', t('interpreted')))],
     ],
+    [
+      'interpreted texts',
+      '`foo` :x:`bar` :x:y',
+      [p(interpreted(t('foo')), t(' '), interpreted('x', t('bar')), t(' :x:y'))],
+    ],
   ].forEach(([title, input, children]) => {
     it(`should parse ${title} correctly`, () => assertNode(input, children));
   });
