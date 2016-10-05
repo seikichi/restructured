@@ -20,10 +20,12 @@ _.forEach(Type.valueTypes, (type, name) => {
 
 _.forEach(Type.parentTypes, (type, name) => {
   Elements[capitalize(name)] = class {
-    constructor({ children = [], position }) {
+    constructor({ children = [], position, role = null }) {
       this.type = type;
       this.children = children;
       this.position = position;
+
+      if (type === 'interpreted_text') { this.role = role; }
     }
   };
 });

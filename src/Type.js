@@ -30,6 +30,8 @@ const parents = [
   // Error Handling
   'system_message', 'problematic',
   'unknown',
+  // restructured Original Elements
+  'interpreted_text',
 ];
 
 const Type = {

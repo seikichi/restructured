@@ -98,3 +98,10 @@ export function line(...children) {
 export function lineblock(...children) {
   return new Elements.LineBlock({ children });
 }
+
+export function interpreted(...children) {
+  if (_.isString(children[0])) {
+    return new Elements.InterpretedText({ role: children[0], children: children.slice(1) });
+  }
+  return new Elements.InterpretedText({ children });
+}
