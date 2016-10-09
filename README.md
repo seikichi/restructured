@@ -1,5 +1,6 @@
 # restructured
 
+[![NPM](https://nodei.co/npm/restructured.svg?mini=true)](https://npmjs.org/package/restructured)
 [![Build Status](https://travis-ci.org/seikichi/restructured.svg?branch=master)](https://travis-ci.org/seikichi/restructured)
 
 A reStructuredText parser for JavaScript.
