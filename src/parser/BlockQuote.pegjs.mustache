@@ -3,21 +3,23 @@ BlockQuote = NestedBlockQuote / SimpleBlockQuote
 NestedBlockQuote =
   blanklines:BlankLines?
   indent:PushFirstIndent$
-    nested:(BlockQuoteBody / FailbackIndent$)
-    attribution:Attribution?
+    inner:InnerBlockQuote
     &(BlankLines ShallowIndent / FailbackIndent$)
   PopIndent$
   outer:BlockQuote {
     var innerIndent = { width: indent.width, offset: indent.width - outer.indent.width };
-    var first = new Elements.BlockQuote({
-      indent: innerIndent,
-      children: nested.concat(attribution || []),
-    });
+    inner.indent = innerIndent;
 
-    var children = [first].concat(outer.children);
+    var children = [inner].concat(outer.children);
     var indent = outer.indent;
     return new Elements.BlockQuote({ indent, blanklines, children });
   }
+
+InnerBlockQuote =
+  nested:(BlockQuoteBody / FailbackIndent$)
+  attribution:Attribution? {
+  return new Elements.BlockQuote({ children: nested.concat(attribution || []) });
+}
 
 SimpleBlockQuote =
   blanklines:BlankLines?

@@ -8,19 +8,22 @@ DefinitionListItem =
   term:DefinitionTerm
   classifiers:(Whitespace+ ':' Whitespace+ DefinitionClassifier)* Whitespace* Newline
   indent:PushFirstIndent$
-  body:(BodyElement+ / FailbackIndent$)
+  body:(DefinitionListBody / FailbackIndent$)
   PopIndent$ {
     var classifiers = mapByIndex(classifiers, 3);
-    var definition = new Elements.Definition({ children: body });
     return new Elements.DefinitionListItem({
       blanklines,
       indent,
-      children: [term, ...classifiers, definition],
+      children: [term, ...classifiers, body],
     });
   }
 
 DefinitionTerm = children:(InlineMarkupWithoutNewline / DefinitionTermText)+ {
   return new Elements.Term({ children });
+}
+
+DefinitionListBody = children:BodyElement+ {
+  return new Elements.Definition({ children });
 }
 
 DefinitionClassifierBeggining = Whitespace+ ':' Whitespace+
