@@ -168,10 +168,10 @@ term 2
   bullet paragraph 3
 `,
       [
-        ul(li(p(t('bullet paragraph 1\n')),
-              p(t('bullet paragraph 2\n')),
-              comment(t('comment between bullet paragraphs 2 and 3')),
-              p(t('bullet paragraph 3\n')))),
+        ul('+', li(p(t('bullet paragraph 1\n')),
+                   p(t('bullet paragraph 2\n')),
+                   comment(t('comment between bullet paragraphs 2 and 3')),
+                   p(t('bullet paragraph 3\n')))),
       ],
     ],
     [
@@ -184,9 +184,9 @@ term 2
   bullet paragraph 2
 `,
       [
-        ul(li(p(t('bullet paragraph 1\n')),
-              comment(t('comment between bullet paragraphs 1 (leader) and 2')),
-              p(t('bullet paragraph 2\n')))),
+        ul('+', li(p(t('bullet paragraph 1\n')),
+                   comment(t('comment between bullet paragraphs 1 (leader) and 2')),
+                   p(t('bullet paragraph 2\n')))),
       ],
     ],
     [
@@ -196,7 +196,7 @@ term 2
 
   .. trailing comment
 `,
-      [ul(li(p(t('bullet\n')), comment(t('trailing comment'))))],
+      [ul('+', li(p(t('bullet\n')), comment(t('trailing comment'))))],
     ],
   ].forEach(([title, input, children]) => {
     it(`should parse ${title} correctly`, () => assertNode(input, children));

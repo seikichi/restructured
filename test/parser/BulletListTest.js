@@ -16,7 +16,7 @@ describe('RST.parse', () => {
 
 * item 2
 `,
-      [ul(li(p(t('item 1\n'))), li(p(t('item 2\n'))))],
+      [ul('*', li(p(t('item 1\n'))), li(p(t('item 2\n'))))],
     ],
     [
       'bullet list items no blank line between',
@@ -28,7 +28,7 @@ No blank line between:
 `,
       [
         p(t('No blank line between:\n')),
-        ul(li(p(t('item 1\n'))), li(p(t('item 2\n')))),
+        ul('+', li(p(t('item 1\n'))), li(p(t('item 2\n')))),
       ],
     ],
     [
@@ -72,8 +72,8 @@ Different bullets:
       [
         p(t('Different bullets:\n')),
         ul(li(p(t('item 1\n')))),
-        ul(li(p(t('item 2\n')))),
-        ul(li(p(t('item 3\n')))),
+        ul('+', li(p(t('item 2\n')))),
+        ul('*', li(p(t('item 3\n')))),
         ul(li(p(t('item 4\n')))),
       ],
     ],
@@ -99,9 +99,9 @@ Unicode bullets:
 `,
       [
         p(t('Unicode bullets:\n')),
-        ul(li(p(t('BULLET\n')))),
-        ul(li(p(t('TRIANGULAR BULLET\n')))),
-        ul(li(p(t('HYPHEN BULLET\n')))),
+        ul('\u2022', li(p(t('BULLET\n')))),
+        ul('\u2023', li(p(t('TRIANGULAR BULLET\n')))),
+        ul('\u2043', li(p(t('HYPHEN BULLET\n')))),
       ],
     ],
     [

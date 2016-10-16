@@ -14,7 +14,10 @@ export function p(...children) {
 }
 
 export function ul(...children) {
-  return new Elements.BulletList({ children });
+  if (_.isString(children[0])) {
+    return new Elements.BulletList({ bullet: children[0], children: children.slice(1) });
+  }
+  return new Elements.BulletList({ bullet: '-', children });
 }
 
 export function ol(...children) {

@@ -93,6 +93,7 @@ The above script outputs the following JSON.
             },
             {
               "type": "bullet_list",
+              "bullet": "-",
               "children": [
                 {
                   "type": "list_item",
