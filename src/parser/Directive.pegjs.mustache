@@ -1,0 +1,49 @@
+DirectiveType =
+  first:([A-Za-z] !'::' [-_+:.]?)*
+  last:[A-Za-z] {
+    return _.flatMap(first, v => _.compact(v)).concat(last).join('');
+  }
+// Directive types are case-insensitive single words
+// (alphanumerics plus isolated internal hyphens,
+//  underscores, plus signs, colons, and periods; no whitespace)
+
+Directive = DirectiveStartFromFirstLine / DirectiveStartFromNextLine
+
+DirectiveStartFromFirstLine =
+  SameIndent '..' Whitespace+ directive:DirectiveType '::' Whitespace+ &Nonspacechar head:RawLine tail:(BlankLines? DirectiveBlock)? {
+    var children = [new Elements.Text({ value: head.raw })];
+    var indent = null;
+    if (!_.isNull(tail)) {
+      indent = tail[1].indent;
+      children = children.concat(tail[1].children);
+    }
+    return new Elements.Directive({ directive, indent, children });
+  }
+
+DirectiveStartFromNextLine =
+  SameIndent '..' Whitespace+ directive:DirectiveType '::' Whitespace* Newline block:DirectiveBlock? {
+    if (!_.isNull(block)) {
+      return new Elements.Directive({
+        directive: directive,
+        indent: block.indent,
+        children: block.children,
+      });
+    }
+    return new Elements.Directive({ directive });
+  }
+
+DirectiveBlock =
+  BlankLines?
+  indent:PushCommonIndent$
+  blocks:(
+    (Whitespace* Newline { return null; } / SameOrDeepIndent NotEmptyRawLine)+ /
+      FailbackIndent$
+  )
+  PopIndent$ {
+    var children = _.map(_.reject(blocks, _.isNull), function (v) {
+      var ws = v[0], raw = v[1].raw;
+      var text = _.repeat(' ', ws.length - indent.width) + raw;
+      return new Elements.Text({ value: text });
+    });
+    return new Elements.Directive({ indent, children });
+  }

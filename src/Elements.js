@@ -28,6 +28,7 @@ _.forEach(Type.parentTypes, (type, name) => {
       depth = null,
       role = null,
       indent = null,
+      directive = null,
     }) {
       this.type = type;
 
@@ -39,6 +40,9 @@ _.forEach(Type.parentTypes, (type, name) => {
       }
       if (type === 'section') {
         this.depth = depth;
+      }
+      if (type === 'directive') {
+        this.directive = directive;
       }
 
       this.position = position;

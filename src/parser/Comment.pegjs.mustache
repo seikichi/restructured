@@ -3,10 +3,12 @@ Comment = CommentStartFromFirstLine / CommentStartFromNextLine
 CommentStartFromFirstLine =
   SameIndent '..' Whitespace+ &Nonspacechar head:RawLine tail:(BlankLines? CommentBlock)? {
     var children = [new Elements.Text({ value: head.raw })];
+    var indent = null;
     if (!_.isNull(tail)) {
+      indent = tail[1].indent;
       children = children.concat(tail[1].children);
     }
-    return new Elements.Comment({ children });
+    return new Elements.Comment({ indent, children });
   }
 
 CommentStartFromNextLine =
@@ -29,5 +31,5 @@ CommentBlock =
       var text = _.repeat(' ', ws.length - indent.width) + raw;
       return new Elements.Text({ value: text });
     });
-    return new Elements.Comment({ children });
+    return new Elements.Comment({ indent, children });
   }

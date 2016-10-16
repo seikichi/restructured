@@ -31,6 +31,7 @@ const parents = [
   'system_message', 'problematic',
   'unknown',
   // restructured Original Elements
+  'directive',
   'interpreted_text',
 ];
 
