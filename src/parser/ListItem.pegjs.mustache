@@ -8,7 +8,7 @@ PushListItemIndent$ = (
     &{ indentState.push(location().start.column - 1); return true; }
   ) / &(BlankLines PushFirstIndent$)
 ) {
-  return { size: currentIndentSize, diff: indentState.lastIndentDiff() };
+  return { width: currentIndentSize, offset: indentState.lastIndentDiff() };
 }
 
 NonEmptyListItem = indent:PushListItemIndent$ children:(BodyElement+ / FailbackIndent$) PopIndent$ {

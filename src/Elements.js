@@ -27,6 +27,7 @@ _.forEach(Type.parentTypes, (type, name) => {
       bullet = null,
       depth = null,
       role = null,
+      indent = null,
     }) {
       this.type = type;
 
@@ -41,6 +42,9 @@ _.forEach(Type.parentTypes, (type, name) => {
       }
 
       this.position = position;
+      if (indent) {
+        this.indent = indent;
+      }
       this.blanklines = blanklines || [];
       this.children = children;
     }

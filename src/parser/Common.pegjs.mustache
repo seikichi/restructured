@@ -72,7 +72,7 @@ PushCommonIndent$ =
         })
     )* &{ indentState.push(nextIndentSize); return true; }
   ) {
-    return { size: currentIndentSize, diff: indentState.lastIndentDiff() };
+    return { width: currentIndentSize, offset: indentState.lastIndentDiff() };
   }
 
 PushFirstIndent$ =
@@ -80,7 +80,7 @@ PushFirstIndent$ =
     indentState.push(ParserUtil.calcIndentSize(i));
     return true;
   }) {
-    return { size: currentIndentSize, diff: indentState.lastIndentDiff() };
+    return { width: currentIndentSize, offset: indentState.lastIndentDiff() };
   }
 
 SkipIndentCheck$ = &{ indentState.ignore(location().start.line); return true; }

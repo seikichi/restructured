@@ -14,6 +14,9 @@ const RST = {
       if (!options.blanklines) {
         omits.push('blanklines');
       }
+      if (!options.indent) {
+        omits.push('indent');
+      }
       return _.omit(node, omits);
     });
   },

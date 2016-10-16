@@ -26,7 +26,7 @@ CommentBlock =
   PopIndent$ {
     var children = _.map(_.reject(comments, _.isNull), function (v) {
       var ws = v[0], raw = v[1].raw;
-      var text = _.repeat(' ', ws.length - indent.size) + raw;
+      var text = _.repeat(' ', ws.length - indent.width) + raw;
       return new Elements.Text({ value: text });
     });
     return new Elements.Comment({ children });

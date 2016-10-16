@@ -8,9 +8,15 @@ NestedBlockQuote =
     &(BlankLines ShallowIndent / FailbackIndent$)
   PopIndent$
   outer:BlockQuote {
-    var first = new Elements.BlockQuote({ children: nested.concat(attribution || []) });
+    var innerIndent = { width: indent.width, offset: indent.width - outer.indent.width };
+    var first = new Elements.BlockQuote({
+      indent: innerIndent,
+      children: nested.concat(attribution || []),
+    });
+
     var children = [first].concat(outer.children);
-    return new Elements.BlockQuote({ blanklines, children });
+    var indent = outer.indent;
+    return new Elements.BlockQuote({ indent, blanklines, children });
   }
 
 SimpleBlockQuote =
@@ -20,6 +26,7 @@ SimpleBlockQuote =
     attribution:Attribution?
   PopIndent$ {
     return new Elements.BlockQuote({
+      indent,
       blanklines,
       children: children.concat(attribution || []),
     });

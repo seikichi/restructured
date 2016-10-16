@@ -45,7 +45,7 @@ PushLiteralBlockIndent$ =
     literalBlockState.push(ParserUtil.calcIndentSize(i));
     return true;
   }) {
-    return { size: literalBlockState.current(), diff: literalBlockState.diff() };
+    return { width: literalBlockState.current(), offset: literalBlockState.diff() };
   }
 
 PopLiteralBlockIndent$ = &{ literalBlockState.pop(); return true; }
