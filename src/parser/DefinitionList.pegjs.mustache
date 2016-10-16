@@ -3,7 +3,7 @@ DefinitionList = children:DefinitionListItem+ &BlankLines {
 }
 
 DefinitionListItem =
-  blanks:BlankLines?
+  blanklines:BlankLines?
   SameIndent
   term:DefinitionTerm
   classifiers:(Whitespace+ ':' Whitespace+ DefinitionClassifier)* Whitespace* Newline
@@ -12,7 +12,10 @@ DefinitionListItem =
   PopIndent$ {
     var classifiers = mapByIndex(classifiers, 3);
     var definition = new Elements.Definition({ children: body });
-    return new Elements.DefinitionListItem({ children: [term, ...classifiers, definition] });
+    return new Elements.DefinitionListItem({
+      blanklines,
+      children: [term, ...classifiers, definition],
+    });
   }
 
 DefinitionTerm = children:(InlineMarkupWithoutNewline / DefinitionTermText)+ {

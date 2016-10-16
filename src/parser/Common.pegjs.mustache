@@ -9,7 +9,7 @@ Nonspacechar = c:(!NormalizedToWhitespace .) { return c[1]; }
 BlankLines =
   lines:(Whitespace* Newline &(Whitespace* Endline))*
   last:(Whitespace* Endline) {
-    var ret = _.map(lines, function (line) { return line[0].join('') + line[1]; });
+    var ret = _.map(lines, function (line) { return line[0].join('') + (line[1] || ''); });
     return ret.concat(last[0].join('') + (last[1] || ''));
   }
 

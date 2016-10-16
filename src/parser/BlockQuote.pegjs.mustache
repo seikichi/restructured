@@ -1,7 +1,7 @@
 BlockQuote = NestedBlockQuote / SimpleBlockQuote
 
 NestedBlockQuote =
-  blanks:BlankLines?
+  blanklines:BlankLines?
   indent:PushFirstIndent$
     nested:(BlockQuoteBody / FailbackIndent$)
     attribution:Attribution?
@@ -10,16 +10,19 @@ NestedBlockQuote =
   outer:BlockQuote {
     var first = new Elements.BlockQuote({ children: nested.concat(attribution || []) });
     var children = [first].concat(outer.children);
-    return new Elements.BlockQuote({ children });
+    return new Elements.BlockQuote({ blanklines, children });
   }
 
 SimpleBlockQuote =
-  blanks:BlankLines?
+  blanklines:BlankLines?
   indent:PushFirstIndent$
     children:(BlockQuoteBody / FailbackIndent$)
     attribution:Attribution?
   PopIndent$ {
-    return new Elements.BlockQuote({ children: children.concat(attribution || []) });
+    return new Elements.BlockQuote({
+      blanklines,
+      children: children.concat(attribution || []),
+    });
   }
 
 BlockQuoteBody =
@@ -29,10 +32,10 @@ BlockQuoteBody =
   }
 
 Attribution =
-  BlankLines
+  blanklines:BlankLines
   SameIndent ('---' / '--' / '\u2014') Whitespace* &(!Endline .)
   body:(AttributionBodyWithIndent / AttributionBodyWithoutIndent) {
-    return new Elements.Attribution({ children: body.children });
+    return new Elements.Attribution({ blanklines, children: body.children });
   }
 
 PushAttributionIndent$ = &(RawLine PushFirstIndent$)

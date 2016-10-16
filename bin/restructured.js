@@ -7,6 +7,7 @@ var restructured = require('../lib/RST.js').default;
 program
   .usage('[options] < file.rst')
   .option('--position')
+  .option('--blanklines')
   .parse(process.argv)
 
 var input = fs.readFileSync('/dev/stdin', 'utf8');

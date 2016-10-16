@@ -20,7 +20,13 @@ _.forEach(Type.valueTypes, (type, name) => {
 
 _.forEach(Type.parentTypes, (type, name) => {
   Elements[capitalize(name)] = class {
-    constructor({ children = [], position, bullet = null, role = null }) {
+    constructor({
+      children = [],
+      position,
+      blanklines = [],
+      bullet = null,
+      role = null,
+    }) {
       this.type = type;
 
       if (type === 'bullet_list') {
@@ -29,9 +35,9 @@ _.forEach(Type.parentTypes, (type, name) => {
       if (type === 'interpreted_text') {
         this.role = role;
       }
-
-      this.children = children;
       this.position = position;
+      this.blanklines = blanklines || [];
+      this.children = children;
     }
   };
 });

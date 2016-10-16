@@ -1,11 +1,12 @@
 import _ from 'lodash';
 import assert from 'power-assert';
-import removePosition from 'unist-util-remove-position';
+import map from 'unist-util-map';
 import RST from '../lib/RST';
 import Elements from '../lib/Elements';
 
 export function assertNode(input, children) {
-  const actual = removePosition(new Elements.Document({ children }), true);
+  const actual = map(new Elements.Document({ children }),
+                     node => _.omit(node, ['position', 'blanklines']));
   assert.deepStrictEqual(RST.parse(input), actual);
 }
 

@@ -1,5 +1,5 @@
 BodyElementExceptBlockQuote =
-  blanks:BlankLines? element:(
+  blanklines:BlankLines? element:(
     Comment /
     LiteralBlock /
     BulletList /
@@ -8,6 +8,7 @@ BodyElementExceptBlockQuote =
     LineBlock /
     Paragraph
   ) {
+    element.blanklines = blanklines || [];
     return element;
   }
 

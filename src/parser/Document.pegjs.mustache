@@ -1,5 +1,5 @@
 Document =
   children:(Section / Transition / BodyElement / Unknown)*
-  blanks:BlankLines {
+  blanklines:BlankLines {
     return new Elements.Document({ children });
   }

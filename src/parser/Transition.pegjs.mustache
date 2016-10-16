@@ -1,8 +1,8 @@
 Transition =
-  BlankLines? // TODO(seikichi): refactor handling of blanklines
+  blanklines:BlankLines? // TODO(seikichi): refactor handling of blanklines
   marker:TransitionMarker Whitespace* Newline
   &(BlankLines) {
-    return new Elements.Transition({ children: [] });
+    return new Elements.Transition({ blanklines, children: [] });
   }
 
 TransitionMarker =
