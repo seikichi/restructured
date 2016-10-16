@@ -34,7 +34,7 @@ across lines*
 some punctuation is allowed around inline markup, e.g.
 /*emphasis*/, -*emphasis*-, and :*emphasis*: (delimiters),
 (*emphasis*), [*emphasis*], <*emphasis*>, {*emphasis*} (open/close pairs)
-*emphasis*., *emphasis*,, *emphasis*!, and *emphasis*\ (closing delimiters),
+*emphasis*., *emphasis*,, *emphasis*!, and *emphasis* (closing delimiters),
 
 but not
 )*emphasis*(, ]*emphasis*[, >*emphasis*>, }*emphasis*{ (close/open pairs),
