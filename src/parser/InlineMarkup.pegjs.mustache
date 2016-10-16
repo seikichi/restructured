@@ -166,25 +166,25 @@ NamedHyperlinkReference =
   ('`' !NormalizedToWhitespace)
   &{ markupEndString = '`_'; return true; }
   children:MarkupTail {
-    return new Elements.HyperlinkReference({ anonymous: false, simple: false, children });
+    return new Elements.Reference({ anonymous: false, simple: false, children });
   }
 
 NamedSimpleHyperlinkReference =
   ref:HyperlinkReferenceName '_' &InlineMarkupFollowing {
-    return new Elements.HyperlinkReference({ anonymous: false, simple: true, children: [new Text({ value: ref })] });
+    return new Elements.Reference({ anonymous: false, simple: true, children: [new Text({ value: ref })] });
   }
 
 AnonymousHyperlinkReference =
   ('`' !NormalizedToWhitespace)
   &{ markupEndString = '`__'; return true; }
   children:MarkupTail {
-    return new Elements.HyperlinkReference({ anonymous: true, simple: false, children });
+    return new Elements.Reference({ anonymous: true, simple: false, children });
     return {children};
   }
 
 AnonymousSimpleHyperlinkReference =
   ref:HyperlinkReferenceName '__' &InlineMarkupFollowing {
-    return new Elements.HyperlinkReference({ anonymous: true, simple: true, children: [new Text({ value: ref })] });
+    return new Elements.Reference({ anonymous: true, simple: true, children: [new Text({ value: ref })] });
   }
 
 // Reference
