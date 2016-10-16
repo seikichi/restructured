@@ -153,6 +153,9 @@
       popSection: function () {
         --currentIndex;
       },
+      depth: function() {
+        return currentIndex + 1;
+      },
     };
   }());
 }

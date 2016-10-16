@@ -25,6 +25,7 @@ _.forEach(Type.parentTypes, (type, name) => {
       position,
       blanklines = [],
       bullet = null,
+      depth = null,
       role = null,
     }) {
       this.type = type;
@@ -35,6 +36,10 @@ _.forEach(Type.parentTypes, (type, name) => {
       if (type === 'interpreted_text') {
         this.role = role;
       }
+      if (type === 'section') {
+        this.depth = depth;
+      }
+
       this.position = position;
       this.blanklines = blanklines || [];
       this.children = children;

@@ -72,7 +72,7 @@ export function pre(...children) {
 }
 
 export function section(...children) {
-  return new Elements.Section({ children });
+  return new Elements.Section({ depth: children[0], children: children.slice(1) });
 }
 
 export function title(...children) {

@@ -3,9 +3,14 @@ Section =
   IsSubSection
   title:(SectionWithOverline / SectionWithoutOverline)
   children:((IsSubSection Section) / (!IsSection Transition) / (!IsSection BodyElement))* {
+    const depth = sectionState.depth();
     sectionState.popSection();
 
-    return new Elements.Section({ blanklines, children: [title].concat(mapByIndex(children, 1)) });
+    return new Elements.Section({
+      blanklines,
+      depth,
+      children: [title].concat(mapByIndex(children, 1)),
+    });
   }
 
 IsSection = &(BlankLines? SectionLine !BlankLines RawLine SectionLine) /

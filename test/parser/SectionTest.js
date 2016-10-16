@@ -19,7 +19,7 @@ Title
 
 Paragraph.
 `,
-      [section(title(t('Title')), p(t('Paragraph.\n')))],
+      [section(1, title(t('Title')), p(t('Paragraph.\n')))],
     ],
     [
       'a section with a paragraph (no blank line)',
@@ -28,7 +28,7 @@ Title
 =====
 Paragraph.
 `,
-      [section(title(t('Title')), p(t('Paragraph.\n')))],
+      [section(1, title(t('Title')), p(t('Paragraph.\n')))],
     ],
     [
       'a section surrounded by paragraphs',
@@ -40,7 +40,7 @@ Title
 
 Paragraph.
 `,
-      [p(t('Paragraph.\n')), section(title(t('Title')), p(t('Paragraph.\n')))],
+      [p(t('Paragraph.\n')), section(1, title(t('Title')), p(t('Paragraph.\n')))],
     ],
     [
       'a section with overline title',
@@ -51,7 +51,7 @@ Title
 
 Test overline title.
 `,
-      [section(title(t('Title')), p(t('Test overline title.\n')))],
+      [section(1, title(t('Title')), p(t('Test overline title.\n')))],
     ],
     [
       'overline title with inset',
@@ -62,7 +62,7 @@ Test overline title.
 
 Test overline title.
 `,
-      [section(title(t('Title')), p(t('Test overline title.\n')))],
+      [section(1, title(t('Title')), p(t('Test overline title.\n')))],
     ],
     [
       'nested sections',
@@ -84,12 +84,14 @@ Title 4
 Paragraph 4.
 `,
       [
-        section(title(t('Title 1')),
+        section(1,
+                title(t('Title 1')),
                 p(t('Paragraph 1.\n')),
-                section(title(t('Title 2')), p(t('Paragraph 2.\n')))),
-        section(title(t('Title 3')),
+                section(2, title(t('Title 2')), p(t('Paragraph 2.\n')))),
+        section(1,
+                title(t('Title 3')),
                 p(t('Paragraph 3.\n')),
-                section(title(t('Title 4')), p(t('Paragraph 4.\n')))),
+                section(2, title(t('Title 4')), p(t('Paragraph 4.\n')))),
       ],
     ],
     [
@@ -119,12 +121,13 @@ Paragraph 4.
 `,
       [
         p(t('Test return to existing, highest-level section (Title 3, with overlines).\n')),
-        section(title(t('Title 1')),
+        section(1,
+                title(t('Title 1')),
                 p(t('Paragraph 1.\n')),
-                section(title(t('Title 2')), p(t('Paragraph 2.\n')))),
-        section(title(t('Title 3')),
+                section(2, title(t('Title 2')), p(t('Paragraph 2.\n')))),
+        section(1, title(t('Title 3')),
                 p(t('Paragraph 3.\n')),
-                section(title(t('Title 4')), p(t('Paragraph 4.\n')))),
+                section(2, title(t('Title 4')), p(t('Paragraph 4.\n')))),
       ],
     ],
     [
@@ -147,13 +150,16 @@ Title 4
 Paragraph 4.
 `,
       [
-        section(title(t('Title 1')),
+        section(1,
+                title(t('Title 1')),
                 p(t('Paragraph 1.\n')),
-                section(title(t('Title 2')),
+                section(2,
+                        title(t('Title 2')),
                         p(t('Paragraph 2.\n')),
-                        section(title(t('Title 3')),
+                        section(3,
+                                title(t('Title 3')),
                                 p(t('Paragraph 3.\n')))),
-                section(title(t('Title 4')), p(t('Paragraph 4.\n')))),
+                section(2, title(t('Title 4')), p(t('Paragraph 4.\n')))),
       ],
     ],
     [
@@ -165,7 +171,8 @@ Title containing *inline* **markup**
 Paragraph.
 `,
       [
-        section(title(t('Title containing '),
+        section(1,
+                title(t('Title containing '),
                       em(t('inline')),
                       t(' '),
                       strong(t('markup'))),
@@ -181,7 +188,8 @@ Paragraph.
 Paragraph.
 `,
       [
-        section(title(t('1. Numbered Title')),
+        section(1,
+                title(t('1. Numbered Title')),
                 p(t('Paragraph.\n'))),
       ],
     ],
@@ -193,7 +201,7 @@ ABC
 
 Short title.
 `,
-      [section(title(t('ABC')), p(t('Short title.\n')))],
+      [section(1, title(t('ABC')), p(t('Short title.\n')))],
     ],
     [
       'blockquote like section',
@@ -216,7 +224,7 @@ Paragraph
 Empty Section
 =============
 `,
-      [section(title(t('Empty Section')))],
+      [section(1, title(t('Empty Section')))],
     ],
     [
       'sections with short titles',
@@ -236,10 +244,12 @@ The parser currently contains a work-around kludge.
 Without it, the parser ends up in an infinite loop.
 `,
       [
-        section(title(t('One')),
+        section(1,
+                title(t('One')),
                 p(t('The bubble-up parser strategy conflicts with short titles\n'),
                   t('(<= 3 char-long over- & underlines).\n'))),
-        section(title(t('Two')),
+        section(1,
+                title(t('Two')),
                 p(t('The parser currently contains a work-around kludge.\n'),
                   t('Without it, the parser ends up in an infinite loop.\n'))),
       ],

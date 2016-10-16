@@ -60,6 +60,7 @@ The above script outputs the following JSON.
   "children": [
     {
       "type": "section",
+      "depth": 1,
       "children": [
         {
           "type": "title",
@@ -72,6 +73,7 @@ The above script outputs the following JSON.
         },
         {
           "type": "section",
+          "depth": 2,
           "children": [
             {
               "type": "title",
