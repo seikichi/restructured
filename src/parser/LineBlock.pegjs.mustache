@@ -1,16 +1,16 @@
 LineBlock = NestedLineBlock / SimpleLineBlock
 
 NestedLineBlock =
-  indent:PushLiteralBlockIndent$
+  indent:PushLineBlockIndent$
   head:Line tail:(Line / LineBlock)*
-  PopLiteralBlockIndent$
+  PopLineBlockIndent$
   outer:LineBlock {
     var first = new Elements.LineBlock({ children: [head].concat(tail) });
     var children = [first].concat(outer.children);
     return new Elements.LineBlock({ children });
 }
 
-SimpleLineBlock = indent:PushLiteralBlockIndent$ block:(LineBolockMain / FailbackLiteralBlockIndent$) PopLiteralBlockIndent$ {
+SimpleLineBlock = indent:PushLineBlockIndent$ block:(LineBolockMain / FailbackLineBlockIndent$) PopLineBlockIndent$ {
   return block;
 }
 
@@ -20,7 +20,7 @@ LineBolockMain = head:Line tail:(Line / LineBlock)* &BlankLines {
 
 Line = NonEmptyLine / EmptyLine
 
-NonEmptyLine = SameIndent '| ' SameLiteralBlockIndent children:OnelineParagraph Newline {
+NonEmptyLine = SameIndent '| ' SameLineBlockIndent children:OnelineParagraph Newline {
   return new Elements.Line({ children });
 }
 
@@ -28,26 +28,26 @@ EmptyLine = SameIndent '|' Whitespace* Newline {
   return new Elements.Line({ children: [] });
 }
 
-SameLiteralBlockIndent = i:Whitespace* &{
-  return ParserUtil.calcIndentSize(i) === literalBlockState.current();
+SameLineBlockIndent = i:Whitespace* &{
+  return ParserUtil.calcIndentSize(i) === lineBlockState.current();
 } {
   return i.join('');
 }
 
-DeepLiteralBlockIndent = i:Whitespace* &{
-  return ParserUtil.calcIndentSize(i) > literalBlockState.current();
+DeepLineBlockIndent = i:Whitespace* &{
+  return ParserUtil.calcIndentSize(i) > lineBlockState.current();
 } {
   return i.join('');
 }
 
-PushLiteralBlockIndent$ =
-  &(EmptyLine* SameIndent '| ' i:DeepLiteralBlockIndent &{
-    literalBlockState.push(ParserUtil.calcIndentSize(i));
+PushLineBlockIndent$ =
+  &(EmptyLine* SameIndent '| ' i:DeepLineBlockIndent &{
+    lineBlockState.push(ParserUtil.calcIndentSize(i));
     return true;
   }) {
-    return { width: literalBlockState.current(), offset: literalBlockState.diff() };
+    return { width: lineBlockState.current(), offset: lineBlockState.diff() };
   }
 
-PopLiteralBlockIndent$ = &{ literalBlockState.pop(); return true; }
+PopLineBlockIndent$ = &{ lineBlockState.pop(); return true; }
 
-FailbackLiteralBlockIndent$ = PopLiteralBlockIndent$ Fail$
+FailbackLineBlockIndent$ = PopLineBlockIndent$ Fail$
