@@ -1,7 +1,8 @@
+import _ from 'lodash';
 import React from 'react';
 import ReST from './ReST';
 
-export default function ReSTListItem({ element, level, key }) {
-  const children = element.children.map((e, key) => new ReST({ element: e, level, key })).toArray();
+export default function ReSTListItem({ element, key }) {
+  const children = _.map(element.children, (e, k) => new ReST({ element: e, key: k }));
   return <li key={key}>{children}</li>;
 }

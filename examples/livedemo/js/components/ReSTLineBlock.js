@@ -2,7 +2,7 @@ import _ from 'lodash';
 import React from 'react';
 import ReST from './ReST';
 
-export default function ReSTParagraph({ element, key }) {
+export default function ReSTLineBlock({ element, key }) {
   const children = _.map(element.children, (e, k) => new ReST({ element: e, key: k }));
-  return <blockquote key={key}>{children}</blockquote>;
+  return <div className="line-block" key={key}>{children}</div>;
 }

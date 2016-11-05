@@ -23,8 +23,7 @@ export default class App extends React.Component {
         <Grid>
           <Row>
             <Col xs={6}>
-              <ReSTTextField defaultValue={this.props.text}
-                             onChange={(event) => { this.onTextChange(event); }} />
+              <ReSTTextField defaultValue={this.props.text} onChange={(event) => { this.onTextChange(event); }} />
             </Col>
             <Col xs={6} style={{ backgroundColor: 'rgb(230, 230, 230)' }}>
               <ReST element={this.state.element} />
