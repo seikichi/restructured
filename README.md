@@ -160,6 +160,8 @@ The above script outputs the following JSON.
   - [ ] Tables
     - [ ] Grid Tables
     - [ ] Simple Tables
+    - [ ] List tables
+    - [ ] CSV tables
   - [ ] Explicit Markup Blocks
     - [ ] Footnotes
       - [ ] Auto-Numbered Footnotes
