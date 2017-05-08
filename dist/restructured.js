@@ -3,10 +3,10 @@
 		module.exports = factory(require("lodash"));
 	else if(typeof define === 'function' && define.amd)
 		define(["lodash"], factory);
-	else {
-		var a = typeof exports === 'object' ? factory(require("lodash")) : factory(root["_"]);
-		for(var i in a) (typeof exports === 'object' ? exports : root)[i] = a[i];
-	}
+	else if(typeof exports === 'object')
+		exports["restructured"] = factory(require("lodash"));
+	else
+		root["restructured"] = factory(root["_"]);
 })(this, function(__WEBPACK_EXTERNAL_MODULE_0__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 9);
+/******/ 	return __webpack_require__(__webpack_require__.s = 6);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -232,7 +232,7 @@ var _unistUtilMap = __webpack_require__(8);
 
 var _unistUtilMap2 = _interopRequireDefault(_unistUtilMap);
 
-var _Parser = __webpack_require__(5);
+var _Parser = __webpack_require__(4);
 
 var _Parser2 = _interopRequireDefault(_Parser);
 
@@ -264,12 +264,6 @@ exports.default = RST;
 
 /***/ }),
 /* 3 */
-/***/ (function(module, exports) {
-
-throw new Error("Module parse failed: /Users/bung/js_works/restructured/node_modules/webpack/bin/webpack.js Unexpected character '#' (1:0)\nYou may need an appropriate loader to handle this file type.\n| #!/usr/bin/env node\n| \n| /*");
-
-/***/ }),
-/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -285,7 +279,7 @@ var _lodash = __webpack_require__(0);
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _Type = __webpack_require__(6);
+var _Type = __webpack_require__(5);
 
 var _Type2 = _interopRequireDefault(_Type);
 
@@ -488,7 +482,7 @@ Elements.Enumerator = function () {
 exports.default = Elements;
 
 /***/ }),
-/* 5 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12180,7 +12174,7 @@ function peg$parse(input, options) {
 
   // nodes
   var Elements = {};
-  _.forEach(__webpack_require__(4).default, function (ctor, name) {
+  _.forEach(__webpack_require__(3).default, function (ctor, name) {
     function wrapped(params) {
       ctor.apply(this, [Object.assign({}, { position: location() }, params)]);
     }
@@ -12349,7 +12343,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 6 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -12436,6 +12430,21 @@ try {
 }
 
 exports.default = Type;
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _RST = __webpack_require__(2);
+
+var _RST2 = _interopRequireDefault(_RST);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+module.exports = _RST2.default;
 
 /***/ }),
 /* 7 */
@@ -12553,15 +12562,6 @@ module.exports = function map(ast, mapFn) {
         return newNode;
     }(ast, null, null));
 };
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-__webpack_require__(2);
-(function webpackMissingModule() { throw new Error("Cannot find module \"[object Object]\""); }());
-module.exports = __webpack_require__(3);
-
 
 /***/ })
 /******/ ]);

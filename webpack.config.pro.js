@@ -6,6 +6,7 @@ module.exports = {
   output: {
      filename: 'restructured.min.js',
      path: path.resolve(__dirname, 'dist'),
+     library:"restructured",  
      libraryTarget: 'umd'
   },
    externals: {
