@@ -1,0 +1,30 @@
+{
+  "name": "restructured",
+  "description": "A reStructuredText parser for JavaScript",
+  "main": [
+    "dist/restructured.js"
+  ],
+  "authors": [
+    "seikichi"
+  ],
+  "license": {
+    "type": "MIT",
+    "url": "http://seikichi.mit-license.org/"
+  },
+  "keywords": [
+    "reST",
+    "reStructuredText",
+    "rst"
+  ],
+  "homepage": "https://github.com/bung87/restructured",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "lodash": "^4.17.4"
+  }
+}

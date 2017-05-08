@@ -18,8 +18,9 @@
   "devDependencies": {
     "babel": "^6.3.26",
     "babel-cli": "^6.3.17",
+    "babel-loader": "^7.0.0",
     "babel-plugin-unassert": "^2.1.1",
-    "babel-preset-es2015": "^6.3.13",
+    "babel-preset-es2015": "^6.24.1",
     "eslint": "^3.4.0",
     "eslint-config-airbnb": "^10.0.1",
     "eslint-plugin-import": "^1.14.0",
@@ -30,8 +31,10 @@
     "foreman": "^2.0.0",
     "mocha": "^3.0.2",
     "mustache": "^2.2.1",
+    "mustache-loader": "^0.4.1",
     "pegjs": "^0.10.0",
-    "watch": "^0.19.2"
+    "watch": "^0.19.2",
+    "webpack": "^2.5.1"
   },
   "files": [
     "bin",
@@ -53,6 +56,7 @@
     "url": "https://github.com/seikichi/restructured.git"
   },
   "scripts": {
+    "dist":"./node_modules/.bin/webpack --config webpack.config.dev.js && ./node_modules/.bin/webpack --config webpack.config.pro.js",
     "build": "mkdir -p lib/ && npm run build:parser && babel src --source-maps inline --out-dir lib",
     "build:parser": "npm run build:parser:mustache && npm run build:parser:pegjs",
     "build:parser:mustache": "mustache $(for f in src/parser/*.mustache; do echo -p \"$f\"; done) config/parser.json src/Parser.pegjs.mustache > src/Parser.pegjs",

@@ -3,7 +3,8 @@
 *.pegjs
 # Parser.js is generated from PEG.js
 src/Parser.js
-
+.DS_Store
+bower_components/
 # Emacs
 *~
 \#*
