@@ -10,6 +10,7 @@ A reStructuredText parser for JavaScript.
 [demo](https://seikichi.github.io/restructured/).
 
 ## Example
+### CLI  
 
 ```bash
 > npm install -g restructured
@@ -51,6 +52,21 @@ This is a paragraph.
 
 console.log(JSON.stringify(parsed));
 ```
+
+### Browser  
+
+file `dist/restructured.js` 
+
+Dependens on `lodash`.  
+
+use `require()` function  
+
+```javascript
+  require(["restructured"], function (restructured) {
+            console.log(restructured.parse(text))
+        });
+```
+
 
 The above script outputs the following JSON.
 
