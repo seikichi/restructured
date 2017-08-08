@@ -47,6 +47,7 @@
   "scripts": {
     "build": "webpack -p",
     "lint": "eslint js/app.js js/components",
-    "watch": "webpack --watch -d"
+    "watch": "webpack --watch -d",
+    "dev": "node_modules/.bin/webpack-dev-server"
   }
 }

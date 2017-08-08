@@ -1,3 +1,5 @@
 js/bundle.js
 *.map
 /node_modules
+*hot-update.js*
+package-lock.json

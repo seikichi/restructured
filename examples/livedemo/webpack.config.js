@@ -1,8 +1,11 @@
+const webpack = require('webpack');
+
 module.exports = {
   entry: './js/app.js',
   output: {
     filename: 'js/bundle.js',
   },
+  devServer: { inline: true, hot: true },
   module: {
     loaders: [
       {
@@ -20,6 +23,7 @@ module.exports = {
       },
     ],
   },
+  plugins: [ new webpack.HotModuleReplacementPlugin() ],
   resolve: {
     extensions: ['', '.js', '.json'],
   },
